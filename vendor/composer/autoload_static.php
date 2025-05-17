@@ -910,6 +910,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
         'Database\\Seeders\\BiayaSeeder' => __DIR__ . '/../..' . '/database/seeders/BiayaSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
+        'Database\\Seeders\\JurusanSeeder' => __DIR__ . '/../..' . '/database/seeders/JurusanSeeder.php',
         'Database\\Seeders\\SiswaSeeder' => __DIR__ . '/../..' . '/database/seeders/SiswaSeeder.php',
         'Database\\Seeders\\TagihanSeeder' => __DIR__ . '/../..' . '/database/seeders/TagihanSeeder.php',
         'Database\\Seeders\\UserSeeder' => __DIR__ . '/../..' . '/database/seeders/UserSeeder.php',

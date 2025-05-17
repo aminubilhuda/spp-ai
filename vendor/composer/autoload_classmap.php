@@ -263,6 +263,7 @@ return array(
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
     'Database\\Seeders\\BiayaSeeder' => $baseDir . '/database/seeders/BiayaSeeder.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
+    'Database\\Seeders\\JurusanSeeder' => $baseDir . '/database/seeders/JurusanSeeder.php',
     'Database\\Seeders\\SiswaSeeder' => $baseDir . '/database/seeders/SiswaSeeder.php',
     'Database\\Seeders\\TagihanSeeder' => $baseDir . '/database/seeders/TagihanSeeder.php',
     'Database\\Seeders\\UserSeeder' => $baseDir . '/database/seeders/UserSeeder.php',
