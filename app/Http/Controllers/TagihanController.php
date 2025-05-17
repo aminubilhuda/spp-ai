@@ -96,83 +96,81 @@ class TagihanController extends Controller
             'jurusan' => Jurusan::pluck('nama', 'id')->all()
         ];
         return view('operator.' . $this->viewCreate, $data);
-    }
-
-    public function store(Request $request)
+    }    public function store(Request $request)
     {
-        $requestData = $request->validate([
-            'biaya_id' => 'required|array',
-            'biaya_id.*' => 'exists:biayas,id',
-            'angkatan' => 'required',
-            'jurusan' => 'nullable|exists:jurusans,id',
-            'kelas' => 'nullable',
-            'tanggal_tagihan' => 'required|date',
-            'tanggal_jatuh_tempo' => 'required|date',
-            'keterangan' => 'nullable|string'
-        ]);
-
-        // Data biaya
-        $biaya_id_array = $requestData['biaya_id'];
-        
-        // Data siswa yang akan ditagih - dimulai dengan query dasar
-        $siswaQuery = Siswa::where('angkatan', $requestData['angkatan']);
-        
-        // Tambahkan filter jurusan hanya jika dipilih
-        if (!empty($requestData['jurusan'])) {
-            $siswaQuery->where('jurusan_id', $requestData['jurusan']);
-        }
-        
-        // Tambahkan filter kelas hanya jika dipilih
-        if (!empty($requestData['kelas'])) {
-            $siswaQuery->where('kelas', $requestData['kelas']);
-        }
-        
-        // Jalankan query untuk mendapatkan siswa yang sesuai
-        $siswa = $siswaQuery->get();
-
-        $count = 0;
-                    
-        // Loop untuk setiap siswa
-        foreach($siswa as $item) {
-            // Buat tagihan induk untuk siswa ini
-            $tagihanData = [
-                'status' => 'baru',
-                'user_id' => auth()->user()->id,
-                'denda' => 0,
-                'siswa_id' => $item->id,
-                'angkatan' => $requestData['angkatan'],
-                // Gunakan data jurusan dan kelas dari siswa jika tidak ada di request
-                'jurusan' => !empty($requestData['jurusan']) ? $requestData['jurusan'] : $item->jurusan_id,
-                'kelas' => !empty($requestData['kelas']) ? $requestData['kelas'] : $item->kelas,
-                'tanggal_tagihan' => $requestData['tanggal_tagihan'],
-                'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
-                'keterangan' => $requestData['keterangan'] ?? null,
-            ];
+        try {
+            \DB::beginTransaction();
             
-            // Create the parent tagihan
-            $tagihan = Tagihan::create($tagihanData);
+            $requestData = $request->validate([
+                'biaya_id' => 'required|array',
+                'biaya_id.*' => 'exists:biayas,id',
+                'angkatan' => 'required',
+                'jurusan' => 'nullable|exists:jurusans,id',
+                'kelas' => 'nullable',
+                'tanggal_tagihan' => 'required|date',
+                'tanggal_jatuh_tempo' => 'required|date',
+                'keterangan' => 'nullable|string'
+            ]);
+
+            // Data biaya
+            $biaya_id_array = $requestData['biaya_id'];
             
-            // Buat tagihan_details untuk setiap biaya yang dipilih
-            foreach($biaya_id_array as $biaya_id) {
-                $biaya = Biaya::findOrFail($biaya_id);
-                
-                if (!$biaya->jumlah) {
-                    throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
-                }
-                
-                // Create detail record with explicit jumlah_biaya
-                $tagihan->tagihan_details()->create([
-                    'nama_biaya' => $biaya->nama ?? 'Tidak ada nama',
-                    'jumlah_biaya' => $biaya->jumlah,
-                    'tagihan_id' => $tagihan->id
-                ]);
-                
-                $count++;
+            // Data siswa yang akan ditagih
+            $siswaQuery = Siswa::where('angkatan', $requestData['angkatan']);
+            
+            if (!empty($requestData['jurusan'])) {
+                $siswaQuery->where('jurusan_id', $requestData['jurusan']);
             }
+            
+            if (!empty($requestData['kelas'])) {
+                $siswaQuery->where('kelas', $requestData['kelas']);
+            }
+            
+            $siswa = $siswaQuery->get();
+            $count = 0;
+            
+            foreach($siswa as $item) {
+                $tagihanData = [
+                    'status' => 'baru',
+                    'user_id' => auth()->user()->id,
+                    'denda' => 0,
+                    'siswa_id' => $item->id,
+                    'angkatan' => $requestData['angkatan'],
+                    'jurusan' => !empty($requestData['jurusan']) ? $requestData['jurusan'] : $item->jurusan_id,
+                    'kelas' => !empty($requestData['kelas']) ? $requestData['kelas'] : $item->kelas,
+                    'tanggal_tagihan' => $requestData['tanggal_tagihan'],
+                    'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
+                    'keterangan' => $requestData['keterangan'] ?? null,
+                ];
+                
+                $tagihan = Tagihan::create($tagihanData);
+                
+                foreach($biaya_id_array as $biaya_id) {
+                    $biaya = Biaya::findOrFail($biaya_id);
+                    
+                    if (!$biaya->jumlah) {
+                        throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                    }
+                    
+                    $tagihan->tagihan_details()->create([
+                        'nama_biaya' => $biaya->nama ?? 'Tidak ada nama',
+                        'jumlah_biaya' => $biaya->jumlah,
+                        'tagihan_id' => $tagihan->id
+                    ]);
+                    
+                    $count++;
+                }
+            }
+            
+            \DB::commit();
+            return redirect()->route($this->routePrefix . '.index')
+                ->with('success', 'Data berhasil ditambah untuk ' . $count . ' tagihan');
+                
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return redirect()->route($this->routePrefix . '.index')
+                ->with('error', 'Gagal menambah tagihan: ' . $e->getMessage());
         }
-
-        return redirect()->route($this->routePrefix . '.index')
-            ->with('success', 'Data berhasil ditambah untuk ' . $count . ' tagihan');
     }
 
     public function show(Tagihan $tagihan)
@@ -210,43 +208,54 @@ class TagihanController extends Controller
 
     public function update(Request $request, Tagihan $tagihan)
     {
-        $requestData = $request->validate([
-            'biaya_id' => 'required|exists:biayas,id',
-            'siswa_id' => 'required|exists:siswas,id',
-            'tanggal_tagihan' => 'required|date',
-            'tanggal_jatuh_tempo' => 'required|date',
-            'keterangan' => 'nullable|string',
-            'denda' => 'required|numeric'
-        ]);
+        try {
+            \DB::beginTransaction();
+            
+            $requestData = $request->validate([
+                'biaya_id' => 'required|exists:biayas,id',
+                'siswa_id' => 'required|exists:siswas,id',
+                'tanggal_tagihan' => 'required|date',
+                'tanggal_jatuh_tempo' => 'required|date',
+                'keterangan' => 'nullable|string',
+                'denda' => 'required|numeric'
+            ]);
 
-        $biaya = Biaya::findOrFail($requestData['biaya_id']);
-        $siswa = Siswa::findOrFail($requestData['siswa_id']);
-        
-        // Update main tagihan
-        $tagihan->update([
-            'siswa_id' => $requestData['siswa_id'],
-            'status' => 'baru',
-            'angkatan' => $siswa->angkatan,
-            'kelas' => $siswa->kelas,
-            'jurusan' => $siswa->jurusan_id,
-            'tanggal_tagihan' => $requestData['tanggal_tagihan'],
-            'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
-            'keterangan' => $requestData['keterangan'],
-            'denda' => $requestData['denda'],
-            'user_id' => auth()->user()->id,
-        ]);
+            $biaya = Biaya::findOrFail($requestData['biaya_id']);
+            $siswa = Siswa::findOrFail($requestData['siswa_id']);
+            
+            // Update main tagihan
+            $tagihan->update([
+                'siswa_id' => $requestData['siswa_id'],
+                'status' => 'baru',
+                'angkatan' => $siswa->angkatan,
+                'kelas' => $siswa->kelas,
+                'jurusan' => $siswa->jurusan_id,
+                'tanggal_tagihan' => $requestData['tanggal_tagihan'],
+                'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
+                'keterangan' => $requestData['keterangan'],
+                'denda' => $requestData['denda'],
+                'user_id' => auth()->user()->id,
+            ]);
 
-        // Delete existing details
-        $tagihan->tagihan_details()->delete();
-        
-        // Create new detail
-        $tagihan->tagihan_details()->create([
-            'nama_biaya' => $biaya->nama,
-            'jumlah_biaya' => $biaya->jumlah
-        ]);
+            // Delete existing details
+            $tagihan->tagihan_details()->delete();
+            
+            // Create new detail
+            $tagihan->tagihan_details()->create([
+                'nama_biaya' => $biaya->nama,
+                'jumlah_biaya' => $biaya->jumlah
+            ]);
 
-        return redirect()->route($this->routePrefix . '.index')
-            ->with('success', 'Data berhasil diupdate');
+            \DB::commit();
+            
+            return redirect()->route($this->routePrefix . '.index')
+                ->with('success', 'Data berhasil diupdate');
+                
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return redirect()->route($this->routePrefix . '.index')
+                ->with('error', 'Gagal mengupdate tagihan: ' . $e->getMessage());
+        }
     }
 
     public function destroy($siswa_id)
@@ -258,48 +267,59 @@ class TagihanController extends Controller
 
     public function deleteByCategory(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'angkatan' => 'nullable',
-            'jurusan' => 'nullable',
-            'kelas' => 'nullable|string',
-        ]);
-        
-        // Mulai membangun query
-        $query = Tagihan::query();
-        
-        // Tambahkan filter sesuai parameter yang dipilih
-        if ($request->filled('angkatan')) {
-            $query->where('angkatan', $request->angkatan);
-        }
-        
-        if ($request->filled('jurusan')) {
-            $query->where('jurusan', $request->jurusan);
-        }
-        
-        if ($request->filled('kelas')) {
-            $query->where('kelas', $request->kelas);
-        }
-        
-        // Jika tidak ada filter yang dipilih, kembalikan dengan pesan error
-        if (!$request->filled('angkatan') && !$request->filled('jurusan') && !$request->filled('kelas')) {
+        try {
+            \DB::beginTransaction();
+            
+            // Validasi input
+            $request->validate([
+                'angkatan' => 'nullable',
+                'jurusan' => 'nullable',
+                'kelas' => 'nullable|string',
+            ]);
+            
+            // Mulai membangun query
+            $query = Tagihan::query();
+            
+            // Tambahkan filter sesuai parameter yang dipilih
+            if ($request->filled('angkatan')) {
+                $query->where('angkatan', $request->angkatan);
+            }
+            
+            if ($request->filled('jurusan')) {
+                $query->where('jurusan', $request->jurusan);
+            }
+            
+            if ($request->filled('kelas')) {
+                $query->where('kelas', $request->kelas);
+            }
+            
+            // Jika tidak ada filter yang dipilih, kembalikan dengan pesan error
+            if (!$request->filled('angkatan') && !$request->filled('jurusan') && !$request->filled('kelas')) {
+                return redirect()->route($this->routePrefix . '.index')
+                    ->with('error', 'Silakan pilih minimal satu kriteria untuk menghapus tagihan');
+            }
+            
+            // Hitung jumlah data yang akan dihapus
+            $count = $query->count();
+            
+            if ($count === 0) {
+                return redirect()->route($this->routePrefix . '.index')
+                    ->with('info', 'Tidak ada data yang sesuai dengan kriteria yang dipilih');
+            }
+            
+            // Hapus data yang sesuai dengan kriteria
+            $query->delete();
+            
+            \DB::commit();
+            
             return redirect()->route($this->routePrefix . '.index')
-                ->with('error', 'Silakan pilih minimal satu kriteria untuk menghapus tagihan');
-        }
-        
-        // Hitung jumlah data yang akan dihapus
-        $count = $query->count();
-        
-        if ($count === 0) {
+                ->with('success', "Berhasil menghapus $count data tagihan yang sesuai dengan kriteria");
+                
+        } catch (\Exception $e) {
+            \DB::rollBack();
             return redirect()->route($this->routePrefix . '.index')
-                ->with('info', 'Tidak ada data yang sesuai dengan kriteria yang dipilih');
+                ->with('error', 'Gagal menghapus tagihan: ' . $e->getMessage());
         }
-        
-        // Hapus data yang sesuai dengan kriteria
-        $query->delete();
-        
-        return redirect()->route($this->routePrefix . '.index')
-            ->with('success', "Berhasil menghapus $count data tagihan yang sesuai dengan kriteria");
     }
 
     // Menambahkan method baru untuk menampilkan detail tagihan siswa
@@ -336,6 +356,8 @@ class TagihanController extends Controller
     public function destroyDetail($id)
     {
         try {
+            \DB::beginTransaction();
+            
             // Find and delete the tagihan detail
             $detail = \App\Models\TagihanDetail::findOrFail($id);
             $tagihanId = $detail->tagihan_id;
@@ -349,15 +371,19 @@ class TagihanController extends Controller
             // If this was the last detail, delete the parent tagihan
             if ($tagihan->tagihan_details()->count() === 0) {
                 $tagihan->delete();
+                \DB::commit();
                 return redirect()->route($this->routePrefix . '.index')
                     ->with('success', 'Tagihan berhasil dihapus karena tidak ada item tersisa');
             }
 
+            \DB::commit();
+            
             // Redirect back to the tagihan detail page
             return redirect()->route('tagihan.showByStudent', $tagihan->siswa_id)
                 ->with('success', 'Item tagihan berhasil dihapus');
 
         } catch (\Exception $e) {
+            \DB::rollBack();
             return back()->with('error', 'Gagal menghapus item tagihan: ' . $e->getMessage());
         }
     }

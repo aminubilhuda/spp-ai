@@ -26,11 +26,11 @@
                             </tr>
                             <tr>
                                 <td>Tanggal Tagihan</td>
-                                <td>: {{ $tagihan->tanggal_tagihan->format('d/m/Y') }}</td>
+                                <td>: {{ \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->format('d/m/Y') }}</td>
                             </tr>
                             <tr>
                                 <td>Tanggal Jatuh Tempo</td>
-                                <td>: {{ $tagihan->tanggal_jatuh_tempo->format('d/m/Y') }}</td>
+                                <td>: {{ \Carbon\Carbon::parse($tagihan->tanggal_jatuh_tempo)->format('d/m/Y') }}</td>
                             </tr>
                             <tr>
                                 <td>Status</td>

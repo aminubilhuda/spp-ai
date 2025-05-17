@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tagihan_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tagihan_id')->constrained('tagihans')->onDelete('cascade');
+            $table->foreignId('pembayaran_id')->index()->nullable();
             $table->string('nama_biaya');
             $table->double('jumlah_biaya');
             $table->timestamps();
