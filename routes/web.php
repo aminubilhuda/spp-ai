@@ -41,8 +41,8 @@ Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(
     Route::post('pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
     Route::get('tagihan/siswa/{siswaId}', [TagihanController::class, 'showByStudent'])->name('tagihan.showByStudent');
     Route::delete('tagihan-kategori', [TagihanController::class, 'deleteByCategory'])->name('tagihan.deleteByCategory');
-    Route::delete('tagihan-detail/{id}', [TagihanController::class, 'destroyDetail'])->name('tagihan.destroyDetail');
-    Route::resource('tagihan', TagihanController::class);
+    Route::delete('tagihan-detail/{id}', [TagihanController::class, 'destroyDetail'])->name('tagihan.destroyDetail');    Route::resource('tagihan', TagihanController::class);
+    Route::get('tagihan-detail/{id}/info', [TagihanController::class, 'detailInfo'])->name('tagihan.detailInfo');
 });
 
 Route::prefix('walimurid')->middleware(['auth','auth.wali'])->group(function(){
@@ -50,7 +50,7 @@ Route::prefix('walimurid')->middleware(['auth','auth.wali'])->group(function(){
 });
 
 Route::prefix('admin')->middleware(['auth','auth.admin'])->group(function(){
-    
+    Route::get('tagihan-detail/{id}/info', [TagihanController::class, 'detailInfo'])->name('tagihan.detailInfo');
 });
 
 Route::get('logout', function () {

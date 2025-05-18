@@ -7,6 +7,7 @@ use App\Models\Biaya;
 use App\Models\Siswa;
 use App\Models\Jurusan;
 use App\Models\Tagihan;
+use App\Models\TagihanDetail;
 use Illuminate\Http\Request;
 
 class TagihanController extends Controller
@@ -423,6 +424,48 @@ class TagihanController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Error in detail method:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'Gagal mengambil data tagihan: ' . $e->getMessage()
+            ], 500);
+        }
+    }    public function detailInfo($id)
+    {
+        try {
+            \Log::info('Fetching tagihan detail info for ID: ' . $id);
+            \Log::info('Request URL: ' . request()->url());
+            \Log::info('Request method: ' . request()->method());
+            
+            $detail = \App\Models\TagihanDetail::with(['tagihan.siswa'])->findOrFail($id);
+            
+            $totalBayar = $detail->pembayaran->sum('jumlah_dibayar');
+            $sisaBayar = max(0, $detail->jumlah_biaya - $totalBayar);
+
+            \Log::info('Calculated amounts:', [
+                'total_biaya' => $detail->jumlah_biaya,
+                'total_dibayar' => $totalBayar,
+                'sisa_bayar' => $sisaBayar
+            ]);
+
+            $response = [
+                'detail' => [
+                    'nama_siswa' => $detail->tagihan->siswa->nama ?? 'Tidak ditemukan',
+                    'kelas' => $detail->tagihan->siswa->kelas ?? '-',
+                    'nama_biaya' => $detail->nama_biaya,
+                ],
+                'total_tagihan' => $detail->jumlah_biaya,
+                'total_bayar' => $totalBayar,
+                'remaining_amount' => $sisaBayar,
+                'status' => $detail->status
+            ];
+
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in detailInfo method:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

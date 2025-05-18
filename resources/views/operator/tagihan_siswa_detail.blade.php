@@ -209,6 +209,7 @@
                                     <th>Tanggal Tagihan</th>
                                     <th>Jatuh Tempo</th>
                                     <th>Jumlah</th>
+                                    <th>Sisa</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -257,12 +258,17 @@
                                             </td>
                                             <td><strong>{{ formatRupiah($detail->jumlah_biaya) }}</strong></td>
                                             <td>
-                                                @if ($detail->status == 'baru')
-                                                    <span class="badge bg-primary">Baru</span>
+                                                @php
+                                                    $totalBayar = $detail->pembayaran->sum('jumlah_dibayar');
+                                                    $sisaTagihan = $detail->jumlah_biaya - $totalBayar;
+                                                @endphp
+                                                <strong>{{ formatRupiah($sisaTagihan) }}</strong>
+                                            </td>
+                                            <td>
+                                                @if ($detail->status == 'lunas')
+                                                    <span class="badge bg-success">Lunas</span>
                                                 @elseif($detail->status == 'angsur')
                                                     <span class="badge bg-warning">Angsur</span>
-                                                @elseif($detail->status == 'lunas')
-                                                    <span class="badge bg-success">Lunas</span>
                                                 @else
                                                     <span class="badge bg-danger">Belum Lunas</span>
                                                 @endif
@@ -274,7 +280,7 @@
                                                         <i class="bx bx-show-alt"></i>
                                                     </a>
                                                     <button type="button" class="btn btn-success btn-sm"
-                                                        onclick="openPaymentModal('{{ $item->id }}')">
+                                                        onclick="openPaymentModal('{{ $detail->id }}', '{{ $item->id }}')">
                                                         <i class="bx bx-money"></i>
                                                     </button>
                                                     <a href="{{ route($routePrefix . '.edit', $item->id) }}"
@@ -345,8 +351,8 @@
                     @csrf
                     <div class="modal-body">
                         <div id="payment-alert" class="alert" style="display: none;"></div>
-
                         <input type="hidden" name="tagihan_id" id="tagihan_id">
+                        <input type="hidden" name="detail_id" id="detail_id">
                         <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
 
                         <div class="mb-3">
@@ -392,165 +398,170 @@
                 </form>
             </div>
         </div>
-    </div> @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize tooltips
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
+    </div>
+@endsection
 
-                // Initialize payment form handling
-                initializePaymentForm();
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            function initializePaymentForm() {
-                const form = document.getElementById('paymentForm');
-                const alert = document.getElementById('payment-alert');
-                const submitBtn = document.getElementById('submitPayment');
-                const jumlahInput = document.getElementById('jumlah_dibayar');
+            // Initialize payment form handling
+            initializePaymentForm();
+        });
 
-                // Show/hide bukti pembayaran field based on payment method
-                document.getElementById('metode_pembayaran').addEventListener('change', function() {
-                    var buktiField = document.getElementById('bukti_bayar_field');
-                    var buktiInput = buktiField.querySelector('input[name="bukti_bayar"]');
+        function initializePaymentForm() {
+            const form = document.getElementById('paymentForm');
+            const alert = document.getElementById('payment-alert');
+            const submitBtn = document.getElementById('submitPayment');
+            const jumlahInput = document.getElementById('jumlah_dibayar');
 
-                    if (this.value === 'Bank Transfer') {
-                        buktiField.style.display = 'block';
-                        buktiInput.required = true;
-                    } else {
-                        buktiField.style.display = 'none';
-                        buktiInput.required = false;
-                    }
-                });
+            // Show/hide bukti pembayaran field based on payment method
+            document.getElementById('metode_pembayaran').addEventListener('change', function() {
+                var buktiField = document.getElementById('bukti_bayar_field');
+                var buktiInput = buktiField.querySelector('input[name="bukti_bayar"]');
 
-                // Handle form submission
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    submitBtn.disabled = true;
+                if (this.value === 'Bank Transfer') {
+                    buktiField.style.display = 'block';
+                    buktiInput.required = true;
+                } else {
+                    buktiField.style.display = 'none';
+                    buktiInput.required = false;
+                }
+            });
 
-                    let formData = new FormData(form);
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitBtn.disabled = true;
 
-                    fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            submitBtn.disabled = false;
+                let formData = new FormData(form);
 
-                            if (data.success) {
-                                alert.className = 'alert alert-success';
-                                alert.textContent = data.message;
-                                alert.style.display = 'block';
-
-                                // Auto close modal after 2 seconds and reload page
-                                setTimeout(() => {
-                                    var modal = bootstrap.Modal.getInstance(document.getElementById(
-                                        'paymentModal'));
-                                    modal.hide();
-                                    window.location.reload();
-                                }, 2000);
-                            } else {
-                                throw new Error(data.message);
-                            }
-                        })
-                        .catch(error => {
-                            submitBtn.disabled = false;
-                            alert.className = 'alert alert-danger';
-                            alert.textContent = error.message;
-                            alert.style.display = 'block';
-                        });
-                });
-
-                // Validate payment amount
-                jumlahInput.addEventListener('input', function() {
-                    const maxAmount = parseFloat(this.max);
-                    const value = parseFloat(this.value);
-
-                    if (value > maxAmount) {
-                        this.setCustomValidity(`Jumlah tidak boleh melebihi ${maxAmount}`);
-                    } else {
-                        this.setCustomValidity('');
-                    }
-                });
-            }
-
-            // Set tagihan_id and fetch tagihan details when modal is opened
-            function openPaymentModal(tagihanId) {
-                console.log('Opening modal for tagihan:', tagihanId);
-
-                // Set the tagihan_id in the form
-                document.getElementById('tagihan_id').value = tagihanId;
-                // First show the modal
-                var modalElement = document.getElementById('paymentModal');
-                var modal = new bootstrap.Modal(modalElement);
-                modal.show();
-
-                // Then fetch the details
-                fetch(`{{ url('/operator') }}/tagihan/${tagihanId}/detail`)
-                    .then(response => {
-                        console.log('Response received:', response);
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error(text || 'Network response was not ok');
-                            });
+                fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
-                        return response.json();
                     })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log('Data received:', data);
-                        if (data.error) {
-                            throw new Error(data.error);
-                        }
-                        if (typeof data.remaining_amount === 'undefined') {
-                            throw new Error('Data tagihan tidak valid');
-                        }
-                        // Set jumlah yang harus dibayar
-                        let jumlahInput = document.querySelector('input[name="jumlah_dibayar"]');
-                        let sisaTagihanText = document.getElementById('sisa_tagihan');
+                        submitBtn.disabled = false;
 
-                        jumlahInput.value = data.remaining_amount;
-                        jumlahInput.max = data.remaining_amount;
-                        sisaTagihanText.textContent = formatRupiah(data.remaining_amount);
+                        if (data.success) {
+                            alert.className = 'alert alert-success';
+                            alert.textContent = data.message;
+                            alert.style.display = 'block';
 
-                        // Update form title with student details
-                        if (data.detail && data.detail.nama_siswa) {
-                            document.querySelector('#paymentModalLabel').textContent =
-                                `Form Pembayaran - ${data.detail.nama_siswa}`;
+                            // Auto close modal after 2 seconds and reload page
+                            setTimeout(() => {
+                                var modal = bootstrap.Modal.getInstance(document.getElementById(
+                                    'paymentModal'));
+                                modal.hide();
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            throw new Error(data.message);
                         }
-
-                        // Reset form and alert
-                        document.getElementById('payment-alert').style.display = 'none';
-                        document.getElementById('paymentForm').reset();
-                        document.getElementById('tagihan_id').value = tagihanId;
-                        document.getElementById('jumlah_dibayar').value = data.remaining_amount;
-                        document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
-                            0];
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        let alert = document.getElementById('payment-alert');
+                        submitBtn.disabled = false;
                         alert.className = 'alert alert-danger';
-                        alert.textContent = 'Terjadi kesalahan saat mengambil data tagihan: ' + error.message;
+                        alert.textContent = error.message;
                         alert.style.display = 'block';
                     });
-            }
+            });
 
-            // Helper function to format currency
-            function formatRupiah(amount) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                }).format(amount);
-            }
-        </script>
-    @endpush
-@endsection
+            // Validate payment amount
+            jumlahInput.addEventListener('input', function() {
+                const maxAmount = parseFloat(this.max);
+                const value = parseFloat(this.value);
+
+                if (value > maxAmount) {
+                    this.setCustomValidity(`Jumlah tidak boleh melebihi ${maxAmount}`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+
+        // Set tagihan_id and fetch tagihan details when modal is opened
+        function openPaymentModal(detailId, tagihanId) {
+            console.log('Opening modal for detail:', detailId, 'tagihan:', tagihanId);
+
+            // Set the tagihan_id and detail_id in the form
+            document.getElementById('tagihan_id').value = tagihanId;
+            document.getElementById('detail_id').value = detailId;
+            // First show the modal
+            var modalElement = document.getElementById('paymentModal');
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+            // Then fetch the details
+            fetch(`{{ url('/operator') }}/tagihan-detail/${detailId}/info`)
+                .then(response => {
+                    console.log('Response received:', response);
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Network response was not ok');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received:', data);
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    if (typeof data.remaining_amount === 'undefined') {
+                        throw new Error('Data tagihan tidak valid');
+                    }
+                    // Set jumlah yang harus dibayar
+                    let jumlahInput = document.querySelector('input[name="jumlah_dibayar"]');
+                    let sisaTagihanText = document.getElementById('sisa_tagihan');
+
+                    jumlahInput.value = data.remaining_amount;
+                    jumlahInput.max = data.remaining_amount;
+                    sisaTagihanText.textContent = formatRupiah(data.remaining_amount);
+
+                    // Update form title with student details
+                    if (data.detail && data.detail.nama_siswa) {
+                        document.querySelector('#paymentModalLabel').textContent =
+                            `Form Pembayaran - ${data.detail.nama_siswa}`;
+                    } // Reset form and alert
+                    document.getElementById('payment-alert').style.display = 'none';
+                    document.getElementById('paymentForm').reset();
+
+                    // Set values again
+                    document.getElementById('tagihan_id').value = tagihanId;
+                    document.getElementById('detail_id').value = detailId;
+                    document.getElementById('jumlah_dibayar').value = data.remaining_amount;
+                    document.getElementById('jumlah_dibayar').max = data.remaining_amount;
+                    document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
+                    0];
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    let alert = document.getElementById('payment-alert');
+                    alert.className = 'alert alert-danger';
+                    alert.textContent = 'Terjadi kesalahan saat mengambil data tagihan: ' + error.message;
+                    alert.style.display = 'block';
+                });
+        }
+
+        // Helper function to format currency
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+    </script>
+@endpush
