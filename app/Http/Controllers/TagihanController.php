@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use App\Models\Biaya;
 use App\Models\Siswa;
-use App\Models\Tagihan;
 use App\Models\Jurusan;
+use App\Models\Tagihan;
 use Illuminate\Http\Request;
 
 class TagihanController extends Controller
@@ -19,11 +20,10 @@ class TagihanController extends Controller
     public function index(Request $request)
     {
         // Query dasar untuk tagihan dengan eager loading yang lebih efisien
-        $baseQuery = Tagihan::query()
-            ->select('tagihans.siswa_id', 
-                     \DB::raw('COUNT(DISTINCT tagihans.id) as total_tagihan'), 
-                     \DB::raw('SUM(tagihan_details.jumlah_biaya) as total_nilai'),
-                     \DB::raw('MAX(tagihans.created_at) as latest_created'))
+        $baseQuery = Tagihan::query()->select('tagihans.siswa_id', 
+                     DB::raw('COUNT(DISTINCT tagihan_details.id) as total_tagihan'), 
+                     DB::raw('SUM(tagihan_details.jumlah_biaya) as total_nilai'),
+                     DB::raw('MAX(tagihans.created_at) as latest_created'))
             ->join('tagihan_details', 'tagihans.id', '=', 'tagihan_details.tagihan_id')
             ->with(['siswa' => function($q) {
                 $q->select('id', 'nama', 'nisn', 'kelas', 'jurusan_id', 'angkatan')
@@ -61,10 +61,11 @@ class TagihanController extends Controller
                 $q->where('jurusan_id', $request->jurusan);
             });
         }
-        
-        // Filter berdasarkan status tagihan
+          // Filter berdasarkan status tagihan detail
         if ($request->has('status') && !empty($request->status)) {
-            $baseQuery->where('tagihans.status', $request->status);
+            $baseQuery->whereHas('tagihan_details', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         // Urutkan berdasarkan latest_created yang sudah diagregasi
@@ -129,9 +130,7 @@ class TagihanController extends Controller
             $siswa = $siswaQuery->get();
             $count = 0;
             
-            foreach($siswa as $item) {
-                $tagihanData = [
-                    'status' => 'baru',
+            foreach($siswa as $item) {                $tagihanData = [
                     'user_id' => auth()->user()->id,
                     'denda' => 0,
                     'siswa_id' => $item->id,
@@ -224,9 +223,7 @@ class TagihanController extends Controller
             $siswa = Siswa::findOrFail($requestData['siswa_id']);
             
             // Update main tagihan
-            $tagihan->update([
-                'siswa_id' => $requestData['siswa_id'],
-                'status' => 'baru',
+            $tagihan->update([                'siswa_id' => $requestData['siswa_id'],
                 'angkatan' => $siswa->angkatan,
                 'kelas' => $siswa->kelas,
                 'jurusan' => $siswa->jurusan_id,
@@ -385,6 +382,54 @@ class TagihanController extends Controller
         } catch (\Exception $e) {
             \DB::rollBack();
             return back()->with('error', 'Gagal menghapus item tagihan: ' . $e->getMessage());
+        }
+    }    public function detail($id)
+    {
+        try {
+            \Log::info('Fetching tagihan details for ID: ' . $id);
+            
+            $tagihan = Tagihan::with(['tagihan_details', 'pembayaran', 'siswa'])->findOrFail($id);
+            \Log::info('Tagihan found:', ['tagihan' => $tagihan->toArray()]);
+
+            $totalTagihan = $tagihan->tagihan_details->sum('jumlah_biaya');
+            $totalDibayar = $tagihan->pembayaran->sum('jumlah_dibayar');
+            $sisaBayar = max(0, $totalTagihan - $totalDibayar);
+
+            \Log::info('Calculated amounts:', [
+                'total_tagihan' => $totalTagihan,
+                'total_dibayar' => $totalDibayar,
+                'sisa_bayar' => $sisaBayar
+            ]);            $status = 'belum_lunas';
+            if ($sisaBayar <= 0) {
+                $status = 'lunas';
+            } elseif ($totalDibayar > 0) {
+                $status = 'angsur';
+            }
+
+            $response = [
+                'tagihan' => $tagihan,
+                'total_tagihan' => $totalTagihan,
+                'total_bayar' => $totalDibayar,
+                'remaining_amount' => $sisaBayar,
+                'status' => $status,
+                'detail' => [
+                    'nama_siswa' => $tagihan->siswa->nama ?? 'Tidak ditemukan',
+                    'kelas' => $tagihan->siswa->kelas ?? '-',
+                ]
+            ];
+
+            \Log::info('Sending response:', $response);
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in detail method:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'Gagal mengambil data tagihan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

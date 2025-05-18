@@ -10,6 +10,7 @@ use App\Http\Controllers\BerandaWaliController;
 use App\Http\Controllers\BerandaOperatorController;
 use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\PembayaranController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,9 +36,9 @@ Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(
     Route::post('siswa/tambahkewali', [SiswaController::class, 'tambahKeWali'])->name('siswa.tambahkewali');
     Route::post('siswa/hapusdariwall', [SiswaController::class, 'hapusDariWali'])->name('siswa.hapusdariwall');
     Route::resource('jurusan', JurusanController::class);
-    Route::resource('biaya', BiayaController::class);
-    
-    // Tempatkan route custom sebelum resource route untuk menghindari konflik
+    Route::resource('biaya', BiayaController::class);    // Payment routes
+    Route::get('tagihan/{id}/detail', [TagihanController::class, 'detail'])->name('tagihan.detail');
+    Route::post('pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
     Route::get('tagihan/siswa/{siswaId}', [TagihanController::class, 'showByStudent'])->name('tagihan.showByStudent');
     Route::delete('tagihan-kategori', [TagihanController::class, 'deleteByCategory'])->name('tagihan.deleteByCategory');
     Route::delete('tagihan-detail/{id}', [TagihanController::class, 'destroyDetail'])->name('tagihan.destroyDetail');

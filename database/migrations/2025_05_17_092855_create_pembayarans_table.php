@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tagihan_id')->index();
             $table->foreignId('wali_id')->index();
-            $table->string('status_konfirmasi')->nullable();
+            $table->enum('status_konfirmasi',['belum','sudah'])->nullable();
             $table->decimal('jumlah_dibayar', 15, 2);
+            $table->date('tanggal_bayar')->nullable();
             $table->string('bukti_bayar')->nullable();
-            $table->string('metode_pembayaran');
+            $table->enum('metode_pembayaran',['tunai','transfer'])->nullable();
             $table->foreignId('user_id')->nullable()->index();
             $table->timestamps();
         });

@@ -161,18 +161,16 @@
                                 @php
                                     $status = 'unpaid';
                                     $totalBulan = 0;
-                                    $tagihanBulan = $tagihanByBulan[$kodeBulan] ?? [];
-
-                                    // Hitung total dan cek status pembayaran
+                                    $tagihanBulan = $tagihanByBulan[$kodeBulan] ?? []; // Hitung total dan cek status pembayaran
                                     foreach ($tagihanBulan as $item) {
                                         // Calculate total from tagihan_details
                                         foreach ($item->tagihan_details as $detail) {
                                             $totalBulan += $detail->jumlah_biaya;
-                                        }
-                                        if ($item->status == 'lunas') {
-                                            $status = 'paid';
-                                        } elseif ($item->status == 'angsur' && $status != 'paid') {
-                                            $status = 'partial';
+                                            if ($detail->status == 'lunas') {
+                                                $status = 'paid';
+                                            } elseif ($detail->status == 'angsur' && $status != 'paid') {
+                                                $status = 'partial';
+                                            }
                                         }
                                     }
                                 @endphp
@@ -259,11 +257,11 @@
                                             </td>
                                             <td><strong>{{ formatRupiah($detail->jumlah_biaya) }}</strong></td>
                                             <td>
-                                                @if ($item->status == 'baru')
+                                                @if ($detail->status == 'baru')
                                                     <span class="badge bg-primary">Baru</span>
-                                                @elseif($item->status == 'angsur')
+                                                @elseif($detail->status == 'angsur')
                                                     <span class="badge bg-warning">Angsur</span>
-                                                @elseif($item->status == 'lunas')
+                                                @elseif($detail->status == 'lunas')
                                                     <span class="badge bg-success">Lunas</span>
                                                 @else
                                                     <span class="badge bg-danger">Belum Lunas</span>
@@ -275,6 +273,10 @@
                                                         class="btn btn-info btn-sm">
                                                         <i class="bx bx-show-alt"></i>
                                                     </a>
+                                                    <button type="button" class="btn btn-success btn-sm"
+                                                        onclick="openPaymentModal('{{ $item->id }}')">
+                                                        <i class="bx bx-money"></i>
+                                                    </button>
                                                     <a href="{{ route($routePrefix . '.edit', $item->id) }}"
                                                         class="btn btn-warning btn-sm">
                                                         <i class="bx bx-edit-alt"></i>
@@ -329,4 +331,226 @@
             </div>
         </div>
     </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Form Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="paymentForm" action="{{ route('pembayaran.store') }}" method="POST"
+                    enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div id="payment-alert" class="alert" style="display: none;"></div>
+
+                        <input type="hidden" name="tagihan_id" id="tagihan_id">
+                        <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah yang akan dibayar</label>
+                            <input type="number" name="jumlah_dibayar" id="jumlah_dibayar" class="form-control" required
+                                step="0.01" min="0">
+                            <small class="text-muted">Sisa yang harus dibayar: <span id="sisa_tagihan">0</span></small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Metode Pembayaran</label>
+                            <select name="metode_pembayaran" class="form-select" id="metode_pembayaran" required>
+                                <option value="">Pilih Metode Pembayaran</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Cash">Tunai</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="bukti_bayar_field" style="display: none;">
+                            <label class="form-label">Bukti Pembayaran</label>
+                            <input type="file" name="bukti_bayar" class="form-control" accept="image/*,.pdf">
+                            <small class="text-muted">Upload bukti transfer (Gambar/PDF)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Pembayaran</label>
+                            <input type="date" name="tanggal_bayar" class="form-control" required
+                                value="{{ date('Y-m-d') }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Status Konfirmasi</label>
+                            <select name="status_konfirmasi" class="form-select" required>
+                                <option value="Belum Dikonfirmasi">Belum Dikonfirmasi</option>
+                                <option value="Sudah Dikonfirmasi">Sudah Dikonfirmasi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary" id="submitPayment">Simpan Pembayaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+
+                // Initialize payment form handling
+                initializePaymentForm();
+            });
+
+            function initializePaymentForm() {
+                const form = document.getElementById('paymentForm');
+                const alert = document.getElementById('payment-alert');
+                const submitBtn = document.getElementById('submitPayment');
+                const jumlahInput = document.getElementById('jumlah_dibayar');
+
+                // Show/hide bukti pembayaran field based on payment method
+                document.getElementById('metode_pembayaran').addEventListener('change', function() {
+                    var buktiField = document.getElementById('bukti_bayar_field');
+                    var buktiInput = buktiField.querySelector('input[name="bukti_bayar"]');
+
+                    if (this.value === 'Bank Transfer') {
+                        buktiField.style.display = 'block';
+                        buktiInput.required = true;
+                    } else {
+                        buktiField.style.display = 'none';
+                        buktiInput.required = false;
+                    }
+                });
+
+                // Handle form submission
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+
+                    let formData = new FormData(form);
+
+                    fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            submitBtn.disabled = false;
+
+                            if (data.success) {
+                                alert.className = 'alert alert-success';
+                                alert.textContent = data.message;
+                                alert.style.display = 'block';
+
+                                // Auto close modal after 2 seconds and reload page
+                                setTimeout(() => {
+                                    var modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'paymentModal'));
+                                    modal.hide();
+                                    window.location.reload();
+                                }, 2000);
+                            } else {
+                                throw new Error(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            submitBtn.disabled = false;
+                            alert.className = 'alert alert-danger';
+                            alert.textContent = error.message;
+                            alert.style.display = 'block';
+                        });
+                });
+
+                // Validate payment amount
+                jumlahInput.addEventListener('input', function() {
+                    const maxAmount = parseFloat(this.max);
+                    const value = parseFloat(this.value);
+
+                    if (value > maxAmount) {
+                        this.setCustomValidity(`Jumlah tidak boleh melebihi ${maxAmount}`);
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+
+            // Set tagihan_id and fetch tagihan details when modal is opened
+            function openPaymentModal(tagihanId) {
+                console.log('Opening modal for tagihan:', tagihanId);
+
+                // Set the tagihan_id in the form
+                document.getElementById('tagihan_id').value = tagihanId;
+                // First show the modal
+                var modalElement = document.getElementById('paymentModal');
+                var modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                // Then fetch the details
+                fetch(`{{ url('/operator') }}/tagihan/${tagihanId}/detail`)
+                    .then(response => {
+                        console.log('Response received:', response);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(text || 'Network response was not ok');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Data received:', data);
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        if (typeof data.remaining_amount === 'undefined') {
+                            throw new Error('Data tagihan tidak valid');
+                        }
+                        // Set jumlah yang harus dibayar
+                        let jumlahInput = document.querySelector('input[name="jumlah_dibayar"]');
+                        let sisaTagihanText = document.getElementById('sisa_tagihan');
+
+                        jumlahInput.value = data.remaining_amount;
+                        jumlahInput.max = data.remaining_amount;
+                        sisaTagihanText.textContent = formatRupiah(data.remaining_amount);
+
+                        // Update form title with student details
+                        if (data.detail && data.detail.nama_siswa) {
+                            document.querySelector('#paymentModalLabel').textContent =
+                                `Form Pembayaran - ${data.detail.nama_siswa}`;
+                        }
+
+                        // Reset form and alert
+                        document.getElementById('payment-alert').style.display = 'none';
+                        document.getElementById('paymentForm').reset();
+                        document.getElementById('tagihan_id').value = tagihanId;
+                        document.getElementById('jumlah_dibayar').value = data.remaining_amount;
+                        document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
+                            0];
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        let alert = document.getElementById('payment-alert');
+                        alert.className = 'alert alert-danger';
+                        alert.textContent = 'Terjadi kesalahan saat mengambil data tagihan: ' + error.message;
+                        alert.style.display = 'block';
+                    });
+            }
+
+            // Helper function to format currency
+            function formatRupiah(amount) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            }
+        </script>
+    @endpush
 @endsection

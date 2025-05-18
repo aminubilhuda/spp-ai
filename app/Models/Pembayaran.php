@@ -11,15 +11,16 @@ class Pembayaran extends Model
     use HasFormatRupiah;
 
     protected $table = 'pembayarans';
-    
     protected $fillable = [
         'tagihan_id',
+        'tagihan_detail_id',
         'wali_id',
         'status_konfirmasi',
         'jumlah_dibayar',
         'bukti_bayar',
         'metode_pembayaran',
-        'user_id'
+        'user_id',
+        'tanggal_bayar'
     ];
 
     /**
@@ -28,6 +29,14 @@ class Pembayaran extends Model
     public function tagihan(): BelongsTo
     {
         return $this->belongsTo(Tagihan::class);
+    }
+
+    /**
+     * Get the tagihan detail that owns the payment
+     */
+    public function tagihan_detail(): BelongsTo
+    {
+        return $this->belongsTo(TagihanDetail::class);
     }
 
     /**

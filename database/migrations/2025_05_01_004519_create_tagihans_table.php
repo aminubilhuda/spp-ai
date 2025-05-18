@@ -24,7 +24,6 @@ return new class extends Migration
             $table->double('jumlah_biaya');
             $table->string('keterangan')->nullable();
             $table->string('denda');
-            $table->enum('status', ['baru','angsur','lunas', 'belum_lunas'])->default('baru');
             $table->timestamps();
         });
     }

@@ -10,6 +10,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <meta name="description" content="" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('sneat') }}/assets/img/favicon/favicon.ico" />
@@ -37,14 +38,15 @@
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <!-- Page CSS -->
-    @yield('styles')
-
-    <!-- Helpers -->
+    @yield('styles') <!-- Helpers -->
     <script src="{{ asset('sneat') }}/assets/vendor/js/helpers.js"></script>
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('sneat') }}/assets/js/config.js"></script>
+    <script src="{{ asset('sneat') }}/assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="{{ asset('sneat') }}/assets/vendor/libs/popper/popper.js"></script>
+    <script src="{{ asset('sneat') }}/assets/vendor/js/bootstrap.js"></script>
     <link rel="stylesheet" href="{{ asset('font/css/all.min.css') }}">
 </head>
 
@@ -235,9 +237,7 @@
     <script src="{{ asset('js/jquery.mask.min.js') }}"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-
-    <!-- Custom JS -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script> <!-- Custom JS -->
     <script>
         $(document).ready(function() {
             $('.rupiah').mask("#.##0", {
@@ -246,7 +246,7 @@
         });
     </script>
 
-    @yield('scripts')
+    @stack('scripts')
 </body>
 
 </html>
