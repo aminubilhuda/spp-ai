@@ -23,6 +23,8 @@ class Pembayaran extends Model
         'tanggal_bayar'
     ];
 
+    protected $dates = ['tanggal_bayar'];
+
     /**
      * Get the tagihan that owns the payment
      */
@@ -44,7 +46,7 @@ class Pembayaran extends Model
      */
     public function wali(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'wali_id');
+        return $this->belongsTo(Wali::class);
     }
 
     /**
@@ -52,6 +54,22 @@ class Pembayaran extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get formatted status konfirmasi
+     */
+    public function getStatusKonfirmasiFormattedAttribute()
+    {
+        return str_replace('_', ' ', $this->status_konfirmasi);
+    }
+
+    /**
+     * Get formatted payment method
+     */
+    public function getMetodePembayaranFormattedAttribute()
+    {
+        return str_replace('_', ' ', $this->metode_pembayaran);
     }
 }

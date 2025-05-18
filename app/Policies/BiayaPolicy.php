@@ -13,7 +13,7 @@ class BiayaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -21,7 +21,7 @@ class BiayaPolicy
      */
     public function view(User $user, Biaya $biaya): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -29,7 +29,7 @@ class BiayaPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -37,7 +37,7 @@ class BiayaPolicy
      */
     public function update(User $user, Biaya $biaya): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -45,7 +45,7 @@ class BiayaPolicy
      */
     public function delete(User $user, Biaya $biaya): bool
     {
-        return false;
+        return $user->akses === 'admin';
     }
 
     /**
@@ -53,7 +53,7 @@ class BiayaPolicy
      */
     public function restore(User $user, Biaya $biaya): bool
     {
-        return false;
+        return $user->akses === 'admin';
     }
 
     /**
@@ -61,6 +61,6 @@ class BiayaPolicy
      */
     public function forceDelete(User $user, Biaya $biaya): bool
     {
-        return false;
+        return $user->akses === 'admin';
     }
 }

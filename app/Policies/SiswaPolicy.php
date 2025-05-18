@@ -13,7 +13,7 @@ class SiswaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -21,6 +21,15 @@ class SiswaPolicy
      */
     public function view(User $user, Siswa $siswa): bool
     {
+        if (in_array($user->akses, ['admin', 'operator'])) {
+            return true;
+        }
+        
+        // Wali can only view their own students
+        if ($user->akses === 'wali') {
+            return $siswa->wali_id === $user->id;
+        }
+
         return false;
     }
 
@@ -29,7 +38,7 @@ class SiswaPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -37,7 +46,7 @@ class SiswaPolicy
      */
     public function update(User $user, Siswa $siswa): bool
     {
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
@@ -45,7 +54,7 @@ class SiswaPolicy
      */
     public function delete(User $user, Siswa $siswa): bool
     {
-        return false;
+        return in_array($user->akses, ['admin']);
     }
 
     /**
@@ -53,7 +62,7 @@ class SiswaPolicy
      */
     public function restore(User $user, Siswa $siswa): bool
     {
-        return false;
+        return $user->akses === 'admin';
     }
 
     /**
@@ -61,6 +70,6 @@ class SiswaPolicy
      */
     public function forceDelete(User $user, Siswa $siswa): bool
     {
-        return false;
+        return $user->akses === 'admin';
     }
 }

@@ -19,6 +19,7 @@ class Wali
         if ($request->user()->akses == 'wali') {
            return $next($request);
         }
-        return response('Unauthorized.', 401);
+        
+        return redirect()->route('home')->with('error', 'Anda tidak memiliki akses sebagai wali murid.');
     }
 }

@@ -33,4 +33,10 @@ class Siswa extends Model
             'nama' => 'Belum ada jurusan',
         ]);
     }
+
+    // relasi ke tagihan
+    public function tagihan()
+    {
+        return $this->hasMany(Tagihan::class);
+    }
 }

@@ -19,6 +19,7 @@ class Operator
         if ($request->user()->akses == 'operator') {
            return $next($request);
         }
-        return response('Unauthorized.', 401);
+        
+        return redirect()->route('home')->with('error', 'Anda tidak memiliki akses sebagai operator.');
     }
 }

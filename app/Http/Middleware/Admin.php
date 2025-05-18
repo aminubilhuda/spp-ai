@@ -19,6 +19,7 @@ class Admin
         if ($request->user()->akses == 'admin') {
            return $next($request);
         }
-        return response('Unauthorized.', 401);
+        
+        return redirect()->route('home')->with('error', 'Anda tidak memiliki akses sebagai administrator.');
     }
 }

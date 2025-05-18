@@ -8,10 +8,12 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     */    public function up(): void
+     */
+    public function up(): void
     {
         Schema::table('pembayarans', function (Blueprint $table) {
-            $table->date('tanggal_bayar')->after('jumlah_dibayar');
+            $table->dropColumn('status_konfirmasi');
+            $table->enum('status_konfirmasi', ['Belum Dikonfirmasi', 'Sudah Dikonfirmasi'])->nullable()->after('metode_pembayaran');
         });
     }
 
@@ -21,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pembayarans', function (Blueprint $table) {
-            $table->dropColumn('tanggal_bayar');
+            $table->dropColumn('status_konfirmasi');
+            $table->enum('status_konfirmasi', ['belum', 'sudah'])->nullable()->after('metode_pembayaran');
         });
     }
 };

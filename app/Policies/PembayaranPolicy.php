@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Tagihan;
+use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class TagihanPolicy
+class PembayaranPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,15 +19,15 @@ class TagihanPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Tagihan $tagihan): bool
+    public function view(User $user, Pembayaran $pembayaran): bool
     {
         if (in_array($user->akses, ['admin', 'operator'])) {
             return true;
         }
 
-        // Wali can only view tagihan for their students
+        // Wali can only view their own payments
         if ($user->akses === 'wali') {
-            return $tagihan->siswa->wali_id === $user->id;
+            return $pembayaran->wali_id === $user->id;
         }
 
         return false;
@@ -38,21 +38,22 @@ class TagihanPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->akses, ['admin', 'operator']);
+        return in_array($user->akses, ['admin', 'operator', 'wali']);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Tagihan $tagihan): bool
+    public function update(User $user, Pembayaran $pembayaran): bool
     {
+        // Only admin and operator can update payments
         return in_array($user->akses, ['admin', 'operator']);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Tagihan $tagihan): bool
+    public function delete(User $user, Pembayaran $pembayaran): bool
     {
         return $user->akses === 'admin';
     }
@@ -60,7 +61,7 @@ class TagihanPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Tagihan $tagihan): bool
+    public function restore(User $user, Pembayaran $pembayaran): bool
     {
         return $user->akses === 'admin';
     }
@@ -68,25 +69,16 @@ class TagihanPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Tagihan $tagihan): bool
+    public function forceDelete(User $user, Pembayaran $pembayaran): bool
     {
         return $user->akses === 'admin';
     }
 
     /**
-     * Determine whether the user can create a payment.
+     * Determine whether the user can confirm the payment.
      */
-    public function createPayment(User $user, Tagihan $tagihan): bool
+    public function confirm(User $user, Pembayaran $pembayaran): bool
     {
-        if (in_array($user->akses, ['admin', 'operator'])) {
-            return true;
-        }
-
-        // Wali can only create payments for their students' tagihan
-        if ($user->akses === 'wali') {
-            return $tagihan->siswa->wali_id === $user->id;
-        }
-
-        return false;
+        return in_array($user->akses, ['admin', 'operator']);
     }
 }
