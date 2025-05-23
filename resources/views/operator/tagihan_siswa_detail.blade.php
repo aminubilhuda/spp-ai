@@ -278,15 +278,15 @@
                                                     <a href="{{ route($routePrefix . '.show', $item->id) }}"
                                                         class="btn btn-info btn-sm">
                                                         <i class="bx bx-show-alt"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-success btn-sm"
+                                                    </a> <button type="button" class="btn btn-success btn-sm"
                                                         onclick="openPaymentModal('{{ $detail->id }}', '{{ $item->id }}')">
                                                         <i class="bx bx-money"></i>
                                                     </button>
-                                                    <a href="{{ route($routePrefix . '.edit', $item->id) }}"
-                                                        class="btn btn-warning btn-sm">
+                                                    <button type="button" class="btn btn-warning btn-sm"
+                                                        onclick="openEditModal('{{ $detail->id }}')"
+                                                        title="Edit Tagihan">
                                                         <i class="bx bx-edit-alt"></i>
-                                                    </a>
+                                                    </button>
                                                     <form action="{{ route('tagihan.destroyDetail', $detail->id) }}"
                                                         method="POST"
                                                         onsubmit="return confirm('Yakin ingin menghapus item tagihan ini?')"
@@ -412,6 +412,41 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                         <button type="submit" class="btn btn-primary" id="submitPayment">Simpan Pembayaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Detail Tagihan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div id="edit-alert" class="alert" style="display: none;"></div>
+                        <input type="hidden" name="detail_id" id="edit_detail_id">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nama Biaya</label>
+                            <input type="text" name="nama_biaya" id="edit_nama_biaya" class="form-control" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah Biaya</label>
+                            <input type="number" name="jumlah_biaya" id="edit_jumlah_biaya" class="form-control"
+                                required min="0" step="1">
+                            <small class="text-muted">Masukkan jumlah biaya tanpa tanda koma atau titik</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary" id="submitEdit">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
@@ -581,5 +616,77 @@
                 maximumFractionDigits: 0
             }).format(amount);
         }
+
+        function openEditModal(detailId) {
+            // Fetch detail data
+            fetch(`{{ url('/operator') }}/tagihan-detail/${detailId}/info`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Populate form
+                    document.getElementById('edit_detail_id').value = detailId;
+                    document.getElementById('edit_nama_biaya').value = data.detail.nama_biaya;
+                    document.getElementById('edit_jumlah_biaya').value = data.total_tagihan;
+
+                    // Update form action
+                    document.getElementById('editForm').action =
+                        `{{ url('/operator') }}/tagihan-detail/${detailId}/update`;
+
+                    // Show modal
+                    var modal = new bootstrap.Modal(document.getElementById('editModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data tagihan');
+                });
+        }
+
+        // Initialize edit form handling
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitEdit');
+            submitBtn.disabled = true;
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch(this.action, {
+                    method: 'PUT',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    if (data.success) {
+                        // Show success message
+                        const alert = document.getElementById('edit-alert');
+                        alert.className = 'alert alert-success';
+                        alert.textContent = data.message;
+                        alert.style.display = 'block';
+
+                        // Reload page after 2 seconds
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        throw new Error(data.message || 'Terjadi kesalahan');
+                    }
+                })
+                .catch(error => {
+                    submitBtn.disabled = false;
+                    const alert = document.getElementById('edit-alert');
+                    alert.className = 'alert alert-danger';
+                    alert.textContent = error.message;
+                    alert.style.display = 'block';
+                });
+        });
     </script>
 @endpush
