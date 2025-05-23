@@ -329,6 +329,24 @@
                                         </td>
                                         <td colspan="2"></td>
                                     </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="5" class="text-end"><strong>Total Sisa:</strong></td>
+                                        <td>
+                                            <strong>
+                                                @php
+                                                    $totalSisa = 0;
+                                                    foreach ($tagihan as $item) {
+                                                        foreach ($item->tagihan_details as $detail) {
+                                                            $totalBayar = $detail->pembayaran->sum('jumlah_dibayar');
+                                                            $totalSisa += $detail->jumlah_biaya - $totalBayar;
+                                                        }
+                                                    }
+                                                @endphp
+                                                {{ formatRupiah($totalSisa) }}
+                                            </strong>
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
                                 @endif
                             </tfoot>
                         </table>
@@ -357,8 +375,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Jumlah yang akan dibayar</label>
-                            <input type="number" name="jumlah_dibayar" id="jumlah_dibayar" class="form-control" required
-                                step="0.01" min="0">
+                            <input type="number" name="jumlah_dibayar" id="jumlah_dibayar" class="form-control"
+                                required step="0.01" min="0">
                             <small class="text-muted">Sisa yang harus dibayar: <span id="sisa_tagihan">0</span></small>
                         </div>
 
@@ -543,7 +561,7 @@
                     document.getElementById('jumlah_dibayar').value = data.remaining_amount;
                     document.getElementById('jumlah_dibayar').max = data.remaining_amount;
                     document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
-                    0];
+                        0];
                 })
                 .catch(error => {
                     console.error('Error:', error);
