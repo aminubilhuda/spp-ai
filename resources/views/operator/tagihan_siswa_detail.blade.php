@@ -273,12 +273,12 @@
                                                     <span class="badge bg-danger">Belum Lunas</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <div class="btn-group">
+                                            <td>                                                <div class="btn-group">
                                                     <a href="{{ route($routePrefix . '.show', $item->id) }}"
                                                         class="btn btn-info btn-sm">
                                                         <i class="bx bx-show-alt"></i>
-                                                    </a> <button type="button" class="btn btn-success btn-sm"
+                                                    </a>
+                                                    <button type="button" class="btn btn-success btn-sm"
                                                         onclick="openPaymentModal('{{ $detail->id }}', '{{ $item->id }}')">
                                                         <i class="bx bx-money"></i>
                                                     </button>
@@ -287,6 +287,15 @@
                                                         title="Edit Tagihan">
                                                         <i class="bx bx-edit-alt"></i>
                                                     </button>
+                                                    @php
+                                                        $latest_payment = $detail->pembayaran->sortByDesc('id')->first();
+                                                    @endphp
+                                                    @if($latest_payment)
+                                                        <a href="{{ route('kwitansi_pembayaran.show', $latest_payment->id) }}" target="blank" class="btn btn-primary btn-sm"
+                                                            title="Cetak Kwitansi">
+                                                            <i class="bx bx-printer"></i>
+                                                        </a>
+                                                    @endif
                                                     <form action="{{ route('tagihan.destroyDetail', $detail->id) }}"
                                                         method="POST"
                                                         onsubmit="return confirm('Yakin ingin menghapus item tagihan ini?')"
@@ -456,6 +465,8 @@
 
 @push('scripts')
     <script>
+
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

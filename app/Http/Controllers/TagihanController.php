@@ -62,10 +62,11 @@ class TagihanController extends Controller
                 $q->where('jurusan_id', $request->jurusan);
             });
         }
-        
-        // Filter berdasarkan status tagihan
+          // Filter berdasarkan status tagihan
         if ($request->has('status') && !empty($request->status)) {
-            $baseQuery->where('tagihans.status', $request->status);
+            $baseQuery->whereHas('tagihan_details', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         // Urutkan berdasarkan latest_created yang sudah diagregasi
@@ -130,9 +131,7 @@ class TagihanController extends Controller
             $siswa = $siswaQuery->get();
             $count = 0;
             
-            foreach($siswa as $item) {
-                $tagihanData = [
-                    'status' => 'baru',
+            foreach($siswa as $item) {                $tagihanData = [
                     'user_id' => auth()->user()->id,
                     'denda' => 0,
                     'siswa_id' => $item->id,
@@ -152,11 +151,11 @@ class TagihanController extends Controller
                     if (!$biaya->jumlah) {
                         throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
                     }
-                    
-                    $tagihan->tagihan_details()->create([
+                      $tagihan->tagihan_details()->create([
                         'nama_biaya' => $biaya->nama ?? 'Tidak ada nama',
                         'jumlah_biaya' => $biaya->jumlah,
-                        'tagihan_id' => $tagihan->id
+                        'tagihan_id' => $tagihan->id,
+                        'status' => 'baru'
                     ]);
                     
                     $count++;
@@ -227,7 +226,6 @@ class TagihanController extends Controller
             // Update main tagihan
             $tagihan->update([
                 'siswa_id' => $requestData['siswa_id'],
-                'status' => 'baru',
                 'angkatan' => $siswa->angkatan,
                 'kelas' => $siswa->kelas,
                 'jurusan' => $siswa->jurusan_id,
@@ -244,7 +242,8 @@ class TagihanController extends Controller
             // Create new detail
             $tagihan->tagihan_details()->create([
                 'nama_biaya' => $biaya->nama,
-                'jumlah_biaya' => $biaya->jumlah
+                'jumlah_biaya' => $biaya->jumlah,
+                'status' => 'baru'
             ]);
 
             \DB::commit();

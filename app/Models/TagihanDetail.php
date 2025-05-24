@@ -11,7 +11,13 @@ class TagihanDetail extends Model
     use HasFactory;
     
     protected $table = 'tagihan_details';
-    protected $fillable = ['tagihan_id', 'nama_biaya', 'jumlah_biaya', 'status'];
+    protected $fillable = [
+        'tagihan_id', 
+        'pembayaran_id',  // Tambahkan pembayaran_id 
+        'nama_biaya', 
+        'jumlah_biaya', 
+        'status'
+    ];
 
     /**
      * Get the tagihan that owns this detail
@@ -19,6 +25,14 @@ class TagihanDetail extends Model
     public function tagihan(): BelongsTo
     {
         return $this->belongsTo(Tagihan::class);
+    }
+
+    /**
+     * Get latest payment for this detail
+     */
+    public function latest_payment(): BelongsTo
+    {
+        return $this->belongsTo(Pembayaran::class, 'pembayaran_id');
     }
 
     /**

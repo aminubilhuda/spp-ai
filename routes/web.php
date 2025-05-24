@@ -11,6 +11,7 @@ use App\Http\Controllers\BerandaOperatorController;
 use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\KwitansiPembayaranController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,8 @@ Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(
     Route::post('tagihan-detail/{id}/update', [TagihanController::class, 'updateDetail'])->name('tagihan.updateDetail');
     Route::resource('tagihan', TagihanController::class);    Route::get('tagihan-detail/{id}/info', [TagihanController::class, 'detailInfo'])->name('tagihan.detailInfo');
     Route::put('tagihan-detail/{id}/update', [TagihanController::class, 'updateDetail'])->name('tagihan.updateDetail');
+
+    Route::get('kwitansi-pembayaran/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi_pembayaran.show');
 });
 
 Route::prefix('walimurid')->middleware(['auth','auth.wali'])->group(function(){
