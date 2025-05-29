@@ -22,6 +22,40 @@
                             @method('PUT')
                         @endif
 
+                        <!-- Data Wali Murid -->
+                        <div class="mb-3 form-group">
+                            <label for="wali_id" class="form-label">Wali Murid</label>
+                            <select name="wali_id" class="form-control select2" id="wali_id"
+                                {{ isset($isShow) ? 'disabled' : '' }}>
+                                <option value="">Pilih Wali Murid</option>
+                                @foreach (\App\Models\User::where('akses', 'wali')->get() as $wali)
+                                    <option value="{{ $wali->id }}"
+                                        {{ old('wali_id') == $wali->id || $model->wali_id == $wali->id ? 'selected' : '' }}>
+                                        {{ $wali->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="text-danger">{{ $errors->first('wali_id') }}</span>
+                        </div>
+
+                        <div class="mb-3 form-group">
+                            <label for="wali_status" class="form-label">Status Wali</label>
+                            <select name="wali_status" class="form-control" id="wali_status"
+                                {{ isset($isShow) ? 'disabled' : '' }}>
+                                <option value="">Pilih Status</option>
+                                <option value="Ayah"
+                                    {{ old('wali_status') == 'Ayah' || $model->wali_status == 'Ayah' ? 'selected' : '' }}>
+                                    Ayah</option>
+                                <option value="Ibu"
+                                    {{ old('wali_status') == 'Ibu' || $model->wali_status == 'Ibu' ? 'selected' : '' }}>
+                                    Ibu</option>
+                                <option value="Wali"
+                                    {{ old('wali_status') == 'Wali' || $model->wali_status == 'Wali' ? 'selected' : '' }}>
+                                    Wali</option>
+                            </select>
+                            <span class="text-danger">{{ $errors->first('wali_status') }}</span>
+                        </div>
+
                         <!-- Data Siswa -->
                         <div class="mb-3 form-group">
                             <label for="nama" class="form-label">Nama Siswa</label>
@@ -111,40 +145,6 @@
                                 value="{{ old('angkatan') ?? ($model->angkatan ?? date('Y')) }}"
                                 {{ isset($isShow) ? 'readonly' : '' }}>
                             <span class="text-danger">{{ $errors->first('angkatan') }}</span>
-                        </div>
-
-                        <!-- Data Wali Murid -->
-                        <div class="mb-3 form-group">
-                            <label for="wali_id" class="form-label">Wali Murid</label>
-                            <select name="wali_id" class="form-control select2" id="wali_id"
-                                {{ isset($isShow) ? 'disabled' : '' }}>
-                                <option value="">Pilih Wali Murid</option>
-                                @foreach (\App\Models\User::where('akses', 'wali')->get() as $wali)
-                                    <option value="{{ $wali->id }}"
-                                        {{ old('wali_id') == $wali->id || $model->wali_id == $wali->id ? 'selected' : '' }}>
-                                        {{ $wali->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span class="text-danger">{{ $errors->first('wali_id') }}</span>
-                        </div>
-
-                        <div class="mb-3 form-group">
-                            <label for="wali_status" class="form-label">Status Wali</label>
-                            <select name="wali_status" class="form-control" id="wali_status"
-                                {{ isset($isShow) ? 'disabled' : '' }}>
-                                <option value="">Pilih Status</option>
-                                <option value="Ayah"
-                                    {{ old('wali_status') == 'Ayah' || $model->wali_status == 'Ayah' ? 'selected' : '' }}>
-                                    Ayah</option>
-                                <option value="Ibu"
-                                    {{ old('wali_status') == 'Ibu' || $model->wali_status == 'Ibu' ? 'selected' : '' }}>
-                                    Ibu</option>
-                                <option value="Wali"
-                                    {{ old('wali_status') == 'Wali' || $model->wali_status == 'Wali' ? 'selected' : '' }}>
-                                    Wali</option>
-                            </select>
-                            <span class="text-danger">{{ $errors->first('wali_status') }}</span>
                         </div>
 
                         @if (isset($isShow))

@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('pembayarans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tagihan_id')->index();
+             $table->foreignId('tagihan_detail_id')->nullable();
             $table->foreignId('wali_id')->index();
-            $table->enum('status_konfirmasi',['belum','sudah'])->nullable();
             $table->decimal('jumlah_dibayar', 15, 2);
             $table->date('tanggal_bayar')->nullable();
             $table->string('bukti_bayar')->nullable();
-            $table->enum('metode_pembayaran',['tunai','transfer'])->nullable();
+            $table->enum('metode_pembayaran', ['Bank Transfer', 'Cash'])->nullable();
+            $table->enum('status_konfirmasi', ['Belum Dikonfirmasi', 'Sudah Dikonfirmasi'])->nullable();
             $table->foreignId('user_id')->nullable()->index();
             $table->timestamps();
         });

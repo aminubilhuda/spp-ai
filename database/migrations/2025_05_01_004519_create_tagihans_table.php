@@ -20,8 +20,6 @@ return new class extends Migration
             $table->string('kelas')->nullable();
             $table->date('tanggal_tagihan');
             $table->date('tanggal_jatuh_tempo');
-            $table->string('nama_biaya');
-            $table->double('jumlah_biaya');
             $table->string('keterangan')->nullable();
             $table->string('denda');
             $table->timestamps();

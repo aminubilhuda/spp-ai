@@ -148,12 +148,15 @@
                                                 method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')"
                                                 class="d-inline">
                                                 @csrf
-                                                @method('DELETE')
-                                                <a href="{{ route($routePrefix . '.showByStudent', $item->siswa_id) }}"
-                                                    class="btn btn-info btn-sm">
+                                                @method('DELETE')                                                <a href="{{ route($routePrefix . '.showByStudent', $item->siswa_id) }}"
+                                                    class="btn btn-info btn-sm" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                <a href="{{ route('tagihan.rekap', $item->siswa_id) }}"
+                                                    class="btn btn-primary btn-sm" target="_blank" title="Cetak Rekap">
+                                                    <i class="bx bx-printer"></i>
+                                                </a>
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </form>

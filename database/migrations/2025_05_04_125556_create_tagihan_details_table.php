@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('pembayaran_id')->index()->nullable();
             $table->string('nama_biaya');
             $table->double('jumlah_biaya');
+            $table->enum('status', ['baru','angsur','lunas', 'belum_lunas'])->default('baru');
             $table->timestamps();
         });
     }

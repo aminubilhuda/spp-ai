@@ -3,6 +3,18 @@
     data-assets-path="{{ asset('sneat') }}/assets/" data-template="vertical-menu-template-free">
 
 <head>
+    <style>
+        @media print {
+        @page {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        body  {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        }
+    </style>
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
@@ -48,6 +60,7 @@
     <script src="{{ asset('sneat') }}/assets/vendor/libs/popper/popper.js"></script>
     <script src="{{ asset('sneat') }}/assets/vendor/js/bootstrap.js"></script>
     <link rel="stylesheet" href="{{ asset('font/css/all.min.css') }}">
+
 </head>
 
 <body>
