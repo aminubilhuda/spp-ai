@@ -45,6 +45,10 @@ class LoginController extends Controller
     {
         return view('auth.login_sneat');
     }
+    public function showLoginFormWali()
+    {
+        return view('auth.login_sneat_wali');
+    }
 
     public function authenticated(Request $request, $user)
     {
@@ -54,7 +58,7 @@ class LoginController extends Controller
             return redirect()->route('wali.beranda');
         } else {
             Auth::logout();
-            flash('Anda tidak memiliki akses')->error();
+            session()->flash('error', 'Anda tidak memiliki akses');
             return redirect()->route('login');
         }
     }

@@ -2,17 +2,21 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WaliController;
+use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\JurusanController;
-use App\Http\Controllers\BerandaWaliController;
-use App\Http\Controllers\BerandaOperatorController;
-use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PembayaranController;
-use App\Http\Controllers\KwitansiPembayaranController;
+use App\Http\Controllers\BerandaWaliController;
 use App\Http\Controllers\TagihanRekapController;
+use App\Http\Controllers\WaliMuridSiswaController;
+use App\Http\Controllers\BerandaOperatorController;
+use App\Http\Controllers\WaliMuridTagihanController;
+use App\Http\Controllers\KwitansiPembayaranController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,7 +24,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(){
     Route::get('/beranda', [BerandaOperatorController::class, 'index'])->name('operator.beranda');
@@ -62,10 +66,17 @@ Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(
     Route::get('kwitansi-pembayaran/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi_pembayaran.show');
 });
 
-Route::prefix('walimurid')->middleware(['auth','auth.wali'])->group(function(){
-    Route::get('/beranda', [BerandaWaliController::class, 'index'])->name('wali.beranda');
+// Login routes wali
+Route::get('login-wali', [LoginController::class, 'showLoginFormWali'])->name('login.wali');
+
+// route wali
+Route::prefix('walimurid')->middleware(['auth','auth.wali'])->name('wali.')->group(function(){
+    Route::get('/beranda', [BerandaWaliController::class, 'index'])->name('beranda');
+    Route::resource('siswa', WaliMuridSiswaController::class);
+    Route::resource('tagihan', WaliMuridTagihanController::class);
 });
 
+// route operator
 Route::prefix('admin')->middleware(['auth','auth.admin'])->group(function(){
     Route::get('tagihan-detail/{id}/info', [TagihanController::class, 'detailInfo'])->name('tagihan.detailInfo');
 });
