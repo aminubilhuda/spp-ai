@@ -17,7 +17,7 @@ class KwitansiPembayaranController extends Controller
     public function show($id) 
     {
         // Ambil pembayaran dengan relasi
-        $pembayaran = Pembayaran::with(['tagihan.siswa.jurusan', 'tagihan_detail'])
+        $pembayaran = Pembayaran::with(['tagihan.siswa.jurusan', 'tagihan_detail', 'bank_sekolah'])
             ->findOrFail($id);
         
         // Update pembayaran_id di tagihan_detail jika ini pembayaran terkonfirmasi

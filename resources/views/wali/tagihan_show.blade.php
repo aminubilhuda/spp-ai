@@ -67,19 +67,32 @@
                                     <h6>Ringkasan Pembayaran</h6>
                                     @php
                                         $totalTagihan = $tagihan->tagihan_details->sum('jumlah_biaya');
-                                        $totalLunas = $tagihan->tagihan_details
-                                            ->where('status', 'lunas')
-                                            ->sum('jumlah_biaya');
-                                        $totalAngsur = $tagihan->tagihan_details
-                                            ->where('status', 'angsur')
-                                            ->sum('jumlah_biaya');
-                                        $totalBelumLunas = $tagihan->tagihan_details
-                                            ->where('status', 'belum_lunas')
-                                            ->sum('jumlah_biaya');
-                                        $totalBaru = $tagihan->tagihan_details
-                                            ->where('status', 'baru')
-                                            ->sum('jumlah_biaya');
-                                        $sisaBayar = $totalBelumLunas + $totalBaru;
+                                        $totalLunas = 0;
+                                        $totalAngsur = 0;
+                                        $totalBelumLunas = 0;
+                                        $totalBaru = 0;
+                                        $totalSisaSeluruhDetail = 0;
+
+                                        foreach ($tagihan->tagihan_details as $detail) {
+                                            // Hitung total pembayaran yang sudah dikonfirmasi
+                                            $totalDibayar = $detail
+                                                ->pembayaran()
+                                                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                                ->sum('jumlah_dibayar');
+                                            $sisaBayar = $detail->jumlah_biaya - $totalDibayar;
+                                            $totalSisaSeluruhDetail += max(0, $sisaBayar);
+
+                                            if ($sisaBayar <= 0) {
+                                                $totalLunas += $detail->jumlah_biaya;
+                                            } elseif ($totalDibayar > 0) {
+                                                $totalAngsur += $detail->jumlah_biaya;
+                                            } elseif ($detail->status == 'baru') {
+                                                $totalBaru += $detail->jumlah_biaya;
+                                            } else {
+                                                $totalBelumLunas += $detail->jumlah_biaya;
+                                            }
+                                        }
+
                                         $progress = $totalTagihan > 0 ? ($totalLunas / $totalTagihan) * 100 : 0;
                                     @endphp
                                     <div class="row">
@@ -97,7 +110,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <div class="text-center">
-                                                <h5 class="text-warning">{{ formatRupiah($sisaBayar) }}</h5>
+                                                <h5 class="text-warning">{{ formatRupiah($totalSisaSeluruhDetail) }}</h5>
                                                 <small class="text-muted">Sisa Bayar</small>
                                             </div>
                                         </div>
@@ -140,29 +153,45 @@
                                     <tbody>
                                         @php $no = 1; @endphp
                                         @forelse ($tagihan->tagihan_details as $detail)
+                                            @php
+                                                $totalDibayar = $detail
+                                                    ->pembayaran()
+                                                    ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                                    ->sum('jumlah_dibayar');
+                                                $sisaBayar = $detail->jumlah_biaya - $totalDibayar;
+
+                                                if ($sisaBayar <= 0) {
+                                                    $statusDisplay = 'lunas';
+                                                } elseif ($totalDibayar > 0) {
+                                                    $statusDisplay = 'angsur';
+                                                } elseif ($detail->status == 'baru') {
+                                                    $statusDisplay = 'baru';
+                                                } else {
+                                                    $statusDisplay = 'belum_lunas';
+                                                }
+                                            @endphp
                                             <tr>
                                                 <td>{{ $no++ }}</td>
                                                 <td>{{ $detail->nama_biaya }}</td>
                                                 <td>{{ formatRupiah($detail->jumlah_biaya) }}</td>
                                                 <td>
-                                                    @if ($detail->status == 'lunas')
+                                                    @if ($statusDisplay == 'lunas')
                                                         <span class="badge bg-label-success">Lunas</span>
-                                                    @elseif ($detail->status == 'angsur')
+                                                    @elseif ($statusDisplay == 'angsur')
                                                         <span class="badge bg-label-info">Diangsur</span>
-                                                    @elseif ($detail->status == 'belum_lunas')
+                                                    @elseif ($statusDisplay == 'belum_lunas')
                                                         <span class="badge bg-label-warning">Belum Lunas</span>
                                                     @else
                                                         <span class="badge bg-label-secondary">Baru</span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($detail->status == 'lunas')
+                                                    @if ($statusDisplay == 'lunas')
                                                         <span class="text-success">Rp 0</span>
-                                                    @elseif ($detail->status == 'angsur')
+                                                    @elseif ($statusDisplay == 'angsur')
                                                         <span class="text-info">Diangsur</span>
                                                     @else
-                                                        <span
-                                                            class="text-warning">{{ formatRupiah($detail->jumlah_biaya) }}</span>
+                                                        <span class="text-warning">{{ formatRupiah($sisaBayar) }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -177,7 +206,7 @@
                                             <th colspan="2" class="text-end">Total:</th>
                                             <th>{{ formatRupiah($tagihan->tagihan_details->sum('jumlah_biaya')) }}</th>
                                             <th></th>
-                                            <th class="text-warning">{{ formatRupiah($sisaBayar) }}</th>
+                                            <th class="text-warning">{{ formatRupiah($totalSisaSeluruhDetail) }}</th>
                                         </tr>
                                     </tfoot>
                                 </table>

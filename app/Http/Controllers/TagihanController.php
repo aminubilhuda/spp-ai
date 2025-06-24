@@ -435,7 +435,7 @@ class TagihanController extends Controller
             
             $detail = TagihanDetail::with(['tagihan.siswa'])->findOrFail($id);
             
-            $totalBayar = $detail->pembayaran->sum('jumlah_dibayar');
+            $totalBayar = $detail->pembayaran->where('status_konfirmasi', 'Sudah Dikonfirmasi')->sum('jumlah_dibayar');
             $sisaBayar = max(0, $detail->jumlah_biaya - $totalBayar);
 
             $response = [

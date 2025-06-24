@@ -74,11 +74,18 @@
         <!-- Cards -->
         <li class="menu-item {{ request()->is('walimurid/tagihan*') ? 'active' : '' }}">
             <a href="{{ route('wali.tagihan.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
+                <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Basic">Data Tagihan</div>
             </a>
         </li>
 
+        <!-- Pembayaran -->
+        <li class="menu-item {{ request()->is('walimurid/pembayaran*') ? 'active' : '' }}">
+            <a href="{{ route('wali.pembayaran.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Basic">Data Pembayaran</div>
+            </a>
+        </li>
 
         <li class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">

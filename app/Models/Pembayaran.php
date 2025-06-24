@@ -20,7 +20,8 @@ class Pembayaran extends Model
         'bukti_bayar',
         'metode_pembayaran',
         'user_id',
-        'tanggal_bayar'
+        'tanggal_bayar',
+        'bank_sekolah_id'
     ];
 
     protected $dates = ['tanggal_bayar'];
@@ -55,6 +56,14 @@ class Pembayaran extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the bank sekolah that owns the payment
+     */
+    public function bank_sekolah(): BelongsTo
+    {
+        return $this->belongsTo(BankSekolah::class);
     }
 
     /**

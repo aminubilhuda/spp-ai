@@ -88,6 +88,14 @@
             </a>
         </li>
 
+        <!-- Pembayaran -->
+        <li class="menu-item {{ request()->is('operator/pembayaran*') ? 'active' : '' }}">
+            <a href="{{ route('pembayaran.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Basic">Data Pembayaran</div>
+            </a>
+        </li>
+
         <!-- Jurusan -->
         <li class="menu-item {{ request()->is('operator/jurusan*') ? 'active' : '' }}">
             <a href="{{ route('jurusan.index') }}" class="menu-link">

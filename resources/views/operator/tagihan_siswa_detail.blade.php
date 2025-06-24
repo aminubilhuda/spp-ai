@@ -166,9 +166,14 @@
                                         // Calculate total from tagihan_details
                                         foreach ($item->tagihan_details as $detail) {
                                             $totalBulan += $detail->jumlah_biaya;
-                                            if ($detail->status == 'lunas') {
+                                            $totalDibayar = $detail->pembayaran
+                                                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                                ->sum('jumlah_dibayar');
+                                            $sisaBayar = $detail->jumlah_biaya - $totalDibayar;
+
+                                            if ($sisaBayar <= 0) {
                                                 $status = 'paid';
-                                            } elseif ($detail->status == 'angsur' && $status != 'paid') {
+                                            } elseif ($totalDibayar > 0 && $status != 'paid') {
                                                 $status = 'partial';
                                             }
                                         }
@@ -259,21 +264,33 @@
                                             <td><strong>{{ formatRupiah($detail->jumlah_biaya) }}</strong></td>
                                             <td>
                                                 @php
-                                                    $totalBayar = $detail->pembayaran->sum('jumlah_dibayar');
+                                                    $totalBayar = $detail->pembayaran
+                                                        ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                                        ->sum('jumlah_dibayar');
                                                     $sisaTagihan = $detail->jumlah_biaya - $totalBayar;
                                                 @endphp
                                                 <strong>{{ formatRupiah($sisaTagihan) }}</strong>
                                             </td>
                                             <td>
-                                                @if ($detail->status == 'lunas')
+                                                @php
+                                                    if ($sisaTagihan <= 0) {
+                                                        $statusDisplay = 'lunas';
+                                                    } elseif ($totalBayar > 0) {
+                                                        $statusDisplay = 'angsur';
+                                                    } else {
+                                                        $statusDisplay = 'belum_lunas';
+                                                    }
+                                                @endphp
+                                                @if ($statusDisplay == 'lunas')
                                                     <span class="badge bg-success">Lunas</span>
-                                                @elseif($detail->status == 'angsur')
+                                                @elseif($statusDisplay == 'angsur')
                                                     <span class="badge bg-warning">Angsur</span>
                                                 @else
                                                     <span class="badge bg-danger">Belum Lunas</span>
                                                 @endif
                                             </td>
-                                            <td>                                                <div class="btn-group">
+                                            <td>
+                                                <div class="btn-group">
                                                     <a href="{{ route($routePrefix . '.show', $item->id) }}"
                                                         class="btn btn-info btn-sm">
                                                         <i class="bx bx-show-alt"></i>
@@ -288,10 +305,13 @@
                                                         <i class="bx bx-edit-alt"></i>
                                                     </button>
                                                     @php
-                                                        $latest_payment = $detail->pembayaran->sortByDesc('id')->first();
+                                                        $latest_payment = $detail->pembayaran
+                                                            ->sortByDesc('id')
+                                                            ->first();
                                                     @endphp
-                                                    @if($latest_payment)
-                                                        <a href="{{ route('kwitansi_pembayaran.show', $latest_payment->id) }}" target="blank" class="btn btn-primary btn-sm"
+                                                    @if ($latest_payment)
+                                                        <a href="{{ route('kwitansi_pembayaran.show', $latest_payment->id) }}"
+                                                            target="blank" class="btn btn-primary btn-sm"
                                                             title="Cetak Kwitansi">
                                                             <i class="bx bx-printer"></i>
                                                         </a>
@@ -379,14 +399,44 @@
                     <div class="modal-body">
                         <div id="payment-alert" class="alert" style="display: none;"></div>
                         <input type="hidden" name="tagihan_id" id="tagihan_id">
-                        <input type="hidden" name="detail_id" id="detail_id">
                         <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Pilih Item yang akan dibayar</label>
+                            <div id="tagihan_details_list">
+                                <!-- Tagihan details will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Pilih Bank Sekolah (Opsional)</label>
+                            <select name="bank_sekolah_id" class="form-select" id="bank_sekolah_id">
+                                <option value="">Pilih Bank Sekolah (Opsional)</option>
+                                @foreach (\App\Models\BankSekolah::all() as $bank)
+                                    <option value="{{ $bank->id }}" data-nama="{{ $bank->nama_bank }}"
+                                        data-rekening="{{ $bank->no_rekening }}"
+                                        data-atas-nama="{{ $bank->atas_nama }}">
+                                        {{ $bank->nama_bank }} - {{ $bank->no_rekening }} ({{ $bank->atas_nama }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="bank_info" style="display: none;">
+                            <div class="alert alert-info">
+                                <h6>Informasi Rekening:</h6>
+                                <p class="mb-1"><strong>Bank:</strong> <span id="bank_nama"></span></p>
+                                <p class="mb-1"><strong>No. Rekening:</strong> <span id="bank_rekening"></span></p>
+                                <p class="mb-0"><strong>Atas Nama:</strong> <span id="bank_atas_nama"></span></p>
+                            </div>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label">Jumlah yang akan dibayar</label>
                             <input type="number" name="jumlah_dibayar" id="jumlah_dibayar" class="form-control"
-                                required step="0.01" min="0">
-                            <small class="text-muted">Sisa yang harus dibayar: <span id="sisa_tagihan">0</span></small>
+                                required step="0.01" min="0" readonly>
+                            <small class="text-muted">Total dari item yang dipilih: <span
+                                    id="sisa_tagihan">0</span></small>
                         </div>
 
                         <div class="mb-3">
@@ -465,8 +515,6 @@
 
 @push('scripts')
     <script>
-
-
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -585,29 +633,78 @@
                     if (typeof data.remaining_amount === 'undefined') {
                         throw new Error('Data tagihan tidak valid');
                     }
-                    // Set jumlah yang harus dibayar
-                    let jumlahInput = document.querySelector('input[name="jumlah_dibayar"]');
-                    let sisaTagihanText = document.getElementById('sisa_tagihan');
 
-                    jumlahInput.value = data.remaining_amount;
-                    jumlahInput.max = data.remaining_amount;
-                    sisaTagihanText.textContent = formatRupiah(data.remaining_amount);
+                    // Populate tagihan details with checkbox
+                    const detailsList = document.getElementById('tagihan_details_list');
+                    detailsList.innerHTML = '';
+
+                    // Create single checkbox for this detail
+                    const detailDiv = document.createElement('div');
+                    detailDiv.className = 'card mb-2';
+                    detailDiv.innerHTML = `
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input detail-checkbox" type="checkbox" name="detail_ids[]" 
+                                       id="detail_${detailId}" value="${detailId}" 
+                                       data-sisa="${data.remaining_amount}" data-nama="${data.detail.nama_biaya}" checked>
+                                <label class="form-check-label" for="detail_${detailId}">
+                                    <strong>${data.detail.nama_biaya}</strong><br>
+                                    <small class="text-muted">
+                                        Total: ${formatRupiah(data.total_tagihan)} | 
+                                        Sisa: ${formatRupiah(data.remaining_amount)}
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                    detailsList.appendChild(detailDiv);
+
+                    // Handle checkbox selection
+                    document.querySelectorAll('.detail-checkbox').forEach(checkbox => {
+                        checkbox.addEventListener('change', function() {
+                            calculateTotal();
+                        });
+                    });
+
+                    // Handle bank selection
+                    document.getElementById('bank_sekolah_id').addEventListener('change', function() {
+                        const selectedOption = this.options[this.selectedIndex];
+                        const bankInfo = document.getElementById('bank_info');
+
+                        if (this.value) {
+                            document.getElementById('bank_nama').textContent = selectedOption.dataset.nama;
+                            document.getElementById('bank_rekening').textContent = selectedOption.dataset
+                                .rekening;
+                            document.getElementById('bank_atas_nama').textContent = selectedOption.dataset
+                                .atasNama;
+                            bankInfo.style.display = 'block';
+                        } else {
+                            bankInfo.style.display = 'none';
+                        }
+                    });
+
+                    // Calculate initial total
+                    calculateTotal();
 
                     // Update form title with student details
                     if (data.detail && data.detail.nama_siswa) {
                         document.querySelector('#paymentModalLabel').textContent =
                             `Form Pembayaran - ${data.detail.nama_siswa}`;
-                    } // Reset form and alert
+                    }
+
+                    // Reset form and alert
                     document.getElementById('payment-alert').style.display = 'none';
                     document.getElementById('paymentForm').reset();
 
                     // Set values again
                     document.getElementById('tagihan_id').value = tagihanId;
                     document.getElementById('detail_id').value = detailId;
-                    document.getElementById('jumlah_dibayar').value = data.remaining_amount;
-                    document.getElementById('jumlah_dibayar').max = data.remaining_amount;
                     document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
                         0];
+
+                    // Check the checkbox
+                    document.getElementById(`detail_${detailId}`).checked = true;
+                    calculateTotal();
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -626,6 +723,19 @@
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(amount);
+        }
+
+        // Function to calculate total from selected checkboxes
+        function calculateTotal() {
+            const checkboxes = document.querySelectorAll('.detail-checkbox:checked');
+            let total = 0;
+
+            checkboxes.forEach(checkbox => {
+                total += parseFloat(checkbox.dataset.sisa);
+            });
+
+            document.getElementById('jumlah_dibayar').value = total;
+            document.getElementById('sisa_tagihan').textContent = formatRupiah(total);
         }
 
         function openEditModal(detailId) {
