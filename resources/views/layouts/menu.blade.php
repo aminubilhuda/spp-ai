@@ -105,6 +105,14 @@
         </li>
 
         <!-- Biaya -->
+        <li class="menu-item {{ request()->is('operator/bank-sekolah*') ? 'active' : '' }}">
+            <a href="{{ route('bank-sekolah.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Basic">Rekening Sekolah</div>
+            </a>
+        </li>
+
+        <!-- Biaya -->
         <li class="menu-item {{ request()->is('operator/biaya*') ? 'active' : '' }}">
             <a href="{{ route('biaya.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-money"></i>

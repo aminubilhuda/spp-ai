@@ -11,6 +11,7 @@ use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\BankSekolahController;
 use App\Http\Controllers\BerandaWaliController;
 use App\Http\Controllers\TagihanRekapController;
 use App\Http\Controllers\WaliMuridSiswaController;
@@ -30,6 +31,7 @@ Route::prefix('operator')->middleware(['auth','auth.operator'])->group(function(
     Route::get('/beranda', [BerandaOperatorController::class, 'index'])->name('operator.beranda');
     Route::resource('user', UserController::class);
     Route::resource('wali', WaliController::class);
+    Route::resource('bank-sekolah', BankSekolahController::class);
 
       // Siswa routes
     Route::controller(SiswaController::class)->group(function () {

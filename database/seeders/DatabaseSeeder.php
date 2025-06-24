@@ -17,7 +17,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             JurusanSeeder::class,
             BiayaSeeder::class,
+            BankSekolahSeeder::class,
             SiswaSeeder::class,
+            IndoBankSeeder::class,
         ]);
     }
 }

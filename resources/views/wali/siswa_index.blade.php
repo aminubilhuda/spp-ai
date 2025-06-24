@@ -39,7 +39,7 @@
                             <thead>
                                 <tr>
                                     <td>No</td>
-                                    <td>Nama Wali Murid</td>
+                                    {{-- <td>Nama Wali Murid</td> --}}
                                     <td>Nama</td>
                                     <td>NISN</td>
                                     <td>NIS</td>
@@ -55,7 +55,7 @@
                                 @forelse ($models as $siswa)
                                     <tr>
                                         <td>{{ $no++ }}</td>
-                                        <td>{{ $siswa->wali->name }}</td>
+                                        {{-- <td>{{ $siswa->wali->name }}</td> --}}
                                         <td>{{ $siswa->nama }}</td>
                                         <td>{{ $siswa->nisn }}</td>
                                         <td>{{ $siswa->nis }}</td>
