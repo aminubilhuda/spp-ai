@@ -32,13 +32,11 @@ class WaliMuridPembayaranController extends Controller
             $query->where('status_konfirmasi', $request->status_konfirmasi);
         }
 
-        // Filter berdasarkan tanggal
-        if ($request->has('tanggal_dari') && $request->tanggal_dari != '') {
-            $query->whereDate('tanggal_bayar', '>=', $request->tanggal_dari);
-        }
-
-        if ($request->has('tanggal_sampai') && $request->tanggal_sampai != '') {
-            $query->whereDate('tanggal_bayar', '<=', $request->tanggal_sampai);
+        // Filter berdasarkan bulan/tahun
+        if ($request->has('bulan_tahun') && $request->bulan_tahun != '') {
+            $bulanTahun = $request->bulan_tahun;
+            $query->whereYear('tanggal_bayar', substr($bulanTahun, 0, 4))
+                  ->whereMonth('tanggal_bayar', substr($bulanTahun, 5, 2));
         }
 
         // Filter pencarian
@@ -57,9 +55,7 @@ class WaliMuridPembayaranController extends Controller
             'title' => 'Data Pembayaran',
             'search' => $request->search,
             'status_konfirmasi' => $request->status_konfirmasi,
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'tanggal_dari' => $request->tanggal_dari,
-            'tanggal_sampai' => $request->tanggal_sampai
+            'bulan_tahun' => $request->bulan_tahun
         ]);
     }
 
