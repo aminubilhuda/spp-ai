@@ -165,6 +165,11 @@
                                                     </a>
                                                 @endif
 
+                                                <a href="{{ route('wali.pembayaran.show', $item->id) }}"
+                                                    class="btn btn-sm btn-secondary" title="Detail Pembayaran">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </a>
+
                                                 <a href="{{ route('wali.kwitansi_pembayaran.show', $item->id) }}"
                                                     class="btn btn-sm btn-primary" title="Cetak Kwitansi">
                                                     <i class="fas fa-print"></i>

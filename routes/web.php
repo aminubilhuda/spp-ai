@@ -17,6 +17,7 @@ use App\Http\Controllers\TagihanRekapController;
 use App\Http\Controllers\WaliMuridSiswaController;
 use App\Http\Controllers\BerandaOperatorController;
 use App\Http\Controllers\WaliMuridTagihanController;
+use App\Http\Controllers\WaliMuridPembayaranController;
 use App\Http\Controllers\KwitansiPembayaranController;
 
 // ============================================================================
@@ -105,12 +106,14 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     });
     Route::resource('tagihan', WaliMuridTagihanController::class);
     
-    // Pembayaran Management
-    Route::controller(PembayaranController::class)->group(function () {
-        Route::get('pembayaran', 'indexWali')->name('pembayaran.index');
+    // Pembayaran Management - Menggunakan WaliMuridPembayaranController
+    Route::controller(WaliMuridPembayaranController::class)->group(function () {
+        Route::get('pembayaran', 'index')->name('pembayaran.index');
         Route::post('pembayaran/store', 'store')->name('pembayaran.store');
-        Route::post('pembayaran/{id}/confirm', 'confirm')->name('pembayaran.confirm');
+        Route::get('pembayaran/{id}', 'show')->name('pembayaran.show');
+        Route::get('tagihan/{tagihanId}/details', 'getTagihanDetails')->name('tagihan.details');
     });
+    Route::resource('pembayaran', WaliMuridPembayaranController::class)->except(['index', 'store', 'show']);
     
     // Kwitansi
     Route::get('kwitansi-pembayaran/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi_pembayaran.show');
