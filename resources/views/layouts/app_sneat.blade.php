@@ -368,7 +368,7 @@
                                         <span class="position-relative">
                                             <i class="icon-base bx bx-bell icon-md"></i>
                                             @if($unreadNotifications > 0)
-                                                <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
+                                                <span class="badge rounded-pill bg-danger badge-dot badge-notifications border">{{ $unreadNotifications }}</span>
                                             @endif
                                         </span>
                                     </a>

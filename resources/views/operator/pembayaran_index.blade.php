@@ -192,7 +192,7 @@
                                         <td>
                                             <div class="btn-group">
                                                 @if ($item->bukti_bayar)
-                                                    <a href="{{ Storage::url($item->bukti_bayar) }}" target="_blank"
+                                                    <a href="javascript:void(0);" onclick="popupCenter('{{ Storage::url($item->bukti_bayar) }}', 'Bukti Pembayaran', 800, 600)"
                                                         class="btn btn-sm btn-info" title="Lihat Bukti">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
@@ -237,6 +237,27 @@
 
 @push('scripts')
     <script>
+        // Function untuk menampilkan popup center
+        function popupCenter(url, title, width, height) {
+            // Hitung posisi center
+            var left = (screen.width - width) / 2;
+            var top = (screen.height - height) / 2;
+            
+            // Buka popup window
+            var popup = window.open(url, title, 
+                'width=' + width + ',height=' + height + 
+                ',left=' + left + ',top=' + top + 
+                ',scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no');
+            
+            // Focus ke popup jika berhasil dibuka
+            if (popup) {
+                popup.focus();
+            } else {
+                // Fallback jika popup diblokir
+                alert('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
+            }
+        }
+        
         // JavaScript untuk notifikasi dan fitur lainnya bisa ditambahkan di sini
     </script>
 @endpush
