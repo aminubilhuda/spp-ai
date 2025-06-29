@@ -12,12 +12,6 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Data Pembayaran</h5>
-                    <!-- Debug buttons -->
-                    <div class="mt-2">
-                        <a href="{{ route('debug.notifications') }}" target="_blank" class="btn btn-sm btn-info">Debug Notifications</a>
-                        <a href="{{ route('create.test.notification') }}" class="btn btn-sm btn-warning">Create Test Notification</a>
-                        <a href="{{ route('test.notification.simple') }}" class="btn btn-sm btn-success">Simple Test</a>
-                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Flash Messages -->

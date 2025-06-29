@@ -64,20 +64,35 @@
             </a>
         </li>
 
-        <!-- Cards -->
-        <li class="menu-item {{ request()->is('operator/user*') ? 'active' : '' }}">
-            <a href="{{ route('user.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Basic">Data User</div>
+        <!-- Data Master -->
+        <li class="menu-item {{ request()->is('operator/user*') || request()->is('operator/wali*') || request()->is('operator/siswa*') || request()->is('operator/jurusan*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-data"></i>
+                <div data-i18n="Layouts">Data Master</div>
+                <div class="badge bg-label-primary rounded-pill ms-auto">4</div>
             </a>
-        </li>
-
-        <!-- Cards -->
-        <li class="menu-item {{ request()->is('operator/wali*') ? 'active' : '' }}">
-            <a href="{{ route('wali.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Basic">Data Wali Murid</div>
-            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('operator/user*') ? 'active' : '' }}">
+                    <a href="{{ route('user.index') }}" class="menu-link">
+                        <div data-i18n="Without menu">Data User</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('operator/wali*') ? 'active' : '' }}">
+                    <a href="{{ route('wali.index') }}" class="menu-link">
+                        <div data-i18n="Without navbar">Data Wali Murid</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('operator/siswa*') ? 'active' : '' }}">
+                    <a href="{{ route('siswa.index') }}" class="menu-link">
+                        <div data-i18n="Container">Data Siswa</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('operator/jurusan*') ? 'active' : '' }}">
+                    <a href="{{ route('jurusan.index') }}" class="menu-link">
+                        <div data-i18n="Fluid">Data Jurusan</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
         <!-- Tagihan -->
@@ -105,24 +120,8 @@
                     $unreadCount = auth()->user()->unreadNotifications()->count();
                 @endphp
                 @if($unreadCount > 0)
-                    <span class="badge rounded-pill badge-danger ms-auto">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                    <span class="badge rounded-pill bg-danger badge-dot badge-notifications border ms-auto"></span>
                 @endif
-            </a>
-        </li>
-
-        <!-- Jurusan -->
-        <li class="menu-item {{ request()->is('operator/jurusan*') ? 'active' : '' }}">
-            <a href="{{ route('jurusan.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-building"></i>
-                <div data-i18n="Basic">Data Jurusan</div>
-            </a>
-        </li>
-
-        <!-- Cards -->
-        <li class="menu-item {{ request()->is('operator/siswa*') ? 'active' : '' }}">
-            <a href="{{ route('siswa.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Basic">Data Siswa</div>
             </a>
         </li>
 

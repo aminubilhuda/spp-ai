@@ -18,13 +18,17 @@ class PembayaranController extends Controller
         // Hapus middleware auth.operator untuk sementara
     }
 
+    /**
+     * Menyimpan data pembayaran baru
+     * Mendukung pembayaran oleh wali (Bank Transfer) dan operator (Bank Transfer/Cash)
+     */
     public function store(Request $request)
     {
         // Tentukan validasi berdasarkan user yang login
         $user = auth()->user();
         $isWali = $user->akses === 'wali';
         
-        // Validate request
+        // Atur aturan validasi dasar
         $validationRules = [
             'tagihan_id' => 'required|exists:tagihans,id',
             'jumlah_dibayar' => 'required|numeric|min:0',
@@ -62,12 +66,13 @@ class PembayaranController extends Controller
 
         $request->validate($validationRules);
 
+        // Mulai transaksi database untuk memastikan konsistensi data
         DB::beginTransaction();
         try {
-            // Get tagihan and validate
+            // Ambil data tagihan dan validasi
             $tagihan = Tagihan::findOrFail($request->tagihan_id);
             
-            // Validate that all detail_ids belong to the tagihan
+            // Validasi bahwa semua detail_ids milik tagihan yang sama
             $detailIds = $request->detail_ids ?? [$request->detail_id];
             $tagihanDetails = TagihanDetail::whereIn('id', $detailIds)
                 ->where('tagihan_id', $tagihan->id)
@@ -80,7 +85,7 @@ class PembayaranController extends Controller
                 ], 400);
             }
 
-            // Calculate total remaining amount for selected details
+            // Hitung total sisa tagihan untuk item yang dipilih
             $totalRemaining = 0;
             foreach ($tagihanDetails as $detail) {
                 $totalDibayar = $detail->pembayaran()
@@ -90,7 +95,7 @@ class PembayaranController extends Controller
                 $totalRemaining += $sisaBayar;
             }
 
-            // Validate payment amount
+            // Validasi jumlah pembayaran tidak boleh melebihi sisa tagihan
             if ($request->jumlah_dibayar > $totalRemaining) {
                 return response()->json([
                     'success' => false,
@@ -98,14 +103,14 @@ class PembayaranController extends Controller
                 ], 400);
             }
 
-            // Handle file upload for Bank Transfer
+            // Handle upload file bukti pembayaran untuk Bank Transfer
             $buktiPath = null;
             if ($request->metode_pembayaran === 'Bank Transfer' && $request->hasFile('bukti_bayar')) {
                 $file = $request->file('bukti_bayar');
                 $buktiPath = $file->store('bukti_pembayaran', 'public');
             }
 
-            // Create payment records for each selected detail
+            // Buat record pembayaran untuk setiap item yang dipilih
             $pembayaranIds = [];
             $totalSisaTagihan = 0;
             
@@ -132,7 +137,7 @@ class PembayaranController extends Controller
                 
                 // Hitung jumlah pembayaran untuk item ini
                 if ($isPembayaranParsial && $totalSisaTagihan > 0) {
-                    // Pembayaran parsial: bagi secara proporsional
+                    // Pembayaran parsial: bagi secara proporsional berdasarkan sisa tagihan
                     $proporsi = $sisaBayar / $totalSisaTagihan;
                     $jumlahUntukItem = $jumlahDibayar * $proporsi;
                 } else {
@@ -140,6 +145,7 @@ class PembayaranController extends Controller
                     $jumlahUntukItem = $sisaBayar;
                 }
 
+                // Buat record pembayaran baru
                 $pembayaran = Pembayaran::create([
                     'tagihan_id' => $request->tagihan_id,
                     'tagihan_detail_id' => $detail->id,
@@ -155,6 +161,7 @@ class PembayaranController extends Controller
                 $pembayaranIds[] = $pembayaran->id;
             }
 
+            // Commit transaksi jika semua berhasil
             DB::commit();
             
             return response()->json([
@@ -167,7 +174,9 @@ class PembayaranController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi error
             DB::rollback();
+            // Hapus file bukti yang sudah diupload jika ada error
             if (isset($buktiPath)) {
                 Storage::disk('public')->delete($buktiPath);
             }
@@ -179,6 +188,10 @@ class PembayaranController extends Controller
         }
     }
 
+    /**
+     * Mengkonfirmasi pembayaran yang dilakukan oleh wali
+     * Hanya operator yang bisa mengkonfirmasi pembayaran
+     */
     public function confirm($id)
     {
         try {
@@ -208,6 +221,10 @@ class PembayaranController extends Controller
         }
     }
 
+    /**
+     * Menampilkan daftar pembayaran untuk operator/admin
+     * Dilengkapi dengan fitur filter dan pencarian
+     */
     public function index(Request $request)
     {
         $query = Pembayaran::with(['tagihan.siswa', 'tagihan_detail', 'wali', 'user'])
@@ -223,16 +240,17 @@ class PembayaranController extends Controller
             $query->where('metode_pembayaran', $request->metode_pembayaran);
         }
 
-        // Filter berdasarkan tanggal
+        // Filter berdasarkan tanggal dari
         if ($request->has('tanggal_dari') && $request->tanggal_dari != '') {
             $query->whereDate('tanggal_bayar', '>=', $request->tanggal_dari);
         }
 
+        // Filter berdasarkan tanggal sampai
         if ($request->has('tanggal_sampai') && $request->tanggal_sampai != '') {
             $query->whereDate('tanggal_bayar', '<=', $request->tanggal_sampai);
         }
 
-        // Filter pencarian
+        // Filter pencarian berdasarkan nama atau NISN siswa
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->whereHas('tagihan.siswa', function($q) use ($search) {
@@ -254,6 +272,10 @@ class PembayaranController extends Controller
         ]);
     }
 
+    /**
+     * Menampilkan daftar pembayaran untuk wali
+     * Wali hanya bisa melihat pembayaran Bank Transfer dari siswa yang dia kelola
+     */
     public function indexWali(Request $request)
     {
         // Ambil siswa yang dimiliki wali yang sedang login
@@ -276,16 +298,17 @@ class PembayaranController extends Controller
             $query->where('metode_pembayaran', $request->metode_pembayaran);
         }
 
-        // Filter berdasarkan tanggal
+        // Filter berdasarkan tanggal dari
         if ($request->has('tanggal_dari') && $request->tanggal_dari != '') {
             $query->whereDate('tanggal_bayar', '>=', $request->tanggal_dari);
         }
 
+        // Filter berdasarkan tanggal sampai
         if ($request->has('tanggal_sampai') && $request->tanggal_sampai != '') {
             $query->whereDate('tanggal_bayar', '<=', $request->tanggal_sampai);
         }
 
-        // Filter pencarian
+        // Filter pencarian berdasarkan nama atau NISN siswa
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->whereHas('tagihan.siswa', function($q) use ($search) {

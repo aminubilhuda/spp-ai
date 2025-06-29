@@ -2,93 +2,94 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use Illuminate\Support\Collection;
 
-class SiswaImportTemplate implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithColumnWidths
+class SiswaImportTemplate implements FromArray, WithHeadings, WithStyles
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
+    public function array(): array
     {
-        return new Collection([
-            // Provide sample data as guidance
+        // Contoh data untuk template
+        return [
             [
-                'John Doe',               // nama
-                '12345678',               // nisn
-                '1234567',                // nis
-                'Laki-laki',              // jenis_kelamin
-                '11',                     // kelas
-                '2022',                   // angkatan
-                'IPA',                    // jurusan
-                'Ahmad (Ayah)',           // wali_murid
-                'Ayah',                   // wali_status 
-                'Jl. Contoh Alamat No. 123', // alamat
-                '08123456789'             // nomor_telepon
+                'nama_wajib' => 'Ahmad Fadillah',
+                'nisn_wajib' => '1234567890',
+                'nis_wajib' => '2024001',
+                'jenis_kelamin_wajib_lp_atau_laki_lakiperempuan' => 'Laki-laki',
+                'kelas_wajib_contoh_x_xi_xii' => 'XII',
+                'angkatan_wajib_contoh_2022' => '2022',
+                'jurusan_wajib' => 'RPL',
+                'wali_murid_opsional' => 'Budi Santoso',
+                'status_wali_opsional_ayah_ibu_atau_wali' => 'Ayah',
+                'email_wali_opsional' => 'budi.santoso@email.com',
+                'nohp_wali_opsional' => '081234567890'
             ],
-            // Empty row for user to fill
             [
-                '', '', '', '', '', '', '', '', '', '', ''
+                'nama_wajib' => 'Siti Nurhaliza',
+                'nisn_wajib' => '1234567891',
+                'nis_wajib' => '2024002',
+                'jenis_kelamin_wajib_lp_atau_laki_lakiperempuan' => 'Perempuan',
+                'kelas_wajib_contoh_x_xi_xii' => 'XI',
+                'angkatan_wajib_contoh_2022' => '2023',
+                'jurusan_wajib' => 'AKL',
+                'wali_murid_opsional' => 'Siti Aminah',
+                'status_wali_opsional_ayah_ibu_atau_wali' => 'Ibu',
+                'email_wali_opsional' => 'siti.aminah@email.com',
+                'nohp_wali_opsional' => '089876543210'
             ],
-        ]);
+            [
+                'nama_wajib' => 'Muhammad Rizki',
+                'nisn_wajib' => '1234567892',
+                'nis_wajib' => '2024003',
+                'jenis_kelamin_wajib_lp_atau_laki_lakiperempuan' => 'Laki-laki',
+                'kelas_wajib_contoh_x_xi_xii' => 'X',
+                'angkatan_wajib_contoh_2022' => '2024',
+                'jurusan_wajib' => 'BD',
+                'wali_murid_opsional' => 'Rizki Pratama',
+                'status_wali_opsional_ayah_ibu_atau_wali' => 'Wali',
+                'email_wali_opsional' => 'rizki.pratama@email.com',
+                'nohp_wali_opsional' => '087654321098'
+            ]
+        ];
     }
 
     public function headings(): array
     {
         return [
-            'Nama (Wajib)',
-            'NISN (Wajib)',
-            'NIS (Wajib)',
-            'Jenis Kelamin (Wajib, L/P atau Laki-laki/Perempuan)',
-            'Kelas (Wajib, contoh: X, XI, XII)',
-            'Angkatan (Wajib, contoh: 2022)',
-            'Jurusan (Wajib)',
-            'Wali Murid (Opsional)',
-            'Status Wali (Opsional: Ayah, Ibu, atau Wali)',
-            'Alamat (Opsional)',
-            'Nomor Telepon (Opsional)'
+            'nama_wajib',
+            'nisn_wajib',
+            'nis_wajib',
+            'jenis_kelamin_wajib_lp_atau_laki_lakiperempuan',
+            'kelas_wajib_contoh_x_xi_xii',
+            'angkatan_wajib_contoh_2022',
+            'jurusan_wajib',
+            'wali_murid_opsional',
+            'status_wali_opsional_ayah_ibu_atau_wali',
+            'email_wali_opsional',
+            'nohp_wali_opsional',
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        // Add notes in cell A3
-        $sheet->setCellValue('A4', 'Catatan:');
-        $sheet->setCellValue('A5', '1. Semua kolom yang ditandai (Wajib) harus diisi');
-        $sheet->setCellValue('A6', '2. Jurusan harus sesuai dengan yang ada di sistem (IPA, IPS, dll)');
-        $sheet->setCellValue('A7', '3. Format file yang diunggah harus Excel (.xlsx atau .xls)');
-        $sheet->setCellValue('A8', '4. Jenis Kelamin: L atau P / Laki-laki atau Perempuan');
-        $sheet->setCellValue('A9', '5. Status Wali: Diisi dengan "Ayah", "Ibu", atau "Wali"');
-        
         return [
-            1 => ['font' => ['bold' => true]],
-            'A4:A9' => ['font' => ['italic' => true, 'bold' => true]],
-            2 => ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'CCFFF1']]],
-        ];
-    }
-
-    public function columnWidths(): array
-    {
-        return [
-            'A' => 25,  // nama
-            'B' => 20,  // nisn
-            'C' => 20,  // nis
-            'D' => 25,  // jenis_kelamin
-            'E' => 15,  // kelas
-            'F' => 15,  // angkatan
-            'G' => 20,  // jurusan
-            'H' => 20,  // wali_murid
-            'I' => 20,  // wali_status
-            'J' => 35,  // alamat
-            'K' => 20,  // nomor_telepon
+            // Style header
+            1 => [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4'],
+                ],
+            ],
+            // Style contoh data
+            'A2:K4' => [
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E7E6E6'],
+                ],
+            ],
         ];
     }
 }

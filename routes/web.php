@@ -97,66 +97,6 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
         Route::post('notifications/mark-all-as-read', 'markAllAsRead')->name('notifications.markAllAsRead');
         Route::get('notifications/unread-count', 'unreadCount')->name('notifications.unreadCount');
     });
-    
-    // Debug route untuk notifikasi
-    Route::get('debug-notifications', function() {
-        $user = auth()->user();
-        $unreadCount = $user->unreadNotifications()->count();
-        $totalCount = $user->notifications()->count();
-        
-        return response()->json([
-            'user' => $user->name,
-            'akses' => $user->akses,
-            'unread_notifications' => $unreadCount,
-            'total_notifications' => $totalCount,
-            'notifications' => $user->notifications()->take(5)->get()->toArray()
-        ]);
-    })->name('debug.notifications');
-    
-    // Route untuk membuat notifikasi test
-    Route::get('create-test-notification', function() {
-        $user = auth()->user();
-        $pembayaran = App\Models\Pembayaran::first();
-        
-        if ($pembayaran) {
-            $user->notify(new App\Notifications\Pembayaran($pembayaran));
-            return response()->json([
-                'success' => true,
-                'message' => 'Notifikasi test berhasil dibuat',
-                'unread_count' => $user->unreadNotifications()->count()
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada pembayaran untuk membuat notifikasi'
-            ]);
-        }
-    })->name('create.test.notification');
-    
-    // Route test sederhana untuk notifikasi
-    Route::get('test-notification-simple', function() {
-        $user = auth()->user();
-        
-        // Buat notifikasi sederhana langsung ke database
-        $notification = new Illuminate\Notifications\DatabaseNotification();
-        $notification->id = \Illuminate\Support\Str::uuid();
-        $notification->type = 'App\Notifications\Pembayaran';
-        $notification->notifiable_type = 'App\Models\User';
-        $notification->notifiable_id = $user->id;
-        $notification->data = json_encode([
-            'title' => 'Test Notification',
-            'message' => 'Ini adalah notifikasi test'
-        ]);
-        $notification->read_at = null;
-        $notification->save();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Notifikasi sederhana dibuat',
-            'unread_count' => $user->unreadNotifications()->count(),
-            'total_count' => $user->notifications()->count()
-        ]);
-    })->name('test.notification.simple');
 });
 
 // ============================================================================

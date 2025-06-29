@@ -67,7 +67,7 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
                 }
                 
                 // Find jurusan
-                $jurusan = $this->findJurusan($data['jurusan']);
+                $jurusan = $this->findOrCreateJurusan($data['jurusan']);
                 
                 // Handle wali if provided
                 $waliData = $this->handleWali($data);
@@ -183,11 +183,15 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
         $data['jenis_kelamin'] = $row['jenis_kelamin_wajib_lp_atau_laki_lakiperempuan'] ?? 
                                 $row['jenis_kelamin'] ?? $row['gender'] ?? $row['sex'] ?? null;
         
-        // Optional fields
+        // Wali data - enhanced with email and phone
         $data['wali_murid'] = $row['wali_murid_opsional'] ?? $row['wali_murid'] ?? 
                              $row['wali'] ?? $row['guardian'] ?? $row['parent'] ?? null;
         $data['wali_status'] = $row['status_wali_opsional_ayah_ibu_atau_wali'] ?? 
                               $row['wali_status'] ?? $row['status_wali'] ?? null;
+        $data['wali_email'] = $row['email_wali_opsional'] ?? $row['email_wali'] ?? 
+                             $row['wali_email'] ?? null;
+        $data['wali_nohp'] = $row['nohp_wali_opsional'] ?? $row['nohp_wali'] ?? 
+                            $row['wali_nohp'] ?? $row['telepon_wali'] ?? null;
 
         // Log the raw data before extraction
         Log::info("Extracting data from row:", [
@@ -221,9 +225,9 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
     }
     
     /**
-     * Find jurusan by name with fuzzy matching
+     * Find jurusan by name, or create if not exists
      */
-    private function findJurusan($jurusanName)
+    private function findOrCreateJurusan($jurusanName)
     {
         if (empty($jurusanName)) {
             return null;
@@ -237,26 +241,30 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
         ];
 
         // Check direct match first
-        $jurusan = Jurusan::where('nama', 'LIKE', '%' . $jurusanName . '%')->first();
+        $jurusan = \App\Models\Jurusan::where('nama', 'LIKE', '%' . $jurusanName . '%')->first();
         
         if (!$jurusan) {
             // Try mapped values
             foreach ($mappings as $oldName => $newNames) {
                 if (strtoupper($jurusanName) === $oldName) {
                     foreach ($newNames as $newName) {
-                        $jurusan = Jurusan::where('nama', 'LIKE', '%' . $newName . '%')->first();
+                        $jurusan = \App\Models\Jurusan::where('nama', 'LIKE', '%' . $newName . '%')->first();
                         if ($jurusan) break;
                     }
                 }
             }
         }
 
-        if ($jurusan) {
-            Log::info("Jurusan found: " . $jurusan->nama . " (ID: " . $jurusan->id . ")");
+        if (!$jurusan) {
+            // Jika belum ada, buat baru
+            $jurusan = \App\Models\Jurusan::create([
+                'nama' => $jurusanName,
+                'keterangan' => 'Import otomatis'
+            ]);
+            \Log::info("Jurusan baru dibuat: " . $jurusanName);
         } else {
-            Log::warning("Jurusan not found for: " . $jurusanName);
+            \Log::info("Jurusan ditemukan: " . $jurusan->nama . " (ID: " . $jurusan->id . ")");
         }
-        
         return $jurusan;
     }
     
@@ -272,16 +280,62 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
             // Debug - processing wali
             Log::info("Processing wali_murid: " . $data['wali_murid']);
             
-            // Check if guardian already exists
+            // Check if guardian already exists by name
             $wali = User::where('name', $data['wali_murid'])->where('akses', 'wali')->first();
             
             if ($wali) {
                 Log::info("Wali found: " . $wali->name . " (ID: " . $wali->id . ")");
+                
+                // Update wali data if email/nohp provided and different
+                $updateData = [];
+                if (!empty($data['wali_email']) && $wali->email !== $data['wali_email']) {
+                    // Check if email is unique
+                    $emailExists = User::where('email', $data['wali_email'])->where('id', '!=', $wali->id)->exists();
+                    if (!$emailExists) {
+                        $updateData['email'] = $data['wali_email'];
+                    } else {
+                        Log::warning("Email wali " . $data['wali_email'] . " sudah digunakan oleh user lain");
+                    }
+                }
+                
+                if (!empty($data['wali_nohp']) && $wali->nohp !== $data['wali_nohp']) {
+                    // Check if nohp is unique
+                    $nohpExists = User::where('nohp', $data['wali_nohp'])->where('id', '!=', $wali->id)->exists();
+                    if (!$nohpExists) {
+                        $updateData['nohp'] = $data['wali_nohp'];
+                    } else {
+                        Log::warning("No. HP wali " . $data['wali_nohp'] . " sudah digunakan oleh user lain");
+                    }
+                }
+                
+                if (!empty($updateData)) {
+                    $wali->update($updateData);
+                    Log::info("Wali data updated: " . json_encode($updateData));
+                }
+                
             } else {
-                // Create new guardian
+                // Create new guardian with provided data
                 try {
-                    $email = Str::slug($data['wali_murid']) . '@mail.com';
-                    $nohp = '08' . rand(100000000, 999999999); // Generate random phone number
+                    // Generate email if not provided
+                    $email = !empty($data['wali_email']) ? $data['wali_email'] : 
+                            Str::slug($data['wali_murid']) . '@mail.com';
+                    
+                    // Generate phone if not provided
+                    $nohp = !empty($data['wali_nohp']) ? $data['wali_nohp'] : 
+                           '08' . rand(100000000, 999999999);
+                    
+                    // Check if email/nohp already exists
+                    $emailExists = User::where('email', $email)->exists();
+                    $nohpExists = User::where('nohp', $nohp)->exists();
+                    
+                    if ($emailExists) {
+                        $email = Str::slug($data['wali_murid']) . '_' . rand(100, 999) . '@mail.com';
+                    }
+                    
+                    if ($nohpExists) {
+                        $nohp = '08' . rand(100000000, 999999999);
+                    }
+                    
                     Log::info("Creating new wali with email: " . $email . " and nohp: " . $nohp);
                     
                     $wali = User::create([
