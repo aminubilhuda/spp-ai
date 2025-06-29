@@ -129,7 +129,7 @@
                                 <a href="{{ route('wali.pembayaran.index') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Kembali
                                 </a>
-                                <a href="{{ route('wali.kwitansi_pembayaran.show', $pembayaran->id) }}" 
+                                <a href="{{ route('wali.kwitansi.show', $pembayaran->id) }}"
                                    target="_blank" 
                                    class="btn btn-primary">
                                     <i class="fas fa-print"></i> Cetak Kwitansi

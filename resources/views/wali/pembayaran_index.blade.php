@@ -262,7 +262,7 @@
                                                             class="btn btn-sm btn-outline-secondary" title="Detail">
                                                             <i class="fas fa-info-circle"></i>
                                                         </a>
-                                                        <a href="{{ route('wali.kwitansi_pembayaran.show', $item->id) }}" target="_blank"
+                                                        <a href="{{ route('wali.kwitansi.show', $item->id) }}" target="_blank"
                                                             class="btn btn-sm btn-outline-primary" title="Kwitansi">
                                                             <i class="fas fa-print"></i>
                                                         </a>
@@ -336,7 +336,7 @@
                                                         class="btn btn-sm btn-outline-secondary" title="Detail">
                                                         <i class="fas fa-info-circle"></i>
                                                     </a>
-                                                    <a href="{{ route('wali.kwitansi_pembayaran.show', $item->id) }}"
+                                                    <a href="{{ route('wali.kwitansi.show', $item->id) }}" target="_blank"
                                                         class="btn btn-sm btn-outline-primary" title="Kwitansi">
                                                         <i class="fas fa-print"></i>
                                                     </a>

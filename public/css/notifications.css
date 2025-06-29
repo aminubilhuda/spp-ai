@@ -1,0 +1,107 @@
+/* Notification Styles */
+.dropdown-notifications {
+    position: relative;
+}
+
+.dropdown-notifications .dropdown-menu {
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notifications-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+}
+
+.dropdown-notifications-item {
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.dropdown-notifications-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #007bff;
+}
+
+.dropdown-notifications-item.unread {
+    border-left-color: #dc3545;
+    background-color: #fff3cd;
+}
+
+.dropdown-notifications-item .msg-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.dropdown-notifications-item .msg-body {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.dropdown-notifications-item .msg-time {
+    font-size: 11px;
+    color: #adb5bd;
+    margin-bottom: 0;
+}
+
+.dropdown-notifications-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dropdown-notifications-item:hover .dropdown-notifications-actions {
+    opacity: 1;
+}
+
+.dropdown-notifications-actions a {
+    color: #6c757d;
+    text-decoration: none;
+    padding: 2px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-notifications-actions a:hover {
+    color: #007bff;
+    background-color: #e9ecef;
+}
+
+.scrollable-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Animation for new notifications */
+@keyframes notificationPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.notifications-badge {
+    animation: notificationPulse 2s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dropdown-notifications .dropdown-menu {
+        width: 280px;
+        right: -10px;
+    }
+} 

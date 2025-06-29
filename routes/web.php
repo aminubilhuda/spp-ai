@@ -19,6 +19,7 @@ use App\Http\Controllers\BerandaOperatorController;
 use App\Http\Controllers\WaliMuridTagihanController;
 use App\Http\Controllers\WaliMuridPembayaranController;
 use App\Http\Controllers\KwitansiPembayaranController;
+use App\Http\Controllers\NotificationController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -81,12 +82,81 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     Route::controller(PembayaranController::class)->group(function () {
         Route::get('pembayaran', 'index')->name('pembayaran.index');
         Route::post('pembayaran/store', 'store')->name('pembayaran.store');
-        Route::post('pembayaran/{id}/confirm', 'confirm')->name('pembayaran.confirm');
+        Route::post('pembayaran/confirm/{id}', 'confirm')->name('pembayaran.confirm');
     });
+    Route::resource('pembayaran', PembayaranController::class);
     
     // Reports & Kwitansi
     Route::get('tagihan-rekap/{siswa_id}', [TagihanRekapController::class, 'show'])->name('tagihan.rekap');
-    Route::get('kwitansi-pembayaran/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi_pembayaran.show');
+    Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
+    
+    // Notifications
+    Route::controller(NotificationController::class)->group(function () {
+        Route::get('notifications', 'index')->name('notifications.index');
+        Route::post('notifications/{id}/mark-as-read', 'markAsRead')->name('notifications.markAsRead');
+        Route::post('notifications/mark-all-as-read', 'markAllAsRead')->name('notifications.markAllAsRead');
+        Route::get('notifications/unread-count', 'unreadCount')->name('notifications.unreadCount');
+    });
+    
+    // Debug route untuk notifikasi
+    Route::get('debug-notifications', function() {
+        $user = auth()->user();
+        $unreadCount = $user->unreadNotifications()->count();
+        $totalCount = $user->notifications()->count();
+        
+        return response()->json([
+            'user' => $user->name,
+            'akses' => $user->akses,
+            'unread_notifications' => $unreadCount,
+            'total_notifications' => $totalCount,
+            'notifications' => $user->notifications()->take(5)->get()->toArray()
+        ]);
+    })->name('debug.notifications');
+    
+    // Route untuk membuat notifikasi test
+    Route::get('create-test-notification', function() {
+        $user = auth()->user();
+        $pembayaran = App\Models\Pembayaran::first();
+        
+        if ($pembayaran) {
+            $user->notify(new App\Notifications\Pembayaran($pembayaran));
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi test berhasil dibuat',
+                'unread_count' => $user->unreadNotifications()->count()
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada pembayaran untuk membuat notifikasi'
+            ]);
+        }
+    })->name('create.test.notification');
+    
+    // Route test sederhana untuk notifikasi
+    Route::get('test-notification-simple', function() {
+        $user = auth()->user();
+        
+        // Buat notifikasi sederhana langsung ke database
+        $notification = new Illuminate\Notifications\DatabaseNotification();
+        $notification->id = \Illuminate\Support\Str::uuid();
+        $notification->type = 'App\Notifications\Pembayaran';
+        $notification->notifiable_type = 'App\Models\User';
+        $notification->notifiable_id = $user->id;
+        $notification->data = json_encode([
+            'title' => 'Test Notification',
+            'message' => 'Ini adalah notifikasi test'
+        ]);
+        $notification->read_at = null;
+        $notification->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifikasi sederhana dibuat',
+            'unread_count' => $user->unreadNotifications()->count(),
+            'total_count' => $user->notifications()->count()
+        ]);
+    })->name('test.notification.simple');
 });
 
 // ============================================================================
@@ -116,7 +186,7 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     Route::resource('pembayaran', WaliMuridPembayaranController::class)->except(['index', 'store', 'show']);
     
     // Kwitansi
-    Route::get('kwitansi-pembayaran/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi_pembayaran.show');
+    Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
 });
 
 // ============================================================================

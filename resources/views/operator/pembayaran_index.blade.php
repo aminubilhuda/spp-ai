@@ -10,9 +10,31 @@
         @endif
         <div class="col-md-12">
             <div class="card">
-                <h5 class="card-header">{{ $title }}</h5>
-
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Data Pembayaran</h5>
+                    <!-- Debug buttons -->
+                    <div class="mt-2">
+                        <a href="{{ route('debug.notifications') }}" target="_blank" class="btn btn-sm btn-info">Debug Notifications</a>
+                        <a href="{{ route('create.test.notification') }}" class="btn btn-sm btn-warning">Create Test Notification</a>
+                        <a href="{{ route('test.notification.simple') }}" class="btn btn-sm btn-success">Simple Test</a>
+                    </div>
+                </div>
                 <div class="card-body">
+                    <!-- Flash Messages -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
                     <!-- Filter Form -->
                     <form action="{{ route('pembayaran.index') }}" method="GET" class="mb-4">
                         <div class="row">
@@ -183,14 +205,17 @@
                                                 @endif
 
                                                 @if ($item->status_konfirmasi == 'Belum Dikonfirmasi')
-                                                    <button type="button" class="btn btn-sm btn-success"
-                                                        onclick="confirmPayment({{ $item->id }})"
-                                                        title="Konfirmasi Pembayaran">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
+                                                    <form method="POST" action="{{ route('pembayaran.confirm', $item->id) }}" style="display: inline;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-success" 
+                                                                onclick="return confirm('Apakah Anda yakin ingin mengkonfirmasi pembayaran ini?')"
+                                                                title="Konfirmasi Pembayaran">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
                                                 @endif
 
-                                                <a href="{{ route('kwitansi_pembayaran.show', $item->id) }}" target="_blank"
+                                                <a href="{{ route('kwitansi.show', $item->id) }}" target="_blank"
                                                     class="btn btn-sm btn-primary" title="Cetak Kwitansi">
                                                     <i class="fas fa-print"></i>
                                                 </a>
@@ -218,29 +243,6 @@
 
 @push('scripts')
     <script>
-        function confirmPayment(paymentId) {
-            if (confirm('Apakah Anda yakin ingin mengkonfirmasi pembayaran ini?')) {
-                fetch(`/operator/pembayaran/${paymentId}/confirm`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        } else {
-                            alert('Gagal mengkonfirmasi pembayaran: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mengkonfirmasi pembayaran');
-                    });
-            }
-        }
+        // JavaScript untuk notifikasi dan fitur lainnya bisa ditambahkan di sini
     </script>
 @endpush

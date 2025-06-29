@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\Pembayaran as PembayaranNotification;
 
 class WaliMuridPembayaranController extends Controller
 {
@@ -180,6 +182,9 @@ class WaliMuridPembayaranController extends Controller
 
             DB::commit();
             
+            // Kirim notifikasi ke operator setelah semua pembayaran berhasil dibuat
+            $this->sendNotificationToOperators($pembayaranIds[0]); // Ambil ID pembayaran pertama
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Pembayaran berhasil disimpan dan menunggu konfirmasi dari operator',
@@ -295,6 +300,27 @@ class WaliMuridPembayaranController extends Controller
                 'success' => false,
                 'error' => 'Terjadi kesalahan saat mengambil data tagihan: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Send notification to all operators
+     */
+    private function sendNotificationToOperators($pembayaranId): void
+    {
+        try {
+            $pembayaran = Pembayaran::with(['tagihan.siswa.wali', 'tagihan_detail', 'user'])->find($pembayaranId);
+            
+            if ($pembayaran) {
+                // Ambil semua user dengan akses operator
+                $operators = \App\Models\User::where('akses', 'operator')->get();
+                
+                // Kirim notifikasi ke semua operator
+                Notification::send($operators, new PembayaranNotification($pembayaran));
+            }
+        } catch (\Exception $e) {
+            // Log error jika gagal mengirim notifikasi
+            \Log::error('Gagal mengirim notifikasi pembayaran: ' . $e->getMessage());
         }
     }
 } 

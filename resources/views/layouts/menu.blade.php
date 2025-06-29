@@ -96,6 +96,20 @@
             </a>
         </li>
 
+        <!-- Notifications -->
+        <li class="menu-item {{ request()->is('operator/notifications*') ? 'active' : '' }}">
+            <a href="{{ route('notifications.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bell"></i>
+                <div data-i18n="Basic">Notifikasi</div>
+                @php
+                    $unreadCount = auth()->user()->unreadNotifications()->count();
+                @endphp
+                @if($unreadCount > 0)
+                    <span class="badge rounded-pill badge-danger ms-auto">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                @endif
+            </a>
+        </li>
+
         <!-- Jurusan -->
         <li class="menu-item {{ request()->is('operator/jurusan*') ? 'active' : '' }}">
             <a href="{{ route('jurusan.index') }}" class="menu-link">

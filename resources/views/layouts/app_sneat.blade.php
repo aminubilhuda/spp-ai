@@ -48,6 +48,143 @@
     <script src="{{ asset('sneat') }}/assets/vendor/libs/popper/popper.js"></script>
     <script src="{{ asset('sneat') }}/assets/vendor/js/bootstrap.js"></script>
     <link rel="stylesheet" href="{{ asset('font/css/all.min.css') }}">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
+    
+    <style>
+        /* Ensure dropdown menus are visible */
+        .dropdown-menu.show {
+            display: block !important;
+        }
+        
+        /* Ensure dropdown toggle is clickable */
+        .dropdown-toggle {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+        
+        /* Ensure badge doesn't block clicks */
+        .notifications-badge {
+            pointer-events: none !important;
+        }
+        
+        /* Mobile-like dropdown behavior for desktop */
+        @media (min-width: 992px) {
+            .dropdown-menu {
+                position: fixed !important;
+                top: 60px !important;
+                left: auto !important;
+                right: 0 !important;
+                width: 100% !important;
+                max-width: 320px !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+                z-index: 1050 !important;
+            }
+            
+            /* Notifications dropdown */
+            .dropdown-notifications .dropdown-menu {
+                left: auto !important;
+                right: 0 !important;
+            }
+            
+            /* User dropdown */
+            .dropdown-user .dropdown-menu {
+                left: auto !important;
+                right: 0 !important;
+            }
+        }
+        
+        /* Force left positioning for all dropdowns */
+        .dropdown-menu {
+            right: 0 !important;
+            left: auto !important;
+            transform: none !important;
+        }
+        
+        /* Specific for notifications */
+        .dropdown-notifications .dropdown-menu {
+            right: 0 !important;
+            left: auto !important;
+            transform: none !important;
+        }
+        
+        /* Specific for user profile */
+        .dropdown-user .dropdown-menu {
+            right: 0 !important;
+            left: auto !important;
+            transform: none !important;
+        }
+        
+        /* Mobile-like overlay effect */
+        .dropdown-menu.show {
+            animation: slideInDown 0.3s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 991.98px) {
+            .dropdown-menu {
+                position: absolute !important;
+                top: 100% !important;
+                left: auto !important;
+                right: 0 !important;
+                width: auto !important;
+                max-width: none !important;
+            }
+        }
+    </style>
+    
+    <script>
+        // Function untuk memuat notifikasi secara dinamis
+        function loadNotifications() {
+            fetch('/operator/notifications/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.querySelector('.notifications-badge');
+                    if (data.count > 0) {
+                        if (badge) {
+                            badge.textContent = data.count > 99 ? '99+' : data.count;
+                            badge.style.display = 'block';
+                        } else {
+                            // Buat badge jika belum ada
+                            const icon = document.querySelector('.bx-bell');
+                            if (icon) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'badge rounded-pill badge-danger h-px-18 w-px-18 notifications-badge';
+                                newBadge.textContent = data.count > 99 ? '99+' : data.count;
+                                icon.parentElement.style.position = 'relative';
+                                icon.parentElement.appendChild(newBadge);
+                            }
+                        }
+                    } else {
+                        if (badge) {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+        
+        // Load notifications when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+        });
+    </script>
 </head>
 
 <body>
@@ -91,10 +228,100 @@
                                     aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a>
                             </li>
 
+                            <!-- Notifications -->
+                            @auth
+                                @if(auth()->user()->akses === 'operator')
+                                @php
+                                    $unreadNotifications = auth()->user()->unreadNotifications()->count();
+                                    $totalNotifications = auth()->user()->notifications()->count();
+                                    $user = auth()->user();
+                                @endphp
+                                <!-- Debug: User {{ $user->name }} ({{ $user->akses }}) - {{ $unreadNotifications }} unread, {{ $totalNotifications }} total -->
+                                <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-3">
+                                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="position: relative;">
+                                        <i class="bx bx-bell bx-sm"></i>
+                                        @if($unreadNotifications > 0)
+                                            <span class="badge rounded-pill badge-danger" 
+                                                  style="position: absolute; top: -8px; right: -8px; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; text-align: center; z-index: 1; pointer-events: none;">
+                                                {{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}
+                                            </span>
+                                        @else
+                                            <!-- Debug: No unread notifications -->
+                                        @endif
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end py-0">
+                                        <li class="dropdown-menu-header border-bottom">
+                                            <div class="dropdown-header d-flex align-items-center py-3">
+                                                <h5 class="text-body mb-0 me-auto">Notifikasi</h5>
+                                                @if($unreadNotifications > 0)
+                                                    <a href="javascript:void(0)" class="dropdown-notifications-all text-body"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Mark all as read">
+                                                        <i class="bx fs-4 bx-envelope-open"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </li>
+                                        <li class="dropdown-notifications-list scrollable-container">
+                                            <ul class="list-group list-group-flush">
+                                                @forelse(auth()->user()->notifications()->take(5)->get() as $notification)
+                                                    <li class="list-group-item list-group-item-action dropdown-notifications-item" data-notification-id="{{ $notification->id }}">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0 me-3">
+                                                                <div class="avatar">
+                                                                    <span class="avatar-initial rounded bg-label-warning">
+                                                                        <i class="bx bx-dollar"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="msg-name">
+                                                                    {{ $notification->data['title'] ?? 'Pembayaran Baru' }}
+                                                                    @if($notification->read_at === null)
+                                                                        <span class="badge rounded-pill badge-xs bg-danger ms-1">Baru</span>
+                                                                    @endif
+                                                                </h6>
+                                                                <p class="msg-body">{{ $notification->data['message'] ?? 'Ada pembayaran baru yang menunggu konfirmasi' }}</p>
+                                                                <p class="msg-time">{{ $notification->created_at->diffForHumans() }}</p>
+                                                            </div>
+                                                            <div class="flex-shrink-0 dropdown-notifications-actions">
+                                                                <a href="javascript:void(0)" class="dropdown-notifications-read">
+                                                                    <span class="badge badge-dot"></span>
+                                                                </a>
+                                                                <div class="dropdown-notifications-actions">
+                                                                    <a href="{{ route('pembayaran.index') }}" class="dropdown-notifications-archive">
+                                                                        <span class="bx bx-archive"></span>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @empty
+                                                    <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                                                        <div class="d-flex">
+                                                            <div class="flex-grow-1 text-center py-3">
+                                                                <p class="text-muted mb-0">Tidak ada notifikasi</p>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @endforelse
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown-menu-footer border-top">
+                                            <a href="{{ route('pembayaran.index') }}" class="dropdown-item d-flex justify-content-center p-3">
+                                                Lihat semua pembayaran
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                @endif
+                            @endauth
+
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
-                                    data-bs-toggle="dropdown">
+                                    data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                     <div class="avatar avatar-online">
                                         <img src="{{ asset('sneat') }}/assets/img/avatars/1.png" alt
                                             class="w-px-40 h-auto rounded-circle" />
@@ -111,8 +338,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">John Doe</span>
-                                                    <small class="text-muted">Admin</small>
+                                                    <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
+                                                    <small class="text-muted">{{ ucfirst(auth()->user()->akses) }}</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -243,8 +470,173 @@
             $('.rupiah').mask("#.##0", {
                 reverse: true
             });
+            
+            // Simple dropdown functionality
+            $('.dropdown-toggle').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var $this = $(this);
+                var $dropdownMenu = $this.next('.dropdown-menu');
+                
+                // Close other dropdowns
+                $('.dropdown-menu').not($dropdownMenu).removeClass('show');
+                
+                // Toggle current dropdown
+                $dropdownMenu.toggleClass('show');
+                
+                // Mobile-like positioning for desktop
+                if ($(window).width() >= 992) {
+                    if ($this.closest('.dropdown-notifications').length) {
+                        // Notifications dropdown - position from right edge
+                        $dropdownMenu.css({
+                            'position': 'fixed',
+                            'top': '60px',
+                            'left': 'auto',
+                            'right': '0',
+                            'width': '320px',
+                            'max-width': '320px',
+                            'margin': '0',
+                            'border-radius': '0',
+                            'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            'z-index': '1050'
+                        });
+                    } else if ($this.closest('.dropdown-user').length) {
+                        // User dropdown - position from right edge
+                        $dropdownMenu.css({
+                            'position': 'fixed',
+                            'top': '60px',
+                            'left': 'auto',
+                            'right': '0',
+                            'width': '280px',
+                            'max-width': '280px',
+                            'margin': '0',
+                            'border-radius': '0',
+                            'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            'z-index': '1050'
+                        });
+                    }
+                }
+                
+                console.log('Dropdown clicked:', $this.attr('data-bs-toggle'), 'Menu visible:', $dropdownMenu.hasClass('show'));
+            });
+            
+            // Debug: Log all dropdown elements
+            console.log('Found dropdown toggles:', $('.dropdown-toggle').length);
+            $('.dropdown-toggle').each(function(index) {
+                console.log('Dropdown', index, ':', $(this).attr('class'), 'Menu:', $(this).next('.dropdown-menu').length);
+            });
+            
+            // Test click on dropdown toggles
+            $('.dropdown-toggle').on('mouseenter', function() {
+                console.log('Mouse entered dropdown:', $(this).attr('class'));
+            });
+            
+            // Test if elements are clickable
+            $('.dropdown-toggle').on('mousedown', function() {
+                console.log('Mouse down on dropdown:', $(this).attr('class'));
+            });
+            
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu').removeClass('show');
+                }
+            });
+            
+            // Close dropdown when pressing Escape
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    $('.dropdown-menu').removeClass('show');
+                }
+            });
+            
+            // Handle window resize
+            $(window).on('resize', function() {
+                // Close all dropdowns when resizing
+                $('.dropdown-menu').removeClass('show');
+            });
         });
     </script>
+
+    <!-- Notification JS -->
+    @auth
+        @if(auth()->user()->akses === 'operator')
+        <script>
+            $(document).ready(function() {
+                // Mark notification as read when clicked
+                $('.dropdown-notifications-read').on('click', function(e) {
+                    e.preventDefault();
+                    var notificationItem = $(this).closest('.dropdown-notifications-item');
+                    var notificationId = notificationItem.data('notification-id');
+                    
+                    if (notificationId) {
+                        $.ajax({
+                            url: '/operator/notifications/' + notificationId + '/mark-as-read',
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    notificationItem.find('.badge-danger').remove();
+                                    updateNotificationBadge();
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // Mark all notifications as read
+                $('.dropdown-notifications-all').on('click', function(e) {
+                    e.preventDefault();
+                    
+                    $.ajax({
+                        url: '/operator/notifications/mark-all-as-read',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('.notifications-badge').remove();
+                                $('.dropdown-notifications-item .badge-danger').remove();
+                            }
+                        }
+                    });
+                });
+
+                // Update notification badge count
+                function updateNotificationBadge() {
+                    $.ajax({
+                        url: '/operator/notifications/unread-count',
+                        method: 'GET',
+                        success: function(response) {
+                            var badge = $('.notifications-badge');
+                            if (response.count > 0) {
+                                if (badge.length === 0) {
+                                    $('.dropdown-notifications .nav-link').append(
+                                        '<span class="badge rounded-pill badge-danger h-px-18 w-px-18 notifications-badge">' + 
+                                        (response.count > 99 ? '99+' : response.count) + '</span>'
+                                    );
+                                } else {
+                                    badge.text(response.count > 99 ? '99+' : response.count);
+                                }
+                            } else {
+                                badge.remove();
+                            }
+                        }
+                    });
+                }
+
+                // Auto refresh notifications every 30 seconds
+                setInterval(function() {
+                    updateNotificationBadge();
+                }, 30000);
+            });
+        </script>
+        @endif
+    @endauth
 
     @stack('scripts')
 </body>

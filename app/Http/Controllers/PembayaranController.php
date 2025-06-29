@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        // Hapus middleware auth.operator untuk sementara
+    }
+
     public function store(Request $request)
     {
         // Tentukan validasi berdasarkan user yang login
@@ -175,39 +181,30 @@ class PembayaranController extends Controller
 
     public function confirm($id)
     {
-        DB::beginTransaction();
         try {
-            $pembayaran = Pembayaran::with(['tagihan_detail'])->findOrFail($id);
-            
-            // Update status konfirmasi
-            $pembayaran->update(['status_konfirmasi' => 'Sudah Dikonfirmasi']);
-            
-            // Update detail status berdasarkan pembayaran yang sudah dikonfirmasi
-            $detail = $pembayaran->tagihan_detail;
-            $totalPaidForDetail = $detail->pembayaran()->where('status_konfirmasi', 'Sudah Dikonfirmasi')->sum('jumlah_dibayar');
-            
-            if ($totalPaidForDetail >= $detail->jumlah_biaya) {
-                $detail->status = 'lunas';
-            } elseif ($totalPaidForDetail > 0) {
-                $detail->status = 'angsur';
-            } else {
-                $detail->status = 'belum_lunas';
+            // Cek apakah user adalah operator
+            if (auth()->user()->akses !== 'operator') {
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengkonfirmasi pembayaran');
             }
-            $detail->save();
-
-            DB::commit();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Pembayaran berhasil dikonfirmasi'
-            ]);
+            // Log untuk debugging
+            \Log::info('Konfirmasi pembayaran ID: ' . $id . ' oleh user: ' . auth()->id());
+            
+            $pembayaran = Pembayaran::findOrFail($id);
+            
+            // Update status konfirmasi saja dulu
+            $pembayaran->status_konfirmasi = 'Sudah Dikonfirmasi';
+            $pembayaran->user_id = auth()->id();
+            $pembayaran->save();
+            
+            \Log::info('Pembayaran berhasil dikonfirmasi');
+            
+            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi');
         } catch (\Exception $e) {
-            DB::rollback();
+            \Log::error('Gagal mengkonfirmasi pembayaran ID ' . $id . ': ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengkonfirmasi pembayaran: ' . $e->getMessage()
-            ], 422);
+            return redirect()->back()->with('error', 'Gagal mengkonfirmasi pembayaran: ' . $e->getMessage());
         }
     }
 

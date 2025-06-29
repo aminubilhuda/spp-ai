@@ -310,7 +310,7 @@
                                                             ->first();
                                                     @endphp
                                                     @if ($latest_payment)
-                                                        <a href="{{ route('kwitansi_pembayaran.show', $latest_payment->id) }}"
+                                                        <a href="{{ route('kwitansi.show', $latest_payment->id) }}"
                                                             target="blank" class="btn btn-primary btn-sm"
                                                             title="Cetak Kwitansi">
                                                             <i class="bx bx-printer"></i>
