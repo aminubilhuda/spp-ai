@@ -19,7 +19,7 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <td width="150">Tanggal Pembayaran</td>
-                                    <td>: {{ $pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}</td>
+                                    <td>: {{ formatTanggalIndonesia($pembayaran->tanggal_bayar) }}</td>
                                 </tr>
                                 <tr>
                                     <td>Jumlah Dibayar</td>
@@ -43,6 +43,16 @@
                                 <tr>
                                     <td>Bank Sekolah</td>
                                     <td>: {{ $pembayaran->bank_sekolah->nama_bank }}</td>
+                                </tr>
+                                @endif
+                                @if ($pembayaran->metode_pembayaran == 'Bank Transfer')
+                                <tr>
+                                    <td>Bank Pengirim</td>
+                                    <td>: {{ $pembayaran->bank_pengirim ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <td>No. Rekening Pengirim</td>
+                                    <td>: {{ $pembayaran->no_rekening_pengirim ?? '-' }}</td>
                                 </tr>
                                 @endif
                             </table>
@@ -106,7 +116,7 @@
                                 </tr>
                                 <tr>
                                     <td>Tanggal Konfirmasi</td>
-                                    <td>: {{ $pembayaran->updated_at ? \Carbon\Carbon::parse($pembayaran->updated_at)->format('d/m/Y H:i') : '-' }}</td>
+                                    <td>: {{ formatTanggalWaktuIndonesia($pembayaran->updated_at) }}</td>
                                 </tr>
                             </table>
                         </div>

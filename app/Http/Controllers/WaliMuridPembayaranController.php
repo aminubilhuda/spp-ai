@@ -74,6 +74,8 @@ class WaliMuridPembayaranController extends Controller
             'bukti_bayar' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'tanggal_bayar' => 'required|date',
             'bank_sekolah_id' => 'required|exists:bank_sekolahs,id',
+            'no_rekening_pengirim' => 'required|string|max:50',
+            'bank_pengirim' => 'required|string|max:50',
         ]);
 
         DB::beginTransaction();
@@ -160,16 +162,18 @@ class WaliMuridPembayaranController extends Controller
                 }
 
                 $pembayaran = Pembayaran::create([
-                    'tagihan_id' => $request->tagihan_id,
+                    'tagihan_id'        => $request->tagihan_id,
                     'tagihan_detail_id' => $detail->id,
-                    'wali_id' => $tagihan->siswa->wali_id,
-                    'tanggal_bayar' => $request->tanggal_bayar,
-                    'jumlah_dibayar' => $jumlahUntukItem,
+                    'wali_id'           => $tagihan->siswa->wali_id,
+                    'tanggal_bayar'     => $request->tanggal_bayar,
+                    'jumlah_dibayar'    => $jumlahUntukItem,
                     'metode_pembayaran' => 'Bank Transfer',
-                    'bukti_bayar' => $buktiPath,
+                    'bukti_bayar'       => $buktiPath,
                     'status_konfirmasi' => 'Belum Dikonfirmasi', // Wali selalu belum dikonfirmasi
-                    'bank_sekolah_id' => $request->bank_sekolah_id,
-                    'user_id' => auth()->id(),
+                    'bank_sekolah_id'   => $request->bank_sekolah_id,
+                    'no_rekening_pengirim' => $request->no_rekening_pengirim,
+                    'bank_pengirim'     => $request->bank_pengirim,
+                    'user_id'           => auth()->id(),
                 ]);
                 $pembayaranIds[] = $pembayaran->id;
             }
@@ -180,9 +184,9 @@ class WaliMuridPembayaranController extends Controller
                 'success' => true,
                 'message' => 'Pembayaran berhasil disimpan dan menunggu konfirmasi dari operator',
                 'data' => [
-                    'pembayaran_ids' => $pembayaranIds,
-                    'details' => $tagihanDetails,
-                    'sisa_tagihan' => $totalRemaining
+                    'pembayaran_ids'    => $pembayaranIds,
+                    'details'           => $tagihanDetails,
+                    'sisa_tagihan'      => $totalRemaining
                 ]
             ]);
         } catch (\Exception $e) {

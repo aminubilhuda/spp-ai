@@ -216,7 +216,7 @@
                                                 <td class="text-center fw-semibold">{{ $no++ }}</td>
                                                 <td>
                                                     <span class="fw-semibold">
-                                                        {{ $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') : '-' }}
+                                                        {{ formatTanggalIndonesia($item->tanggal_bayar) }}
                                                     </span>
                                                 </td>
                                                 <td>
@@ -262,7 +262,7 @@
                                                             class="btn btn-sm btn-outline-secondary" title="Detail">
                                                             <i class="fas fa-info-circle"></i>
                                                         </a>
-                                                        <a href="{{ route('wali.kwitansi_pembayaran.show', $item->id) }}"
+                                                        <a href="{{ route('wali.kwitansi_pembayaran.show', $item->id) }}" target="_blank"
                                                             class="btn btn-sm btn-outline-primary" title="Kwitansi">
                                                             <i class="fas fa-print"></i>
                                                         </a>
@@ -307,7 +307,7 @@
                                                 <div class="col-6">
                                                     <small class="text-muted d-block">Tanggal</small>
                                                     <span class="fw-semibold">
-                                                        {{ $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') : '-' }}
+                                                        {{ formatTanggalIndonesia($item->tanggal_bayar) }}
                                                     </span>
                                                 </div>
                                                 <div class="col-6">

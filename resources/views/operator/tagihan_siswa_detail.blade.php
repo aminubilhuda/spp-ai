@@ -393,16 +393,16 @@
                     <h5 class="modal-title" id="paymentModalLabel">Form Pembayaran</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="paymentForm" action="{{ route('pembayaran.store') }}" method="POST"
-                    enctype="multipart/form-data">
+                <form id="paymentForm" action="{{ route('pembayaran.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div id="payment-alert" class="alert" style="display: none;"></div>
                         <input type="hidden" name="tagihan_id" id="tagihan_id">
                         <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
+                        <input type="hidden" name="detail_ids[]" id="detail_id">
 
                         <div class="mb-3">
-                            <label class="form-label">Pilih Item yang akan dibayar</label>
+                            <label class="form-label">Item yang akan dibayar</label>
                             <div id="tagihan_details_list">
                                 <!-- Tagihan details will be loaded here -->
                             </div>
@@ -524,15 +524,23 @@
 
             // Initialize payment form handling
             initializePaymentForm();
-        });
 
-        function initializePaymentForm() {
-            const form = document.getElementById('paymentForm');
-            const alert = document.getElementById('payment-alert');
-            const submitBtn = document.getElementById('submitPayment');
-            const jumlahInput = document.getElementById('jumlah_dibayar');
+            // Handle bank selection
+            document.getElementById('bank_sekolah_id').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const bankInfo = document.getElementById('bank_info');
 
-            // Show/hide bukti pembayaran field based on payment method
+                if (this.value) {
+                    document.getElementById('bank_nama').textContent = selectedOption.dataset.nama;
+                    document.getElementById('bank_rekening').textContent = selectedOption.dataset.rekening;
+                    document.getElementById('bank_atas_nama').textContent = selectedOption.dataset.atasNama;
+                    bankInfo.style.display = 'block';
+                } else {
+                    bankInfo.style.display = 'none';
+                }
+            });
+
+            // Handle payment method change
             document.getElementById('metode_pembayaran').addEventListener('change', function() {
                 var buktiField = document.getElementById('bukti_bayar_field');
                 var buktiInput = buktiField.querySelector('input[name="bukti_bayar"]');
@@ -545,6 +553,13 @@
                     buktiInput.required = false;
                 }
             });
+        });
+
+        function initializePaymentForm() {
+            const form = document.getElementById('paymentForm');
+            const alert = document.getElementById('payment-alert');
+            const submitBtn = document.getElementById('submitPayment');
+            const jumlahInput = document.getElementById('jumlah_dibayar');
 
             // Handle form submission
             form.addEventListener('submit', function(e) {
@@ -602,49 +617,51 @@
             });
         }
 
-        // Set tagihan_id and fetch tagihan details when modal is opened
         function openPaymentModal(detailId, tagihanId) {
             console.log('Opening modal for detail:', detailId, 'tagihan:', tagihanId);
 
-            // Set the tagihan_id and detail_id in the form
-            document.getElementById('tagihan_id').value = tagihanId;
-            document.getElementById('detail_id').value = detailId;
             // First show the modal
             var modalElement = document.getElementById('paymentModal');
             var modal = new bootstrap.Modal(modalElement);
             modal.show();
 
+            // Set the tagihan_id and detail_id in the form
+            document.getElementById('tagihan_id').value = tagihanId;
+            document.getElementById('detail_id').value = detailId;
+
+            // Reset form and alert
+            document.getElementById('payment-alert').style.display = 'none';
+            document.getElementById('paymentForm').reset();
+
+            // Set values again after reset
+            document.getElementById('tagihan_id').value = tagihanId;
+            document.getElementById('detail_id').value = detailId;
+            document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[0];
+
             // Then fetch the details
             fetch(`{{ url('/operator') }}/tagihan-detail/${detailId}/info`)
                 .then(response => {
-                    console.log('Response received:', response);
                     if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(text || 'Network response was not ok');
-                        });
+                        throw new Error('Network response was not ok');
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Data received:', data);
                     if (data.error) {
                         throw new Error(data.error);
                     }
-                    if (typeof data.remaining_amount === 'undefined') {
-                        throw new Error('Data tagihan tidak valid');
-                    }
 
-                    // Populate tagihan details with checkbox
+                    // Populate tagihan details
                     const detailsList = document.getElementById('tagihan_details_list');
                     detailsList.innerHTML = '';
 
-                    // Create single checkbox for this detail
+                    // Create single detail card
                     const detailDiv = document.createElement('div');
                     detailDiv.className = 'card mb-2';
                     detailDiv.innerHTML = `
                         <div class="card-body">
                             <div class="form-check">
-                                <input class="form-check-input detail-checkbox" type="checkbox" name="detail_ids[]" 
+                                <input class="form-check-input detail-checkbox" type="checkbox" 
                                        id="detail_${detailId}" value="${detailId}" 
                                        data-sisa="${data.remaining_amount}" data-nama="${data.detail.nama_biaya}" checked>
                                 <label class="form-check-label" for="detail_${detailId}">
@@ -659,52 +676,15 @@
                     `;
                     detailsList.appendChild(detailDiv);
 
-                    // Handle checkbox selection
-                    document.querySelectorAll('.detail-checkbox').forEach(checkbox => {
-                        checkbox.addEventListener('change', function() {
-                            calculateTotal();
-                        });
-                    });
-
-                    // Handle bank selection
-                    document.getElementById('bank_sekolah_id').addEventListener('change', function() {
-                        const selectedOption = this.options[this.selectedIndex];
-                        const bankInfo = document.getElementById('bank_info');
-
-                        if (this.value) {
-                            document.getElementById('bank_nama').textContent = selectedOption.dataset.nama;
-                            document.getElementById('bank_rekening').textContent = selectedOption.dataset
-                                .rekening;
-                            document.getElementById('bank_atas_nama').textContent = selectedOption.dataset
-                                .atasNama;
-                            bankInfo.style.display = 'block';
-                        } else {
-                            bankInfo.style.display = 'none';
-                        }
-                    });
-
-                    // Calculate initial total
-                    calculateTotal();
+                    // Set initial amount
+                    document.getElementById('jumlah_dibayar').value = data.remaining_amount;
+                    document.getElementById('sisa_tagihan').textContent = formatRupiah(data.remaining_amount);
 
                     // Update form title with student details
                     if (data.detail && data.detail.nama_siswa) {
                         document.querySelector('#paymentModalLabel').textContent =
                             `Form Pembayaran - ${data.detail.nama_siswa}`;
                     }
-
-                    // Reset form and alert
-                    document.getElementById('payment-alert').style.display = 'none';
-                    document.getElementById('paymentForm').reset();
-
-                    // Set values again
-                    document.getElementById('tagihan_id').value = tagihanId;
-                    document.getElementById('detail_id').value = detailId;
-                    document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[
-                        0];
-
-                    // Check the checkbox
-                    document.getElementById(`detail_${detailId}`).checked = true;
-                    calculateTotal();
                 })
                 .catch(error => {
                     console.error('Error:', error);

@@ -115,6 +115,7 @@
                                     <th>Jumlah</th>
                                     <th>Metode</th>
                                     <th>Bank Sekolah</th>
+                                    <th>Info Rekening Pengirim</th>
                                     <th>Status Konfirmasi</th>
                                     <th>Dikonfirmasi Oleh</th>
                                     <th>Aksi</th>
@@ -144,6 +145,14 @@
                                                 <span class="badge bg-label-info">
                                                     {{ $item->bank_sekolah->nama_bank }}
                                                 </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->metode_pembayaran == 'Bank Transfer')
+                                                <small>Bank: {{ $item->bank_pengirim ?? '-' }}</small><br>
+                                                <small>No. Rek: {{ $item->no_rekening_pengirim ?? '-' }}</small>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -181,7 +190,7 @@
                                                     </button>
                                                 @endif
 
-                                                <a href="{{ route('kwitansi_pembayaran.show', $item->id) }}"
+                                                <a href="{{ route('kwitansi_pembayaran.show', $item->id) }}" target="_blank"
                                                     class="btn btn-sm btn-primary" title="Cetak Kwitansi">
                                                     <i class="fas fa-print"></i>
                                                 </a>

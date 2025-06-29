@@ -21,7 +21,9 @@ class Pembayaran extends Model
         'metode_pembayaran',
         'user_id',
         'tanggal_bayar',
-        'bank_sekolah_id'
+        'bank_sekolah_id',
+        'no_rekening_pengirim',
+        'bank_pengirim'
     ];
 
     protected $dates = ['tanggal_bayar'];

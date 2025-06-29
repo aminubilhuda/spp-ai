@@ -22,6 +22,8 @@ return new class extends Migration
             $table->enum('metode_pembayaran', ['Bank Transfer', 'Cash'])->nullable();
             $table->enum('status_konfirmasi', ['Belum Dikonfirmasi', 'Sudah Dikonfirmasi'])->nullable();
             $table->foreignId('bank_sekolah_id')->nullable()->constrained('bank_sekolahs')->onDelete('set null');
+            $table->string('no_rekening_pengirim')->nullable();
+            $table->string('bank_pengirim')->nullable();
             $table->foreignId('user_id')->nullable()->index();
             $table->timestamps();
         });

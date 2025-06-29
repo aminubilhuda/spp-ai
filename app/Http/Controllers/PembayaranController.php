@@ -35,11 +35,15 @@ class PembayaranController extends Controller
             $validationRules['bukti_bayar'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:2048';
             $validationRules['status_konfirmasi'] = 'required|in:Belum Dikonfirmasi';
             $validationRules['bank_sekolah_id'] = 'required|exists:bank_sekolahs,id';
+            $validationRules['no_rekening_pengirim'] = 'required|string|max:50';
+            $validationRules['bank_pengirim'] = 'required|string|max:50';
         } else {
             // Jika operator/admin, bisa pilih metode dan bukti wajib jika Bank Transfer
             $validationRules['metode_pembayaran'] = 'required|in:Bank Transfer,Cash';
             $validationRules['bukti_bayar'] = 'required_if:metode_pembayaran,Bank Transfer|file|mimes:jpg,jpeg,png,pdf|max:2048';
             $validationRules['status_konfirmasi'] = 'required|in:Belum Dikonfirmasi,Sudah Dikonfirmasi';
+            $validationRules['no_rekening_pengirim'] = 'required_if:metode_pembayaran,Bank Transfer|string|max:50|nullable';
+            $validationRules['bank_pengirim'] = 'required_if:metode_pembayaran,Bank Transfer|string|max:50|nullable';
             
             // Operator bisa menggunakan detail_ids atau detail_id
             if ($request->has('detail_ids')) {

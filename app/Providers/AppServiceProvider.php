@@ -21,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
+        
+        // Register observers
+        \App\Models\Pembayaran::observe(\App\Observers\PembayaranObserver::class);
     }
 }
