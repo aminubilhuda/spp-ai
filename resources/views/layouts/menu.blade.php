@@ -141,6 +141,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->is('operator/whatsapp*') ? 'active' : '' }}">
+            <a href="{{ route('whatsapp.settings') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-whatsapp"></i>
+                <div data-i18n="WhatsApp">Pengaturan WhatsApp</div>
+            </a>
+        </li>
+
         <li class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-log-out"></i>

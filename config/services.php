@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'enabled' => env('FONNTE_ENABLED', false),
+        'notifications' => [
+            'pembayaran' => env('FONNTE_NOTIF_PEMBAYARAN', true),
+            'reminder' => env('FONNTE_NOTIF_REMINDER', true),
+            'konfirmasi' => env('FONNTE_NOTIF_KONFIRMASI', true),
+            'sistem' => env('FONNTE_NOTIF_SISTEM', true),
+        ],
+        'settings' => [
+            'country_code' => env('FONNTE_COUNTRY_CODE', '62'),
+            'typing' => env('FONNTE_TYPING', false),
+            'delay' => env('FONNTE_DELAY', '2'),
+        ],
+    ],
+
 ];

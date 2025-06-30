@@ -8,9 +8,17 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\PembayaranNotification;
+use App\Services\WhatsappFonnteServices;
 
 class PembayaranObserver
 {
+    protected $whatsappService;
+
+    public function __construct(WhatsappFonnteServices $whatsappService)
+    {
+        $this->whatsappService = $whatsappService;
+    }
+
     /**
      * Handle the Pembayaran "created" event.
      */
@@ -20,6 +28,12 @@ class PembayaranObserver
         
         // Load user relationship
         $pembayaran->load('user');
+        
+        // Kirim notifikasi database
+        $pembayaran->tagihan->siswa->wali->notify(new PembayaranNotification($pembayaran));
+        
+        // Kirim notifikasi WhatsApp
+        $this->whatsappService->sendPembayaranNotification($pembayaran);
         
         // Notifikasi untuk wali sekarang dikirim manual di controller
         // untuk menghindari notifikasi ganda ketika multiple pembayaran dibuat
@@ -35,6 +49,11 @@ class PembayaranObserver
     public function updated(Pembayaran $pembayaran): void
     {
         $this->syncBuktiPembayaran($pembayaran);
+        
+        // Jika status pembayaran berubah menjadi dikonfirmasi
+        if ($pembayaran->wasChanged('status') && $pembayaran->status === 'dikonfirmasi') {
+            $this->whatsappService->sendKonfirmasiPembayaran($pembayaran);
+        }
     }
 
     /**
@@ -72,5 +91,29 @@ class PembayaranObserver
                 File::copy($sourcePath, $destinationPath);
             }
         }
+    }
+
+    /**
+     * Handle the Pembayaran "deleted" event.
+     */
+    public function deleted(Pembayaran $pembayaran): void
+    {
+        //
+    }
+
+    /**
+     * Handle the Pembayaran "restored" event.
+     */
+    public function restored(Pembayaran $pembayaran): void
+    {
+        //
+    }
+
+    /**
+     * Handle the Pembayaran "force deleted" event.
+     */
+    public function forceDeleted(Pembayaran $pembayaran): void
+    {
+        //
     }
 } 

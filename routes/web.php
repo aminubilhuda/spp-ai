@@ -21,6 +21,7 @@ use App\Http\Controllers\WaliMuridTagihanController;
 use App\Http\Controllers\WaliMuridPembayaranController;
 use App\Http\Controllers\KwitansiPembayaranController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\WhatsappController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -104,6 +105,11 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
         Route::post('notifications/mark-all-as-read', 'markAllAsRead')->name('notifications.markAllAsRead');
         Route::get('notifications/unread-count', 'unreadCount')->name('notifications.unreadCount');
     });
+
+    // WhatsApp Settings
+    Route::get('whatsapp/settings', [WhatsappController::class, 'settings'])->name('whatsapp.settings');
+    Route::post('whatsapp/settings', [WhatsappController::class, 'updateSettings'])->name('whatsapp.update-settings');
+    Route::post('whatsapp/test', [WhatsappController::class, 'test'])->name('whatsapp.test');
 });
 
 // ============================================================================
