@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\Pembayaran as PembayaranNotification;
+use App\Notifications\PembayaranNotification;
 
 class PembayaranObserver
 {

@@ -51,7 +51,8 @@ class NotificationTest extends TestCase
             'nis' => '12345',
             'jurusan_id' => $this->jurusan->id,
             'kelas' => 'XII',
-            'angkatan' => '2022'
+            'angkatan' => '2022',
+            'jenis_kelamin' => 'L'
         ]);
 
         // Create biaya
@@ -116,7 +117,7 @@ class NotificationTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'notifiable_type' => User::class,
             'notifiable_id' => $this->operator->id,
-            'type' => 'App\Notifications\Pembayaran'
+            'type' => 'App\Notifications\PembayaranNotification'
         ]);
 
         // Check notification data
@@ -144,7 +145,7 @@ class NotificationTest extends TestCase
         $this->assertDatabaseMissing('notifications', [
             'notifiable_type' => User::class,
             'notifiable_id' => $this->operator->id,
-            'type' => 'App\Notifications\Pembayaran'
+            'type' => 'App\Notifications\PembayaranNotification'
         ]);
     }
 
@@ -154,7 +155,7 @@ class NotificationTest extends TestCase
         // Create a notification
         $this->operator->notifications()->create([
             'id' => \Illuminate\Support\Str::uuid(),
-            'type' => 'App\Notifications\Pembayaran',
+            'type' => 'App\Notifications\PembayaranNotification',
             'data' => [
                 'title' => 'Test Notification',
                 'message' => 'Test message'
@@ -180,7 +181,7 @@ class NotificationTest extends TestCase
         for ($i = 0; $i < 3; $i++) {
             $this->operator->notifications()->create([
                 'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\Pembayaran',
+                'type' => 'App\Notifications\PembayaranNotification',
                 'data' => [
                     'title' => "Test Notification {$i}",
                     'message' => "Test message {$i}"
@@ -205,7 +206,7 @@ class NotificationTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $this->operator->notifications()->create([
                 'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\Pembayaran',
+                'type' => 'App\Notifications\PembayaranNotification',
                 'data' => [
                     'title' => "Test Notification {$i}",
                     'message' => "Test message {$i}"

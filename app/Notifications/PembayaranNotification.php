@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class Pembayaran extends Notification
+class PembayaranNotification extends Notification
 {
     use Queueable;
 
@@ -63,4 +63,4 @@ class Pembayaran extends Notification
             'tanggal_bayar' => $pembayaran->tanggal_bayar,
         ];
     }
-}
+} 

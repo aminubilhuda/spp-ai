@@ -6,7 +6,7 @@ Fitur ini menambahkan sistem notifikasi real-time untuk operator ketika wali mur
 ## Komponen yang Ditambahkan
 
 ### 1. Notification Class
-- **File**: `app/Notifications/Pembayaran.php`
+- **File**: `app/Notifications/PembayaranNotification.php`
 - **Fungsi**: Menangani format dan konten notifikasi
 - **Channel**: Database (disimpan di tabel notifications)
 - **Data**: Informasi pembayaran, wali murid, siswa, dan jumlah pembayaran

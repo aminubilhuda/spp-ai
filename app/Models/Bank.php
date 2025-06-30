@@ -22,4 +22,21 @@ class Bank extends Model
      * @var string
      */
     protected $table = 'banks';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'sandi_bank',
+        'nama_bank'
+    ];
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 }

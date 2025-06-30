@@ -12,6 +12,7 @@ use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\BankSekolahController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BerandaWaliController;
 use App\Http\Controllers\TagihanRekapController;
 use App\Http\Controllers\WaliMuridSiswaController;
@@ -48,6 +49,12 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     Route::resource('user', UserController::class);
     Route::resource('wali', WaliController::class);
     Route::resource('bank-sekolah', BankSekolahController::class);
+    
+    // Bank Management
+    Route::controller(BankController::class)->group(function () {
+        Route::post('bank', 'store')->name('bank.store');
+        Route::get('bank', 'getBanks')->name('bank.getBanks');
+    });
     
     // Master Data - Siswa
     Route::controller(SiswaController::class)->group(function () {
