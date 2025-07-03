@@ -266,6 +266,19 @@
                                                             class="btn btn-sm btn-outline-primary" title="Kwitansi">
                                                             <i class="fas fa-print"></i>
                                                         </a>
+                                                        @php
+                                                            $cancelInfo = canCancelPayment($item, auth()->id());
+                                                        @endphp
+                                                        @if ($cancelInfo['can_cancel'])
+                                                            <button type="button" 
+                                                                class="btn btn-sm btn-outline-danger cancel-payment-btn" 
+                                                                data-pembayaran-id="{{ $item->id }}"
+                                                                data-pembayaran-amount="{{ formatRupiah($item->jumlah_dibayar) }}"
+                                                                data-siswa-name="{{ $item->tagihan->siswa->nama }}"
+                                                                title="Batalkan Pembayaran">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -340,6 +353,19 @@
                                                         class="btn btn-sm btn-outline-primary" title="Kwitansi">
                                                         <i class="fas fa-print"></i>
                                                     </a>
+                                                    @php
+                                                        $cancelInfo = canCancelPayment($item, auth()->id());
+                                                    @endphp
+                                                    @if ($cancelInfo['can_cancel'])
+                                                        <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger cancel-payment-btn" 
+                                                            data-pembayaran-id="{{ $item->id }}"
+                                                            data-pembayaran-amount="{{ formatRupiah($item->jumlah_dibayar) }}"
+                                                            data-siswa-name="{{ $item->tagihan->siswa->nama }}"
+                                                            title="Batalkan Pembayaran">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -433,4 +459,137 @@
             }
         }
     </style>
+
+    <!-- Cancel Payment Modal -->
+    <div class="modal fade" id="cancelPaymentModal" tabindex="-1" aria-labelledby="cancelPaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="cancelPaymentModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Pembatalan
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Peringatan:</strong> Pembatalan pembayaran tidak dapat dibatalkan kembali.
+                    </div>
+                    <p>Apakah Anda yakin ingin membatalkan pembayaran berikut?</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Siswa:</strong><br>
+                            <span id="cancelSiswaName"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Jumlah:</strong><br>
+                            <span id="cancelAmount" class="text-danger fw-bold"></span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Pembayaran hanya dapat dibatalkan dalam waktu 24 jam setelah dibuat
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">
+                        <i class="fas fa-trash me-1"></i>Ya, Batalkan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let currentPembayaranId = null;
+
+            // Handle cancel payment button click
+            $('.cancel-payment-btn').on('click', function() {
+                const pembayaranId = $(this).data('pembayaran-id');
+                const amount = $(this).data('pembayaran-amount');
+                const siswaName = $(this).data('siswa-name');
+
+                currentPembayaranId = pembayaranId;
+                $('#cancelSiswaName').text(siswaName);
+                $('#cancelAmount').text(amount);
+
+                $('#cancelPaymentModal').modal('show');
+            });
+
+            // Handle confirm cancel button click
+            $('#confirmCancelBtn').on('click', function() {
+                if (!currentPembayaranId) return;
+
+                const btn = $(this);
+                const originalText = btn.html();
+                
+                // Disable button and show loading
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Memproses...');
+
+                // Send AJAX request
+                console.log('Sending AJAX request to:', `/walimurid/pembayaran/${currentPembayaranId}/cancel`);
+                $.ajax({
+                    url: `/walimurid/pembayaran/${currentPembayaranId}/cancel`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function() {
+                        console.log('AJAX request started');
+                    },
+                    timeout: 30000, // 30 detik timeout
+                    success: function(response) {
+                        console.log('Success response:', response);
+                        if (response.success) {
+                            // Show success message
+                            alert('Berhasil! ' + response.message);
+                            // Reload page to refresh data
+                            location.reload();
+                        } else {
+                            alert('Gagal! ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error response:', xhr);
+                        console.log('Status:', status);
+                        console.log('Error:', error);
+                        
+                        let errorMessage = 'Terjadi kesalahan saat membatalkan pembayaran';
+                        
+                        if (status === 'timeout') {
+                            errorMessage = 'Request timeout. Silakan coba lagi.';
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            errorMessage = xhr.responseText;
+                        } else if (xhr.status === 0) {
+                            errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'Halaman tidak ditemukan. Silakan refresh halaman.';
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Kesalahan server. Silakan coba lagi nanti.';
+                        }
+
+                        alert('Gagal! ' + errorMessage);
+                    },
+                    complete: function() {
+                        // Re-enable button
+                        btn.prop('disabled', false).html(originalText);
+                        $('#cancelPaymentModal').modal('hide');
+                    }
+                });
+            });
+
+            // Reset current pembayaran ID when modal is hidden
+            $('#cancelPaymentModal').on('hidden.bs.modal', function() {
+                currentPembayaranId = null;
+            });
+        });
+    </script>
 @endsection

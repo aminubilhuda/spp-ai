@@ -236,4 +236,141 @@ class WhatsappController extends Controller
 
         return $mockTagihan;
     }
+
+    /**
+     * Kirim signed URL untuk akses pembayaran
+     * Production Ready dengan validasi keamanan maksimal
+     */
+    public function sendPembayaranSignedUrl($pembayaranId, $waliId)
+    {
+        try {
+            // Validasi parameter
+            if (!$pembayaranId || !$waliId) {
+                throw new \Exception('Parameter pembayaran ID dan wali ID harus diisi');
+            }
+
+            // Validasi pembayaran dengan eager loading
+            $pembayaran = \App\Models\Pembayaran::with(['tagihan.siswa.wali'])
+                ->where('id', (int) $pembayaranId)
+                ->first();
+                
+            if (!$pembayaran) {
+                throw new \Exception('Pembayaran tidak ditemukan');
+            }
+
+            // Validasi wali memiliki akses ke pembayaran ini
+            if ($pembayaran->wali_id != (int) $waliId) {
+                \Log::warning('Unauthorized WhatsApp signed URL attempt', [
+                    'pembayaran_id' => $pembayaranId,
+                    'requested_wali_id' => $waliId,
+                    'actual_wali_id' => $pembayaran->wali_id,
+                    'operator_id' => auth()->id()
+                ]);
+                throw new \Exception('Wali tidak memiliki akses ke pembayaran ini');
+            }
+
+            $wali = $pembayaran->tagihan->siswa->wali;
+            if (!$wali) {
+                throw new \Exception('Data wali tidak ditemukan');
+            }
+
+            if (!$wali->no_wa) {
+                throw new \Exception('Wali tidak memiliki nomor WhatsApp');
+            }
+
+            // Rate limiting untuk pengiriman WhatsApp
+            $key = 'whatsapp_signed_url_' . $pembayaranId;
+            $attempts = \Cache::get($key, 0);
+            
+            if ($attempts > 2) { // Max 2 pengiriman per pembayaran per hour
+                throw new \Exception('Terlalu banyak pengiriman signed URL untuk pembayaran ini. Silakan coba lagi nanti.');
+            }
+
+            // Buat signed URL dengan expiry 1 hari untuk production
+            $signedUrl = createPembayaranSignedUrl($pembayaranId, $waliId, 1);
+
+            // Format pesan dengan signed URL
+            $message = $this->formatPembayaranSignedUrlMessage($pembayaran, $signedUrl);
+
+            // Kirim via WhatsApp
+            $result = $this->whatsappService->sendMessage($wali->no_wa, $message);
+
+            if ($result) {
+                // Increment rate limiting
+                \Cache::put($key, $attempts + 1, 3600); // 1 hour
+
+                \Log::info('Signed URL berhasil dikirim via WhatsApp', [
+                    'pembayaran_id' => $pembayaranId,
+                    'wali_id' => $waliId,
+                    'wali_name' => $wali->name,
+                    'siswa_name' => $pembayaran->tagihan->siswa->nama,
+                    'operator_id' => auth()->id(),
+                    'operator_name' => auth()->user()->name,
+                    'signed_url' => $signedUrl,
+                    'sent_at' => now()->toISOString()
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => 'Signed URL berhasil dikirim via WhatsApp',
+                    'data' => [
+                        'pembayaran_id' => $pembayaranId,
+                        'wali_name' => $wali->name,
+                        'siswa_name' => $pembayaran->tagihan->siswa->nama,
+                        'expires_at' => now()->addDay()->format('Y-m-d H:i:s')
+                    ]
+                ];
+            } else {
+                throw new \Exception('Gagal mengirim pesan WhatsApp');
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error sending signed URL via WhatsApp', [
+                'error' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'pembayaran_id' => $pembayaranId,
+                'wali_id' => $waliId,
+                'operator_id' => auth()->id(),
+                'operator_name' => auth()->user()->name ?? 'Unknown',
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Gagal mengirim signed URL: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Format pesan dengan signed URL
+     * Production Ready dengan informasi keamanan yang jelas
+     */
+    protected function formatPembayaranSignedUrlMessage($pembayaran, $signedUrl)
+    {
+        $siswa = $pembayaran->tagihan->siswa;
+        $jumlah = number_format($pembayaran->jumlah_dibayar, 0, ',', '.');
+        $tanggal = $pembayaran->tanggal_bayar->format('d/m/Y H:i');
+        $expiresAt = now()->addDay()->format('d/m/Y H:i');
+        
+        return "💰 *DETAIL PEMBAYARAN SPP*\n\n" .
+               "Halo {$siswa->wali->name},\n\n" .
+               "Berikut detail pembayaran SPP:\n" .
+               "• Siswa: {$siswa->nama}\n" .
+               "• Kelas: {$siswa->kelas}\n" .
+               "• Jumlah: Rp {$jumlah}\n" .
+               "• Metode: {$pembayaran->metode_pembayaran}\n" .
+               "• Tanggal: {$tanggal}\n" .
+               "• Status: {$pembayaran->status_konfirmasi}\n\n" .
+               "🔗 *Akses Detail Pembayaran:*\n" .
+               "{$signedUrl}\n\n" .
+               "⚠️ *KEAMANAN & PENTING:*\n" .
+               "• Link berlaku hingga: {$expiresAt}\n" .
+               "• JANGAN bagikan link ini kepada siapapun\n" .
+               "• Link akan otomatis login ke akun Anda\n" .
+               "• Jika tidak Anda yang meminta, abaikan pesan ini\n" .
+               "• Hubungi operator jika ada pertanyaan\n\n" .
+               "Terima kasih! 🙏\n" .
+               "Sistem Pembayaran SPP";
+    }
 } 

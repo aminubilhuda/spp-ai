@@ -39,4 +39,46 @@ class Siswa extends Model
     {
         return $this->hasMany(Tagihan::class);
     }
+
+    // method untuk mendapatkan biaya SPP berdasarkan tagihan
+    public function getBiayaSppAttribute()
+    {
+        // Ambil tagihan terbaru untuk siswa ini
+        $tagihan = $this->tagihan()
+                        ->with('tagihan_details')
+                        ->latest()
+                        ->first();
+        
+        if ($tagihan && $tagihan->tagihan_details->count() > 0) {
+            return $tagihan->tagihan_details->sum('jumlah_biaya');
+        }
+        
+        return 0;
+    }
+
+    // method untuk mendapatkan total tagihan
+    public function getTotalTagihanAttribute()
+    {
+        return $this->tagihan()
+                    ->with('tagihan_details')
+                    ->get()
+                    ->sum(function($tagihan) {
+                        return $tagihan->tagihan_details->sum('jumlah_biaya');
+                    });
+    }
+
+    // method untuk mendapatkan total pembayaran
+    public function getTotalPembayaranAttribute()
+    {
+        return $this->tagihan()
+                    ->with(['tagihan_details.pembayaran'])
+                    ->get()
+                    ->sum(function($tagihan) {
+                        return $tagihan->tagihan_details->sum(function($detail) {
+                            return $detail->pembayaran
+                                         ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                         ->sum('jumlah_dibayar');
+                        });
+                    });
+    }
 }

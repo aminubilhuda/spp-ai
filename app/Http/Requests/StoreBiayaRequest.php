@@ -35,7 +35,8 @@ class StoreBiayaRequest extends FormRequest
     {
         return [
             'nama' => 'required|string|max:255',
-            'jumlah' => 'required|numeric'
+            'jumlah' => 'required|numeric',
+            'parent_id' => 'nullable|exists:biayas,id'
         ];
     }
 }

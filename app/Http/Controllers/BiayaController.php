@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Biaya as Model;
 use App\Http\Requests\StoreBiayaRequest;
 use App\Http\Requests\UpdateBiayaRequest;
+use Illuminate\Http\Request;
 
 class BiayaController extends Controller
 {
@@ -19,8 +20,13 @@ class BiayaController extends Controller
      */
     public function index()
     {
+        if (request()->filled('q')) {
+            $models = Model::with(['user', 'children'])->whereNull('parent_id')->search(request('q'))->latest()->paginate(50);
+        } else {
+            $models = Model::with(['user', 'children'])->whereNull('parent_id')->latest()->paginate(50);
+        }
         return view('operator.' . $this->viewIndex, [
-            'models' => Model::with('user')->latest()->paginate(50),
+            'models' => $models,
             'routePrefix' => $this->routePrefix,
             'title' => 'Data Biaya',
         ]);
@@ -29,9 +35,14 @@ class BiayaController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $model = new Model();
+        if ($request->filled('parent_id')) {
+            $model = Model::with('children')->findOrFail($request->parent_id);
+        }
         $data = [
+            'parentData' => $model,
             'model' => new Model(),
             'method' => 'POST',
             'action' => $this->routePrefix . '.store',
@@ -98,6 +109,16 @@ class BiayaController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
+    {
+        $model = Model::findOrFail($id);
+        $model->delete();
+
+        return redirect()
+            ->route($this->routePrefix . '.index')
+            ->with('success', 'Data Biaya berhasil dihapus');
+    }
+
+    public function deleteItem(string $id)
     {
         $model = Model::findOrFail($id);
         $model->delete();

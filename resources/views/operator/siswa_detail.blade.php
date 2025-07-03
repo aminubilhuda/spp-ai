@@ -1,179 +1,344 @@
 @extends('layouts.app_sneat')
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{{ $title }}</h5>
-                        <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm">
-                            <i class="fa fa-arrow-left"></i> Kembali
-                        </a>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ $title }}</h5>
+                    <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    <!-- Student Photo and Basic Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            @if ($model->foto)
+                                <img src="{{ asset('storage/' . $model->foto) }}"
+                                    alt="Foto {{ $model->nama }}" class="img-fluid rounded" style="max-width: 150px;">
+                            @else
+                                <div class="bg-light rounded p-4" style="width: 150px; height: 150px; margin: 0 auto;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="col-md-9">
+                            <h4>{{ $model->nama }}</h4>
+                            <p class="text-muted mb-2">NISN: {{ $model->nisn }} | NIS: {{ $model->nis }}</p>
+                            <p class="text-muted mb-0">{{ $model->jurusan->nama }} - Kelas {{ $model->kelas }} | Angkatan {{ $model->angkatan }}</p>
+                        </div>
                     </div>
 
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 text-center mb-4">
-                                <div class="card student-card border-primary">
-                                    <div class="card-header bg-primary text-white text-center">
-                                        <h5>KARTU PELAJAR</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="avatar avatar-xl mb-3">
-                                            @if ($model->foto)
-                                                <img src="{{ asset('storage/' . $model->foto) }}"
-                                                    alt="Foto {{ $model->nama }}" class="rounded-circle">
-                                            @else
-                                                @if ($model->jenis_kelamin == 'Laki-laki')
-                                                    <img src="{{ asset('sneat/assets/img/avatars/male-student.png') }}"
-                                                        alt="Avatar" class="rounded-circle">
-                                                @else
-                                                    <img src="{{ asset('sneat/assets/img/avatars/female-student.png') }}"
-                                                        alt="Avatar" class="rounded-circle">
-                                                @endif
-                                            @endif
-                                        </div>
-                                        <h5 class="mb-1">{{ $model->nama }}</h5>
-                                        <p class="mb-0">NISN: {{ $model->nisn }}</p>
-                                        <p class="mb-0">NIS: {{ $model->nis }}</p>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <p class="mb-0">{{ $model->jurusan->nama }} - Kelas {{ $model->kelas }}</p>
-                                        <p class="mb-0">Angkatan: {{ $model->angkatan }}</p>
-                                    </div>
+                    <!-- Student Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Informasi Siswa</h6>
                                 </div>
-                            </div>
-
-                            <div class="col-md-8">
-                                <div class="card">
-                                    <div class="card-header bg-dark text-white">
-                                        <h5 class="mb-0">INFORMASI LENGKAP</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <table class="table table-borderless">
-                                            <tr>
-                                                <td width="30%"><strong>Nama Lengkap</strong></td>
-                                                <td width="5%">:</td>
-                                                <td>{{ $model->nama }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NISN</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->nisn }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NIS</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->nis }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Jenis Kelamin</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->jenis_kelamin }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Jurusan</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->jurusan->nama }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Kelas</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->kelas }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Angkatan</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->angkatan }}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="card mt-3">
-                                    <div
-                                        class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0">INFORMASI WALI</h5>
-                                        @if ($model->wali_id)
-                                            <a href="{{ route('siswa.wali', $model->id) }}" class="btn btn-light btn-sm">
-                                                <i class="fas fa-eye"></i> Detail Wali Murid
-                                            </a>
-                                        @endif
-                                    </div>
-                                    <div class="card-body">
-                                        <table class="table table-borderless">
-                                            <tr>
-                                                <td width="30%"><strong>Nama Wali</strong></td>
-                                                <td width="5%">:</td>
-                                                <td>{{ $model->wali->name ?? 'Belum diatur' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Status Wali</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->wali_status ?? 'Belum diatur' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Email Wali</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->wali->email ?? 'Belum diatur' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>No. HP</strong></td>
-                                                <td>:</td>
-                                                <td>{{ $model->wali->nohp ?? 'Belum diatur' }}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td width="40%"><strong>Nama Lengkap</strong></td>
+                                            <td>{{ $model->nama }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>NISN</strong></td>
+                                            <td>{{ $model->nisn }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>NIS</strong></td>
+                                            <td>{{ $model->nis }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Jenis Kelamin</strong></td>
+                                            <td>{{ $model->jenis_kelamin }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Jurusan</strong></td>
+                                            <td>{{ $model->jurusan->nama }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Kelas</strong></td>
+                                            <td>{{ $model->kelas }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Angkatan</strong></td>
+                                            <td>{{ $model->angkatan }}</td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-12 text-center">
-                                <a href="{{ route($routePrefix . '.edit', $model->id) }}" class="btn btn-warning">
-                                    <i class="fa fa-edit"></i> Edit
-                                </a>
-                                <form action="{{ route($routePrefix . '.destroy', $model->id) }}" method="post"
-                                    class="d-inline">
-                                    @csrf
-                                    @method('delete')
-                                    <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Apakah anda yakin?')">
-                                        <i class="fa fa-trash"></i> Hapus
-                                    </button>
-                                </form>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Informasi Wali</h6>
+                                    @if ($model->wali_id)
+                                        <a href="{{ route('siswa.wali', $model->id) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td width="40%"><strong>Nama Wali</strong></td>
+                                            <td>{{ $model->wali->name ?? 'Belum diatur' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status Wali</strong></td>
+                                            <td>{{ $model->wali_status ?? 'Belum diatur' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Email</strong></td>
+                                            <td>{{ $model->wali->email ?? 'Belum diatur' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>No. HP</strong></td>
+                                            <td>{{ $model->wali->nohp ?? 'Belum diatur' }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Biaya Siswa -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Detail Biaya Siswa</h6>
+                                    <div>
+                                        <a href="{{ route('tagihan.create') }}?siswa_id={{ $model->id }}" class="btn btn-success btn-sm me-2">
+                                            <i class="fas fa-plus"></i> Buat Tagihan
+                                        </a>
+                                        <a href="{{ route('tagihan.showByStudent', $model->id) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> Lihat Tagihan Lengkap
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if($model->tagihan->count() > 0)
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <td width="40%"><strong>Total Tagihan</strong></td>
+                                                        <td>{{ formatRupiah($model->total_tagihan) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Total Pembayaran</strong></td>
+                                                        <td>{{ formatRupiah($model->total_pembayaran) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Sisa Tagihan</strong></td>
+                                                        <td>{{ formatRupiah($model->total_tagihan - $model->total_pembayaran) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Jumlah Tagihan</strong></td>
+                                                        <td>{{ $model->tagihan->count() }} tagihan</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Ringkasan Tagihan:</h6>
+                                                <ul class="list-unstyled">
+                                                    @foreach($model->tagihan->take(3) as $tagihan)
+                                                        <li class="mb-2">
+                                                            <strong>{{ $tagihan->tanggal_tagihan ? \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->format('d/m/Y') : 'N/A' }}</strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                Total: {{ formatRupiah($tagihan->tagihan_details->sum('jumlah_biaya')) }}
+                                                                | Jatuh Tempo: {{ $tagihan->tanggal_jatuh_tempo ? \Carbon\Carbon::parse($tagihan->tanggal_jatuh_tempo)->format('d/m/Y') : 'N/A' }}
+                                                            </small>
+                                                        </li>
+                                                    @endforeach
+                                                    @if($model->tagihan->count() > 3)
+                                                        <li class="text-muted">... dan {{ $model->tagihan->count() - 3 }} tagihan lainnya</li>
+                                                    @endif
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tabel Detail Tagihan -->
+                                        <div class="table-responsive">
+                                            <h6 class="mb-3">Rincian Tagihan Detail:</h6>
+                                            <table class="table table-sm table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal Tagihan</th>
+                                                        <th>Nama Biaya</th>
+                                                        <th>Jumlah</th>
+                                                        <th>Dibayar</th>
+                                                        <th>Sisa</th>
+                                                        <th>Status</th>
+                                                        <th>Jatuh Tempo</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php $no = 1; @endphp
+                                                    @foreach($model->tagihan->take(10) as $tagihan)
+                                                        @foreach($tagihan->tagihan_details as $detail)
+                                                            @php
+                                                                $totalBayar = $detail->pembayaran
+                                                                    ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                                                    ->sum('jumlah_dibayar');
+                                                                $sisaTagihan = $detail->jumlah_biaya - $totalBayar;
+                                                                
+                                                                if ($sisaTagihan <= 0) {
+                                                                    $statusDisplay = 'lunas';
+                                                                    $statusClass = 'success';
+                                                                } elseif ($totalBayar > 0) {
+                                                                    $statusDisplay = 'angsur';
+                                                                    $statusClass = 'warning';
+                                                                } else {
+                                                                    $statusDisplay = 'belum_lunas';
+                                                                    $statusClass = 'danger';
+                                                                }
+                                                            @endphp
+                                                            <tr>
+                                                                <td>{{ $no++ }}</td>
+                                                                <td>{{ $tagihan->tanggal_tagihan ? \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->format('d/m/Y') : '-' }}</td>
+                                                                <td>
+                                                                    <strong>{{ $detail->nama_biaya }}</strong>
+                                                                    @if($tagihan->keterangan)
+                                                                        <br><small class="text-muted">{{ $tagihan->keterangan }}</small>
+                                                                    @endif
+                                                                </td>
+                                                                <td>{{ formatRupiah($detail->jumlah_biaya) }}</td>
+                                                                <td>{{ formatRupiah($totalBayar) }}</td>
+                                                                <td>{{ formatRupiah($sisaTagihan) }}</td>
+                                                                <td>
+                                                                    @if($statusDisplay == 'lunas')
+                                                                        <span class="badge bg-success">Lunas</span>
+                                                                    @elseif($statusDisplay == 'angsur')
+                                                                        <span class="badge bg-warning">Angsur</span>
+                                                                    @else
+                                                                        <span class="badge bg-danger">Belum Lunas</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @php
+                                                                        $jatuhTempo = \Carbon\Carbon::parse($tagihan->tanggal_jatuh_tempo);
+                                                                        $now = \Carbon\Carbon::now();
+                                                                        $isTerlambat = $now->gt($jatuhTempo) && $sisaTagihan > 0;
+                                                                    @endphp
+                                                                    <span class="{{ $isTerlambat ? 'text-danger' : '' }}">
+                                                                        {{ $jatuhTempo->format('d/m/Y') }}
+                                                                        @if($isTerlambat)
+                                                                            <br><small class="text-danger">Terlambat</small>
+                                                                        @endif
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        @if($model->tagihan->count() > 10)
+                                            <div class="text-center mt-3">
+                                                <small class="text-muted">
+                                                    Menampilkan 10 tagihan terbaru dari {{ $model->tagihan->count() }} tagihan
+                                                </small>
+                                            </div>
+                                        @endif
+
+                                    @else
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                            <p>Belum ada tagihan untuk siswa ini</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Riwayat Pembayaran Terbaru -->
+                    @php
+                        $pembayaranTerbaru = collect();
+                        foreach($model->tagihan as $tagihan) {
+                            foreach($tagihan->tagihan_details as $detail) {
+                                foreach($detail->pembayaran as $pembayaran) {
+                                    $pembayaranTerbaru->push($pembayaran);
+                                }
+                            }
+                        }
+                        $pembayaranTerbaru = $pembayaranTerbaru->sortByDesc('created_at')->take(5);
+                    @endphp
+
+                    @if($pembayaranTerbaru->count() > 0)
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Riwayat Pembayaran Terbaru</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Nama Biaya</th>
+                                                        <th>Jumlah Bayar</th>
+                                                        <th>Metode</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php $no = 1; @endphp
+                                                    @foreach($pembayaranTerbaru as $pembayaran)
+                                                        <tr>
+                                                            <td>{{ $no++ }}</td>
+                                                            <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</td>
+                                                            <td>{{ $pembayaran->tagihan_detail->nama_biaya ?? 'N/A' }}</td>
+                                                            <td>{{ formatRupiah($pembayaran->jumlah_dibayar) }}</td>
+                                                            <td>{{ $pembayaran->metode_pembayaran }}</td>
+                                                            <td>
+                                                                @if($pembayaran->status_konfirmasi == 'Sudah Dikonfirmasi')
+                                                                    <span class="badge bg-success">Dikonfirmasi</span>
+                                                                @else
+                                                                    <span class="badge bg-warning">Menunggu</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-md-12 text-center">
+                            <a href="{{ route($routePrefix . '.edit', $model->id) }}" class="btn btn-warning">
+                                <i class="fa fa-edit"></i> Edit
+                            </a>
+                            <form action="{{ route($routePrefix . '.destroy', $model->id) }}" method="post" class="d-inline">
+                                @csrf
+                                @method('delete')
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah anda yakin?')">
+                                    <i class="fa fa-trash"></i> Hapus
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .student-card {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .student-card:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .student-card .card-header {
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .avatar img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-    </style>
 @endsection

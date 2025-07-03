@@ -27,6 +27,11 @@ use App\Http\Controllers\WhatsappController;
 // PUBLIC ROUTES
 // ============================================================================
 
+// Route untuk login dengan signed URL - Production Ready
+
+// Route untuk login dengan signed URL
+Route::get('login/login-url', [LoginController::class, 'loginUrl'])->name('login.url');
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -106,10 +111,16 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
         Route::get('notifications/unread-count', 'unreadCount')->name('notifications.unreadCount');
     });
 
+    //Biaya
+    Route::controller(BiayaController::class)->group(function () {
+        Route::get('delete-biaya-item/{id}', [BiayaController::class, 'deleteItem'])->name('delete-biaya.item');
+    });
+
     // WhatsApp Settings
     Route::get('whatsapp/settings', [WhatsappController::class, 'settings'])->name('whatsapp.settings');
     Route::post('whatsapp/settings', [WhatsappController::class, 'updateSettings'])->name('whatsapp.update-settings');
     Route::post('whatsapp/test', [WhatsappController::class, 'test'])->name('whatsapp.test');
+    Route::post('whatsapp/send-signed-url/{pembayaranId}/{waliId}', [WhatsappController::class, 'sendPembayaranSignedUrl'])->name('whatsapp.send-signed-url');
 });
 
 // ============================================================================
@@ -135,6 +146,7 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
         Route::post('pembayaran/store', 'store')->name('pembayaran.store');
         Route::get('pembayaran/{id}', 'show')->name('pembayaran.show');
         Route::get('tagihan/{tagihanId}/details', 'getTagihanDetails')->name('tagihan.details');
+        Route::delete('pembayaran/{id}/cancel', 'cancelPayment')->name('pembayaran.cancel');
     });
     Route::resource('pembayaran', WaliMuridPembayaranController::class)->except(['index', 'store', 'show']);
     

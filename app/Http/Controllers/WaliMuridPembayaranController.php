@@ -247,11 +247,91 @@ class WaliMuridPembayaranController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Wali hanya bisa membatalkan pembayaran yang belum dikonfirmasi
      */
     public function destroy($id)
     {
-        // Wali tidak bisa menghapus pembayaran yang sudah dibuat
-        return redirect()->back()->with('error', 'Wali murid tidak dapat menghapus pembayaran');
+        try {
+            // Ambil siswa yang dimiliki wali yang sedang login
+            $siswaIds = Auth::user()->siswa->pluck('id');
+            
+            $pembayaran = Pembayaran::with(['tagihan.siswa', 'tagihan_detail'])
+                ->whereHas('tagihan', function($q) use ($siswaIds) {
+                    $q->whereIn('siswa_id', $siswaIds);
+                })
+                ->where('id', $id)
+                ->first();
+
+            if (!$pembayaran) {
+                return redirect()->back()->with('error', 'Pembayaran tidak ditemukan atau Anda tidak memiliki akses');
+            }
+
+            // Validasi bahwa pembayaran belum dikonfirmasi
+            if ($pembayaran->status_konfirmasi === 'Sudah Dikonfirmasi') {
+                return redirect()->back()->with('error', 'Pembayaran yang sudah dikonfirmasi tidak dapat dibatalkan');
+            }
+
+            // Validasi bahwa pembayaran dibuat oleh wali yang sedang login
+            if ($pembayaran->wali_id !== Auth::id()) {
+                return redirect()->back()->with('error', 'Anda hanya dapat membatalkan pembayaran yang Anda buat');
+            }
+
+            // Validasi waktu pembayaran (maksimal 24 jam setelah dibuat)
+            $createdTime = $pembayaran->created_at;
+            $currentTime = now();
+            $hoursDiff = $currentTime->diffInHours($createdTime);
+
+            if ($hoursDiff > 24) {
+                return redirect()->back()->with('error', 'Pembayaran hanya dapat dibatalkan dalam waktu 24 jam setelah dibuat');
+            }
+
+            DB::beginTransaction();
+            try {
+                // Hapus file bukti pembayaran jika ada
+                if ($pembayaran->bukti_bayar) {
+                    Storage::disk('public')->delete($pembayaran->bukti_bayar);
+                }
+
+                // Hapus pembayaran
+                $pembayaran->delete();
+
+                DB::commit();
+
+                // Log aktivitas pembatalan
+                \Log::info('Pembayaran dibatalkan oleh wali', [
+                    'pembayaran_id' => $id,
+                    'wali_id' => Auth::id(),
+                    'wali_name' => Auth::user()->name,
+                    'siswa_name' => $pembayaran->tagihan->siswa->nama,
+                    'jumlah_dibayar' => $pembayaran->jumlah_dibayar,
+                    'created_at' => $createdTime,
+                    'cancelled_at' => $currentTime,
+                    'hours_diff' => $hoursDiff
+                ]);
+
+                return redirect()->route('wali.pembayaran.index')
+                    ->with('success', 'Pembayaran berhasil dibatalkan');
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                \Log::error('Error saat membatalkan pembayaran', [
+                    'pembayaran_id' => $id,
+                    'error' => $e->getMessage(),
+                    'wali_id' => Auth::id()
+                ]);
+
+                return redirect()->back()->with('error', 'Gagal membatalkan pembayaran: ' . $e->getMessage());
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error dalam destroy pembayaran', [
+                'pembayaran_id' => $id,
+                'error' => $e->getMessage(),
+                'wali_id' => Auth::id()
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membatalkan pembayaran');
+        }
     }
 
     /**
@@ -321,6 +401,130 @@ class WaliMuridPembayaranController extends Controller
         } catch (\Exception $e) {
             // Log error jika gagal mengirim notifikasi
             \Log::error('Gagal mengirim notifikasi pembayaran: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Batalkan pembayaran via AJAX
+     */
+    public function cancelPayment($id)
+    {
+        try {
+            \Log::info('Cancel payment request received', [
+                'pembayaran_id' => $id,
+                'wali_id' => Auth::id(),
+                'request_data' => request()->all()
+            ]);
+
+            // Ambil siswa yang dimiliki wali yang sedang login
+            $siswaIds = Auth::user()->siswa->pluck('id');
+            
+            $pembayaran = Pembayaran::with(['tagihan.siswa', 'tagihan_detail'])
+                ->whereHas('tagihan', function($q) use ($siswaIds) {
+                    $q->whereIn('siswa_id', $siswaIds);
+                })
+                ->where('id', $id)
+                ->first();
+
+            if (!$pembayaran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran tidak ditemukan atau Anda tidak memiliki akses'
+                ], 404);
+            }
+
+            // Validasi bahwa pembayaran belum dikonfirmasi
+            if ($pembayaran->status_konfirmasi === 'Sudah Dikonfirmasi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran yang sudah dikonfirmasi tidak dapat dibatalkan'
+                ], 400);
+            }
+
+            // Validasi bahwa pembayaran dibuat oleh wali yang sedang login
+            if ($pembayaran->wali_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda hanya dapat membatalkan pembayaran yang Anda buat'
+                ], 403);
+            }
+
+            // Validasi waktu pembayaran (maksimal 24 jam setelah dibuat)
+            $createdTime = $pembayaran->created_at;
+            $currentTime = now();
+            $hoursDiff = $currentTime->diffInHours($createdTime);
+
+            if ($hoursDiff > 24) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran hanya dapat dibatalkan dalam waktu 24 jam setelah dibuat'
+                ], 400);
+            }
+
+            DB::beginTransaction();
+            try {
+                // Hapus file bukti pembayaran jika ada
+                if ($pembayaran->bukti_bayar) {
+                    Storage::disk('public')->delete($pembayaran->bukti_bayar);
+                }
+
+                // Simpan data pembayaran sebelum dihapus untuk logging
+                $pembayaranData = [
+                    'id' => $pembayaran->id,
+                    'jumlah_dibayar' => $pembayaran->jumlah_dibayar,
+                    'siswa_name' => $pembayaran->tagihan->siswa->nama,
+                    'created_at' => $pembayaran->created_at
+                ];
+
+                // Hapus pembayaran
+                $pembayaran->delete();
+
+                DB::commit();
+
+                // Log aktivitas pembatalan
+                \Log::info('Pembayaran dibatalkan oleh wali via AJAX', [
+                    'pembayaran_id' => $id,
+                    'wali_id' => Auth::id(),
+                    'wali_name' => Auth::user()->name,
+                    'pembayaran_data' => $pembayaranData,
+                    'cancelled_at' => $currentTime,
+                    'hours_diff' => $hoursDiff
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran berhasil dibatalkan',
+                    'data' => [
+                        'pembayaran_id' => $id,
+                        'cancelled_at' => $currentTime->format('Y-m-d H:i:s')
+                    ]
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                \Log::error('Error saat membatalkan pembayaran via AJAX', [
+                    'pembayaran_id' => $id,
+                    'error' => $e->getMessage(),
+                    'wali_id' => Auth::id()
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membatalkan pembayaran: ' . $e->getMessage()
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error dalam cancelPayment', [
+                'pembayaran_id' => $id,
+                'error' => $e->getMessage(),
+                'wali_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat membatalkan pembayaran'
+            ], 500);
         }
     }
 } 

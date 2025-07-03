@@ -83,8 +83,10 @@ class TagihanController extends Controller
 
     public function create()
     {
-        // Pastikan data biaya memiliki properti jumlah dengan eager loading
-        $biaya = Biaya::select('id', 'nama', 'jumlah')->get();
+        // Ambil biaya dengan struktur parent-child
+        $biaya = Biaya::with('children')
+                     ->whereNull('parent_id') // Hanya ambil parent biaya
+                     ->get();
         
         $data = [
             'model' => new Tagihan(),
@@ -146,19 +148,37 @@ class TagihanController extends Controller
                 $tagihan = Tagihan::create($tagihanData);
                 
                 foreach($biaya_id_array as $biaya_id) {
-                    $biaya = Biaya::findOrFail($biaya_id);
+                    $biaya = Biaya::with('children')->findOrFail($biaya_id);
                     
-                    if (!$biaya->jumlah) {
-                        throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                    // Jika biaya adalah parent, buat tagihan detail untuk semua children
+                    if ($biaya->isParent() && $biaya->children->count() > 0) {
+                        foreach ($biaya->children as $child) {
+                            if (!$child->jumlah) {
+                                throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
+                            }
+                            
+                            $tagihan->tagihan_details()->create([
+                                'nama_biaya' => $child->nama,
+                                'jumlah_biaya' => $child->jumlah,
+                                'tagihan_id' => $tagihan->id,
+                                'status' => 'baru'
+                            ]);
+                            $count++;
+                        }
+                    } else {
+                        // Jika biaya adalah child atau tidak punya children, buat tagihan detail langsung
+                        if (!$biaya->jumlah) {
+                            throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                        }
+                        
+                        $tagihan->tagihan_details()->create([
+                            'nama_biaya' => $biaya->nama,
+                            'jumlah_biaya' => $biaya->jumlah,
+                            'tagihan_id' => $tagihan->id,
+                            'status' => 'baru'
+                        ]);
+                        $count++;
                     }
-                      $tagihan->tagihan_details()->create([
-                        'nama_biaya' => $biaya->nama ?? 'Tidak ada nama',
-                        'jumlah_biaya' => $biaya->jumlah,
-                        'tagihan_id' => $tagihan->id,
-                        'status' => 'baru'
-                    ]);
-                    
-                    $count++;
                 }
             }
             
@@ -196,7 +216,7 @@ class TagihanController extends Controller
             ->with('jurusan:id,nama')
             ->get();
             
-        $biaya = Biaya::select('id', 'nama', 'jumlah')->get();
+        $biaya = Biaya::with('children')->whereNull('parent_id')->get();
         
         return view('operator.' . $this->viewEdit, [
             'title' => 'Edit Data Tagihan',

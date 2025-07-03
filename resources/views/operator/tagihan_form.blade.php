@@ -17,15 +17,34 @@
                                 <label class="form-label">Pilih Biaya</label>
                                 <div class="row">
                                     @foreach ($biaya as $item)
-                                        <div class="col-md-4 mb-2">
-                                            <div class="form-check">
-                                                <input type="checkbox" name="biaya_id[]" value="{{ $item->id }}"
-                                                    class="form-check-input @error('biaya_id') is-invalid @enderror"
-                                                    id="biaya_{{ $item->id }}" data-jumlah="{{ $item->jumlah }}"
-                                                    {{ is_array(old('biaya_id')) && in_array($item->id, old('biaya_id')) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="biaya_{{ $item->id }}">
-                                                    {{ $item->nama }} ({{ formatRupiah($item->jumlah) }})
-                                                </label>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="biaya_id[]" value="{{ $item->id }}"
+                                                            class="form-check-input @error('biaya_id') is-invalid @enderror"
+                                                            id="biaya_{{ $item->id }}" data-jumlah="{{ $item->total_tagihan }}"
+                                                            {{ is_array(old('biaya_id')) && in_array($item->id, old('biaya_id')) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="biaya_{{ $item->id }}">
+                                                            <strong>{{ $item->nama }}</strong>
+                                                            <br>
+                                                            <span class="text-primary">{{ formatRupiah($item->total_tagihan) }}</span>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    @if($item->children->count() > 0)
+                                                        <div class="mt-2 ms-4">
+                                                            <small class="text-muted">Rincian:</small>
+                                                            <ul class="list-unstyled ms-3">
+                                                                @foreach($item->children as $child)
+                                                                    <li>
+                                                                        <small>• {{ $child->nama }}: {{ formatRupiah($child->jumlah) }}</small>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach

@@ -29,7 +29,7 @@ class SiswaController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $query = Model::query()->with('wali', 'jurusan'); //eager loading -> with();
+        $query = Model::query()->with(['wali', 'jurusan', 'tagihan.tagihan_details']); //eager loading -> with();
         
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -97,7 +97,7 @@ class SiswaController extends Controller
     public function show(string $id)
     {
         $data = [
-            'model' => Model::findOrFail($id),
+            'model' => Model::with(['wali', 'jurusan', 'tagihan.tagihan_details.pembayaran.tagihan_detail'])->findOrFail($id),
             'title' => 'Detail Siswa',
             'routePrefix' => $this->routePrefix,
         ];

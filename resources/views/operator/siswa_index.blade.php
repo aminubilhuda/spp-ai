@@ -43,18 +43,19 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped table-sm">
                             <thead>
                                 <tr>
                                     <td>No</td>
                                     <td>Nama Wali Murid</td>
                                     <td>Nama</td>
                                     <td>NISN</td>
-                                    <td>NIS</td>
-                                    <td>Foto</td>
+                                    {{-- <td>NIS</td> --}}
+                                    {{-- <td>Foto</td> --}}
                                     <td>Jurusan</td>
                                     <td>Kelas</td>
                                     <td>Angkatan</td>
+                                    <td>Biaya SPP</td>
                                     <td>Aksi</td>
                                 </tr>
                             </thead>
@@ -66,8 +67,8 @@
                                         <td>{{ $siswa->wali->name }}</td>
                                         <td>{{ $siswa->nama }}</td>
                                         <td>{{ $siswa->nisn }}</td>
-                                        <td>{{ $siswa->nis }}</td>
-                                        <td>
+                                        {{-- <td>{{ $siswa->nis }}</td> --}}
+                                        {{-- <td>
                                             @if ($siswa->foto)
                                                 <img src="{{ asset('storage/' . $siswa->foto) }}"
                                                     alt="Foto {{ $siswa->nama }}" class="img-thumbnail"
@@ -75,22 +76,23 @@
                                             @else
                                                 <span class="badge bg-label-warning">Belum ada foto</span>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                         <td>{{ $siswa->jurusan->nama }}</td>
                                         <td>{{ $siswa->kelas }}</td>
                                         <td>{{ $siswa->angkatan }}</td>
+                                        <td>{{ formatRupiah($siswa->biaya_spp) }}</td>
                                         <td>
                                             <a href="{{ route($routePrefix . '.show', $siswa->id) }}"
-                                                class="btn btn-sm btn-info"> <i class="fas fa-eye"></i> Detail</a>
+                                                class="btn btn-sm btn-info"> <i class="fas fa-eye"></i></a>
                                             <a href="{{ route($routePrefix . '.edit', $siswa->id) }}"
-                                                class="btn btn-sm btn-warning"> <i class="fas fa-edit"></i> Edit</a>
+                                                class="btn btn-sm btn-warning"> <i class="fas fa-edit"></i></a>
                                             <form action="{{ route($routePrefix . '.destroy', $siswa->id) }}"
                                                 method="post" class="d-inline">
                                                 @csrf
                                                 @method('delete')
                                                 <button type="submit" class="btn btn-sm btn-danger"
                                                     onclick="return confirm('Apakah anda yakin?')"><i class="fas fa-trash">
-                                                    </i> Hapus</button>
+                                                    </i></button>
                                             </form>
 
                                         </td>
