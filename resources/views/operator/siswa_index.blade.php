@@ -47,15 +47,16 @@
                             <thead>
                                 <tr>
                                     <td>No</td>
-                                    <td>Nama Wali Murid</td>
+                                    <td>Wali Murid</td>
                                     <td>Nama</td>
                                     <td>NISN</td>
-                                    {{-- <td>NIS</td> --}}
-                                    {{-- <td>Foto</td> --}}
-                                    <td>Jurusan</td>
-                                    <td>Kelas</td>
+                                    <!-- {{-- <td>NIS</td> --}} -->
+                                    <!-- {{-- <td>Foto</td> --}} -->
+                                    <!-- <td>Jurusan</td> -->
+                                    <!-- <td>Kelas</td> -->
                                     <td>Angkatan</td>
                                     <td>Biaya SPP</td>
+                                    <td>Status</td>
                                     <td>Aksi</td>
                                 </tr>
                             </thead>
@@ -77,10 +78,11 @@
                                                 <span class="badge bg-label-warning">Belum ada foto</span>
                                             @endif
                                         </td> --}}
-                                        <td>{{ $siswa->jurusan->nama }}</td>
-                                        <td>{{ $siswa->kelas }}</td>
+                                        <!-- <td>{{ $siswa->jurusan->nama }}</td> -->
+                                        <!-- <td>{{ $siswa->kelas }}</td> -->
                                         <td>{{ $siswa->angkatan }}</td>
                                         <td>{{ formatRupiah($siswa->biaya_spp) }}</td>
+                                        <td>{{ $siswa->status }}</td>
                                         <td>
                                             <a href="{{ route($routePrefix . '.show', $siswa->id) }}"
                                                 class="btn btn-sm btn-info"> <i class="fas fa-eye"></i></a>

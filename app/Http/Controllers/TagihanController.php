@@ -108,7 +108,7 @@ class TagihanController extends Controller
             $requestData = $request->validate([
                 'biaya_id' => 'required|array',
                 'biaya_id.*' => 'exists:biayas,id',
-                'angkatan' => 'required',
+                'angkatan' => 'nullable',
                 'jurusan' => 'nullable|exists:jurusans,id',
                 'kelas' => 'nullable',
                 'tanggal_tagihan' => 'required|date',
@@ -120,8 +120,15 @@ class TagihanController extends Controller
             $biaya_id_array = $requestData['biaya_id'];
             
             // Data siswa yang akan ditagih
-            $siswaQuery = Siswa::where('angkatan', $requestData['angkatan']);
-            
+            $siswaQuery = Siswa::query();
+
+            // Tambahkan filter status Aktif
+            $siswaQuery->currentStatus('Aktif');
+
+            if (!empty($requestData['angkatan'])) {
+                $siswaQuery->where('angkatan', $requestData['angkatan']);
+            }
+
             if (!empty($requestData['jurusan'])) {
                 $siswaQuery->where('jurusan_id', $requestData['jurusan']);
             }

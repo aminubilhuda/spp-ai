@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasFormatRupiah;
+use Spatie\ModelStatus\HasStatuses;
 
 class Tagihan extends Model
 {
     use HasFactory;
     use HasFormatRupiah;
+    use HasStatuses;
 
     protected $guarded = [];
     protected $dates = ['tanggal_tagihan', 'tanggal_jatuh_tempo'];
