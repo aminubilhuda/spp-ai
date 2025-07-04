@@ -158,6 +158,11 @@ class PembayaranController extends Controller
                     'bank_sekolah_id' => $request->bank_sekolah_id ?? null,
                     'user_id' => auth()->id(),
                 ]);
+                
+                // Set status awal menggunakan package Spatie
+                $statusReason = $isWali ? 'Pembayaran dibuat oleh wali, menunggu konfirmasi' : 'Pembayaran dibuat oleh operator';
+                $pembayaran->setStatus('pending', $statusReason);
+                
                 $pembayaranIds[] = $pembayaran->id;
             }
 
@@ -205,10 +210,13 @@ class PembayaranController extends Controller
             
             $pembayaran = Pembayaran::findOrFail($id);
             
-            // Update status konfirmasi saja dulu
+            // Update status konfirmasi lama
             $pembayaran->status_konfirmasi = 'Sudah Dikonfirmasi';
             $pembayaran->user_id = auth()->id();
             $pembayaran->save();
+            
+            // Set status baru menggunakan package Spatie
+            $pembayaran->setStatus('confirmed', 'Pembayaran dikonfirmasi oleh operator: ' . auth()->user()->name);
             
             \Log::info('Pembayaran berhasil dikonfirmasi');
             

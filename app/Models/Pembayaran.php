@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\HasFormatRupiah;
+use Spatie\ModelStatus\HasStatuses;
 
 class Pembayaran extends Model
 {
-    use HasFormatRupiah;
+    use HasFormatRupiah, HasStatuses;
 
     protected $table = 'pembayarans';
     protected $fillable = [
@@ -27,6 +28,21 @@ class Pembayaran extends Model
     ];
 
     protected $dates = ['tanggal_bayar'];
+
+    /**
+     * Validasi status yang diperbolehkan untuk pembayaran
+     */
+    public function isValidStatus(string $name, ?string $reason = null): bool
+    {
+        $validStatuses = [
+            'pending',      // Menunggu konfirmasi
+            'confirmed',    // Sudah dikonfirmasi
+            'rejected',     // Ditolak
+            'cancelled'     // Dibatalkan
+        ];
+
+        return in_array($name, $validStatuses);
+    }
 
     /**
      * Get the tagihan that owns the payment

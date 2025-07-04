@@ -1,11 +1,27 @@
 @extends('layouts.app_sneat')
 
 @section('content')
+
     <div class="row justify-content-center">
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ $title }}</h5>
+                    @if($model->status == "Aktif")
+                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => 'Nonaktif']) }}" class="btn btn-danger btn-sm">Non-Aktifkan Siswa ini</a>
+                    @else
+                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => 'Aktif']) }}" class="btn btn-success btn-sm">Aktifkan Siswa ini</a>
+                    @endif
                     <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm">
                         <i class="fa fa-arrow-left"></i> Kembali
                     </a>
@@ -40,6 +56,16 @@
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-sm">
+                                        <tr>
+                                            <td width="40%"><strong>Status</strong></td>
+                                            <td>
+                                                @if($model->status == 'Aktif')
+                                                    <span class="badge bg-success">Aktif</span>
+                                                @else
+                                                    <span class="badge bg-danger">Nonaktif</span>
+                                                @endif
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <td width="40%"><strong>Nama Lengkap</strong></td>
                                             <td>{{ $model->nama }}</td>
@@ -337,6 +363,7 @@
                             </form>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>

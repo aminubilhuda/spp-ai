@@ -14,10 +14,12 @@ use App\Exports\SiswaExport;
 use App\Exports\SiswaImportTemplate;
 use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
+
  
 //refactor code
 class SiswaController extends Controller
 {
+
     private $viewIndex = 'siswa_index';
     private $viewCreate = 'siswa_form';
     private $viewEdit = 'siswa_form';
@@ -67,6 +69,12 @@ class SiswaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+    public function isValidStatus(string $name, ?string $reason = null): bool
+{
+    return in_array($name, ['Aktif', 'Nonaktif']);
+}
+
     public function store(StoreSiswaRequest $request)
     {
         // validasi data
@@ -84,7 +92,8 @@ class SiswaController extends Controller
         $requestData['user_id'] = auth()->id();
         
         // Buat siswa baru
-        Model::create($requestData);
+        $siswa = Model::create($requestData);
+        $siswa->setStatus('Aktif');
         
         return redirect()
             ->route($this->routePrefix . '.index')

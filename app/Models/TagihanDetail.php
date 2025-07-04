@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\ModelStatus\HasStatuses;
 
 class TagihanDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, HasStatuses;
     
     protected $table = 'tagihan_details';
     protected $fillable = [
@@ -18,6 +19,21 @@ class TagihanDetail extends Model
         'jumlah_biaya', 
         'status'
     ];
+
+    /**
+     * Validasi status yang diperbolehkan untuk tagihan detail
+     */
+    public function isValidStatus(string $name, ?string $reason = null): bool
+    {
+        $validStatuses = [
+            'unpaid',       // Belum dibayar
+            'partial',      // Dibayar sebagian
+            'paid',         // Lunas
+            'overdue'       // Jatuh tempo
+        ];
+
+        return in_array($name, $validStatuses);
+    }
 
     /**
      * Get the tagihan that owns this detail

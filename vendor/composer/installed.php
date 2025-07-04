@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '8c81bbc2f67fdf2964ee193245cb5ff08f99334e',
+        'reference' => '28768c884090ee6fe9caa0a29fb1b1baac6c53bd',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -532,7 +532,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '8c81bbc2f67fdf2964ee193245cb5ff08f99334e',
+            'reference' => '28768c884090ee6fe9caa0a29fb1b1baac6c53bd',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1183,6 +1183,15 @@
             'install_path' => __DIR__ . '/../sebastian/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'spatie/laravel-model-status' => array(
+            'pretty_version' => '1.18.1',
+            'version' => '1.18.1.0',
+            'reference' => '16533bb34ef31a100390567e7afb48e862fe2bc9',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/laravel-model-status',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'spatie/once' => array(
             'dev_requirement' => false,
