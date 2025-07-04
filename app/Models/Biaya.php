@@ -6,6 +6,7 @@ use App\Traits\HasFormatRupiah;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\TagihanDetail;
 
 class Biaya extends Model
 {
@@ -40,6 +41,11 @@ class Biaya extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function tagihan_details()
+    {
+        return $this->hasMany(TagihanDetail::class, 'biaya_id');
     }
 
     /**

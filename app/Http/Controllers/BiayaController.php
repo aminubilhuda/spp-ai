@@ -111,6 +111,16 @@ class BiayaController extends Controller
     public function destroy(string $id)
     {
         $model = Model::findOrFail($id);
+        if ($model->children->count() > 0) {
+            return redirect()
+            ->route($this->routePrefix . '.index')
+            ->with('error', 'Biaya tidak dapat dihapus karena memiliki biaya anak');
+        }
+        if ($model->tagihan_details()->count() > 0) {
+            return redirect()
+                ->route($this->routePrefix . '.index')
+                ->with('error', 'Biaya tidak dapat dihapus karena sudah digunakan di tagihan');
+        }
         $model->delete();
 
         return redirect()

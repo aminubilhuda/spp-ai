@@ -16,6 +16,11 @@ class Tagihan extends Model
     protected $guarded = [];
     protected $dates = ['tanggal_tagihan', 'tanggal_jatuh_tempo'];
 
+    public function getJumlahTagihanAttribute()
+    {
+        return $this->tagihan_details->sum('jumlah_biaya');
+    }
+
     public function siswa()
     {
         return $this->belongsTo(Siswa::class);

@@ -161,6 +161,11 @@ class SiswaController extends Controller
     {
         // delete siswa
         $model = Model::findOrFail($id);
+        if ($model->tagihan->count() > 0) {
+            return redirect()
+            ->route($this->routePrefix . '.index')
+            ->with('error', 'Siswa tidak dapat dihapus karena memiliki tagihan');
+        }
         $model->delete();
 
         return redirect()

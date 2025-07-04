@@ -14,6 +14,7 @@ class TagihanDetail extends Model
     protected $table = 'tagihan_details';
     protected $fillable = [
         'tagihan_id', 
+        'biaya_id',
         'pembayaran_id',  // Tambahkan pembayaran_id 
         'nama_biaya', 
         'jumlah_biaya', 
@@ -41,6 +42,11 @@ class TagihanDetail extends Model
     public function tagihan(): BelongsTo
     {
         return $this->belongsTo(Tagihan::class);
+    }
+
+    public function biaya()
+    {
+        return $this->belongsTo(Biaya::class);
     }
 
     /**

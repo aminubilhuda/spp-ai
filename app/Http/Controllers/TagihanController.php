@@ -100,7 +100,9 @@ class TagihanController extends Controller
             'jurusan' => Jurusan::pluck('nama', 'id')->all()
         ];
         return view('operator.' . $this->viewCreate, $data);
-    }    public function store(Request $request)
+    }    
+    
+    public function store(Request $request)
     {
         try {
             \DB::beginTransaction();
@@ -140,7 +142,8 @@ class TagihanController extends Controller
             $siswa = $siswaQuery->get();
             $count = 0;
             
-            foreach($siswa as $item) {                $tagihanData = [
+            foreach($siswa as $item) {                
+                $tagihanData = [
                     'user_id' => auth()->user()->id,
                     'denda' => 0,
                     'siswa_id' => $item->id,
@@ -168,6 +171,7 @@ class TagihanController extends Controller
                                 'nama_biaya' => $child->nama,
                                 'jumlah_biaya' => $child->jumlah,
                                 'tagihan_id' => $tagihan->id,
+                                'biaya_id' => $child->id,
                                 'status' => 'baru'
                             ]);
                             $count++;
@@ -182,10 +186,16 @@ class TagihanController extends Controller
                             'nama_biaya' => $biaya->nama,
                             'jumlah_biaya' => $biaya->jumlah,
                             'tagihan_id' => $tagihan->id,
+                            'biaya_id' => $biaya->id,
                             'status' => 'baru'
                         ]);
                         $count++;
                     }
+                }
+                
+                // Kirim notifikasi ke wali murid
+                if ($item->wali) {
+                    $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
                 }
             }
             
