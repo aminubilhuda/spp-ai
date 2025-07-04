@@ -15,12 +15,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            JurusanSeeder::class,
-            BiayaSeeder::class,
-            BankSeeder::class,
-            BankSekolahSeeder::class,
-            SiswaSeeder::class,
-            IndoBankSeeder::class,
+            // JurusanSeeder::class,
+            // BiayaSeeder::class,
+            // BankSeeder::class,
+            // BankSekolahSeeder::class,
+            // SiswaSeeder::class,
+            // IndoBankSeeder::class,
         ]);
     }
 }

@@ -32,6 +32,7 @@ return array(
     'App\\Http\\Controllers\\NotificationController' => $baseDir . '/app/Http/Controllers/NotificationController.php',
     'App\\Http\\Controllers\\PembayaranController' => $baseDir . '/app/Http/Controllers/PembayaranController.php',
     'App\\Http\\Controllers\\SiswaController' => $baseDir . '/app/Http/Controllers/SiswaController.php',
+    'App\\Http\\Controllers\\StatusController' => $baseDir . '/app/Http/Controllers/StatusController.php',
     'App\\Http\\Controllers\\TagihanController' => $baseDir . '/app/Http/Controllers/TagihanController.php',
     'App\\Http\\Controllers\\TagihanRekapController' => $baseDir . '/app/Http/Controllers/TagihanRekapController.php',
     'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',

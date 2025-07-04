@@ -91,6 +91,7 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
                     
                     // Create student record
                     $siswa = Siswa::create($siswaData);
+                    $siswa->setStatus('Aktif');
                     
                     // Track for debugging
                     $this->processed[] = [

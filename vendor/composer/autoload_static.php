@@ -684,6 +684,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\NotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/NotificationController.php',
         'App\\Http\\Controllers\\PembayaranController' => __DIR__ . '/../..' . '/app/Http/Controllers/PembayaranController.php',
         'App\\Http\\Controllers\\SiswaController' => __DIR__ . '/../..' . '/app/Http/Controllers/SiswaController.php',
+        'App\\Http\\Controllers\\StatusController' => __DIR__ . '/../..' . '/app/Http/Controllers/StatusController.php',
         'App\\Http\\Controllers\\TagihanController' => __DIR__ . '/../..' . '/app/Http/Controllers/TagihanController.php',
         'App\\Http\\Controllers\\TagihanRekapController' => __DIR__ . '/../..' . '/app/Http/Controllers/TagihanRekapController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
