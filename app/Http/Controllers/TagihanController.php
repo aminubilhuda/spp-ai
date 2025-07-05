@@ -110,12 +110,20 @@ class TagihanController extends Controller
             $requestData = $request->validate([
                 'biaya_id' => 'required|array',
                 'biaya_id.*' => 'exists:biayas,id',
-                'angkatan' => 'nullable',
+                'angkatan' => 'nullable|string',
                 'jurusan' => 'nullable|exists:jurusans,id',
                 'kelas' => 'nullable',
                 'tanggal_tagihan' => 'required|date',
                 'tanggal_jatuh_tempo' => 'required|date',
                 'keterangan' => 'nullable|string'
+            ], [
+                'biaya_id.required' => 'Pilih minimal satu biaya',
+                'biaya_id.array' => 'Format biaya tidak valid',
+                'biaya_id.*.exists' => 'Biaya yang dipilih tidak valid',
+                'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi',
+                'tanggal_tagihan.date' => 'Format tanggal tagihan tidak valid',
+                'tanggal_jatuh_tempo.required' => 'Tanggal jatuh tempo wajib diisi',
+                'tanggal_jatuh_tempo.date' => 'Format tanggal jatuh tempo tidak valid',
             ]);
 
             // Data biaya
@@ -140,6 +148,12 @@ class TagihanController extends Controller
             }
             
             $siswa = $siswaQuery->get();
+
+            // Validasi jika tidak ada siswa yang ditemukan
+            if ($siswa->isEmpty()) {
+                throw new \Exception('Tidak ada siswa yang sesuai dengan kriteria yang dipilih');
+            }
+            
             $count = 0;
             
             foreach($siswa as $item) {                
@@ -147,7 +161,7 @@ class TagihanController extends Controller
                     'user_id' => auth()->user()->id,
                     'denda' => 0,
                     'siswa_id' => $item->id,
-                    'angkatan' => $requestData['angkatan'],
+                    'angkatan' => $requestData['angkatan'] ?? $item->angkatan,
                     'jurusan' => !empty($requestData['jurusan']) ? $requestData['jurusan'] : $item->jurusan_id,
                     'kelas' => !empty($requestData['kelas']) ? $requestData['kelas'] : $item->kelas,
                     'tanggal_tagihan' => $requestData['tanggal_tagihan'],
@@ -200,11 +214,32 @@ class TagihanController extends Controller
             }
             
             \DB::commit();
+
+            // Response untuk AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Berhasil membuat ' . $count . ' tagihan',
+                    'redirect' => route($this->routePrefix . '.index')
+                ]);
+            }
+
+            // Response untuk non-AJAX request
             return redirect()->route($this->routePrefix . '.index')
                 ->with('success', 'Data berhasil ditambah untuk ' . $count . ' tagihan');
                 
         } catch (\Exception $e) {
             \DB::rollBack();
+            
+            // Response untuk AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menambah tagihan: ' . $e->getMessage()
+                ], 422);
+            }
+
+            // Response untuk non-AJAX request
             return redirect()->route($this->routePrefix . '.index')
                 ->with('error', 'Gagal menambah tagihan: ' . $e->getMessage());
         }
@@ -255,6 +290,17 @@ class TagihanController extends Controller
                 'tanggal_jatuh_tempo' => 'required|date',
                 'keterangan' => 'nullable|string',
                 'denda' => 'required|numeric'
+            ], [
+                'biaya_id.required' => 'Biaya wajib dipilih',
+                'biaya_id.exists' => 'Biaya yang dipilih tidak valid',
+                'siswa_id.required' => 'Siswa wajib dipilih',
+                'siswa_id.exists' => 'Siswa yang dipilih tidak valid',
+                'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi',
+                'tanggal_tagihan.date' => 'Format tanggal tagihan tidak valid',
+                'tanggal_jatuh_tempo.required' => 'Tanggal jatuh tempo wajib diisi',
+                'tanggal_jatuh_tempo.date' => 'Format tanggal jatuh tempo tidak valid',
+                'denda.required' => 'Denda wajib diisi',
+                'denda.numeric' => 'Denda harus berupa angka'
             ]);
 
             $biaya = Biaya::findOrFail($requestData['biaya_id']);
@@ -285,11 +331,31 @@ class TagihanController extends Controller
 
             \DB::commit();
             
+            // Response untuk AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data berhasil diupdate',
+                    'redirect' => route($this->routePrefix . '.index')
+                ]);
+            }
+
+            // Response untuk non-AJAX request
             return redirect()->route($this->routePrefix . '.index')
                 ->with('success', 'Data berhasil diupdate');
                 
         } catch (\Exception $e) {
             \DB::rollBack();
+
+            // Response untuk AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupdate tagihan: ' . $e->getMessage()
+                ], 422);
+            }
+
+            // Response untuk non-AJAX request
             return redirect()->route($this->routePrefix . '.index')
                 ->with('error', 'Gagal mengupdate tagihan: ' . $e->getMessage());
         }
@@ -423,7 +489,9 @@ class TagihanController extends Controller
             \DB::rollBack();
             return back()->with('error', 'Gagal menghapus item tagihan: ' . $e->getMessage());
         }
-    }    public function updateDetail(Request $request, $id)
+    }   
+
+    public function updateDetail(Request $request, $id)
     {
         try {
             \DB::beginTransaction();

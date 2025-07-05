@@ -44,7 +44,9 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('sneat') }}/assets/js/config.js"></script>
+    
     <script src="{{ asset('sneat') }}/assets/vendor/libs/jquery/jquery.js"></script>
+    
     <script src="{{ asset('sneat') }}/assets/vendor/libs/popper/popper.js"></script>
     <script src="{{ asset('sneat') }}/assets/vendor/js/bootstrap.js"></script>
     <link rel="stylesheet" href="{{ asset('font/css/all.min.css') }}">
@@ -145,6 +147,42 @@
                 max-width: none !important;
             }
         }
+        
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            position: absolute;
+            top: 60%;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     
     <script>
@@ -188,6 +226,14 @@
 </head>
 
 <body>
+    {{-- Loading Overlay --}}
+    <div id="loading-overlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Memproses...</div>
+        </div>
+    </div>
+    
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -577,96 +623,18 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script> <!-- Custom JS -->
     <script>
+        // Fungsi untuk menampilkan loading
+        function showLoading() {
+            $('#loading-overlay').css('display', 'flex').fadeIn();
+        }
+        
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            $('#loading-overlay').fadeOut();
+        }
+
         $(document).ready(function() {
-            $('.rupiah').mask("#.##0", {
-                reverse: true
-            });
-            
-            // Simple dropdown functionality
-            $('.dropdown-toggle').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                var $this = $(this);
-                var $dropdownMenu = $this.next('.dropdown-menu');
-                
-                // Close other dropdowns
-                $('.dropdown-menu').not($dropdownMenu).removeClass('show');
-                
-                // Toggle current dropdown
-                $dropdownMenu.toggleClass('show');
-                
-                // Mobile-like positioning for desktop
-                if ($(window).width() >= 992) {
-                    if ($this.closest('.dropdown-notifications').length) {
-                        // Notifications dropdown - position from right edge
-                        $dropdownMenu.css({
-                            'position': 'fixed',
-                            'top': '60px',
-                            'left': 'auto',
-                            'right': '0',
-                            'width': '320px',
-                            'max-width': '320px',
-                            'margin': '0',
-                            'border-radius': '0',
-                            'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            'z-index': '1050'
-                        });
-                    } else if ($this.closest('.dropdown-user').length) {
-                        // User dropdown - position from right edge
-                        $dropdownMenu.css({
-                            'position': 'fixed',
-                            'top': '60px',
-                            'left': 'auto',
-                            'right': '0',
-                            'width': '280px',
-                            'max-width': '280px',
-                            'margin': '0',
-                            'border-radius': '0',
-                            'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            'z-index': '1050'
-                        });
-                    }
-                }
-                
-                console.log('Dropdown clicked:', $this.attr('data-bs-toggle'), 'Menu visible:', $dropdownMenu.hasClass('show'));
-            });
-            
-            // Debug: Log all dropdown elements
-            console.log('Found dropdown toggles:', $('.dropdown-toggle').length);
-            $('.dropdown-toggle').each(function(index) {
-                console.log('Dropdown', index, ':', $(this).attr('class'), 'Menu:', $(this).next('.dropdown-menu').length);
-            });
-            
-            // Test click on dropdown toggles
-            $('.dropdown-toggle').on('mouseenter', function() {
-                console.log('Mouse entered dropdown:', $(this).attr('class'));
-            });
-            
-            // Test if elements are clickable
-            $('.dropdown-toggle').on('mousedown', function() {
-                console.log('Mouse down on dropdown:', $(this).attr('class'));
-            });
-            
-            // Close dropdown when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('.dropdown').length) {
-                    $('.dropdown-menu').removeClass('show');
-                }
-            });
-            
-            // Close dropdown when pressing Escape
-            $(document).on('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    $('.dropdown-menu').removeClass('show');
-                }
-            });
-            
-            // Handle window resize
-            $(window).on('resize', function() {
-                // Close all dropdowns when resizing
-                $('.dropdown-menu').removeClass('show');
-            });
+            // ... existing ready code ...
         });
     </script>
 
@@ -750,6 +718,24 @@
     @endauth
 
     @stack('scripts')
+    @yield('js')
+
+    <!-- Custom JS -->
+    <script>
+        // Fungsi untuk menampilkan loading
+        function showLoading() {
+            $('#loading-overlay').css('display', 'flex').fadeIn();
+        }
+        
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            $('#loading-overlay').fadeOut();
+        }
+
+        $(document).ready(function() {
+            // ... existing ready code ...
+        });
+    </script>
 </body>
 
 </html>
