@@ -26,7 +26,6 @@ class WaliMuridPembayaranController extends Controller
             ->whereHas('tagihan', function($q) use ($siswaIds) {
                 $q->whereIn('siswa_id', $siswaIds);
             })
-            ->where('metode_pembayaran', 'Bank Transfer') // Wali hanya bisa melihat Bank Transfer
             ->orderBy('created_at', 'desc');
 
         // Filter berdasarkan status konfirmasi
@@ -83,7 +82,15 @@ class WaliMuridPembayaranController extends Controller
         DB::beginTransaction();
         try {
             // Get tagihan and validate
-            $tagihan = Tagihan::findOrFail($request->tagihan_id);
+            $tagihan = Tagihan::with('siswa')->findOrFail($request->tagihan_id);
+            
+            // Validasi bahwa tagihan memiliki data siswa
+            if (!$tagihan->siswa) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data siswa tidak ditemukan untuk tagihan ini'
+                ], 404);
+            }
             
             // Validasi bahwa wali yang login memiliki akses ke siswa ini
             $siswaIds = Auth::user()->siswa->pluck('id');
@@ -166,7 +173,7 @@ class WaliMuridPembayaranController extends Controller
                 $pembayaran = Pembayaran::create([
                     'tagihan_id'        => $request->tagihan_id,
                     'tagihan_detail_id' => $detail->id,
-                    'wali_id'           => $tagihan->siswa->wali_id,
+                    'wali_id'           => auth()->id(),
                     'tanggal_bayar'     => $request->tanggal_bayar,
                     'jumlah_dibayar'    => $jumlahUntukItem,
                     'metode_pembayaran' => 'Bank Transfer',

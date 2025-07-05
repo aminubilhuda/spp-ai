@@ -30,6 +30,13 @@ class Pembayaran extends Model
     protected $dates = ['tanggal_bayar'];
 
     /**
+     * The relationships that should be eager loaded.
+     *
+     * @var array
+     */
+    protected $with = ['tagihan.siswa'];
+
+    /**
      * Validasi status yang diperbolehkan untuk pembayaran
      */
     public function isValidStatus(string $name, ?string $reason = null): bool

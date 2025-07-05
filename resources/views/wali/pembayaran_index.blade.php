@@ -49,7 +49,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="alert-heading mb-1">Informasi Penting</h6>
-                            <p class="mb-0">Pembayaran yang dilakukan wali murid akan berstatus "Belum Dikonfirmasi" dan akan dikonfirmasi oleh operator/admin setelah verifikasi bukti pembayaran.</p>
+                            <p class="mb-0">Halaman ini menampilkan semua riwayat pembayaran, baik yang dibayar melalui Bank Transfer maupun yang dibayarkan langsung ke operator. Untuk pembayaran via Bank Transfer, status akan "Belum Dikonfirmasi" sampai operator memverifikasi bukti pembayaran.</p>
                         </div>
                     </div>
                 </div>
@@ -235,9 +235,15 @@
                                                     <span class="fw-bold text-success">{{ formatRupiah($item->jumlah_dibayar) }}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-info">
-                                                        <i class="fas fa-university me-1"></i>Bank Transfer
-                                                    </span>
+                                                    @if($item->metode_pembayaran == 'Bank Transfer')
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-university me-1"></i>Bank Transfer
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-cash-register me-1"></i>Bayar di Operator
+                                                        </span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-center">
                                                     @if ($item->status_konfirmasi == 'Sudah Dikonfirmasi')
@@ -335,9 +341,15 @@
                                             </div>
                                             
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="badge bg-info">
-                                                    <i class="fas fa-university me-1"></i>Bank Transfer
-                                                </span>
+                                                @if($item->metode_pembayaran == 'Bank Transfer')
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-university me-1"></i>Bank Transfer
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-cash-register me-1"></i>Bayar di Operator
+                                                    </span>
+                                                @endif
                                                 <div class="btn-group" role="group">
                                                     @if ($item->bukti_bayar)
                                                         <a href="{{ Storage::url($item->bukti_bayar) }}" target="_blank"

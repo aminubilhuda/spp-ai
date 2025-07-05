@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat')
+@extends('layouts.app_sneat', ['title' => 'Import Data Siswa'])
 
 @section('content')
     <div class="row justify-content-center">

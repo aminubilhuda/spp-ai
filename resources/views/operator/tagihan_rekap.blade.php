@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat_blank')
+@extends('layouts.app_sneat_blank', ['title' => 'Rekap Tagihan Siswa'])
 @section('title', 'Rekap Tagihan Siswa')
 @section('content')
     <style>

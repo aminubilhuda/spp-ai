@@ -55,8 +55,14 @@ function canCancelPayment($pembayaran, $userId) {
         return $response;
     }
     
+    // Check if tagihan and siswa exist
+    if (!$pembayaran->tagihan || !$pembayaran->tagihan->siswa) {
+        $response['reason'] = 'Data tagihan atau siswa tidak ditemukan';
+        return $response;
+    }
+    
     // Check if user is authorized (pembayaran belongs to user's student)
-    if ($pembayaran->siswa->wali_id != $userId) {
+    if ($pembayaran->tagihan->siswa->wali_id != $userId) {
         $response['reason'] = 'Anda tidak memiliki akses untuk membatalkan pembayaran ini';
         return $response;
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -28,7 +29,8 @@ class SettingController extends Controller
             'nama_instansi' => 'required|string|max:255',
             'email_instansi' => 'required|email|max:255',
             'nomor_wa_instansi' => 'required|string|max:20',
-            'alamat_instansi' => 'required|string|max:500'
+            'alamat_instansi' => 'required|string|max:500',
+            'logo_instansi' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ], [
             'nama_instansi.required' => 'Nama instansi harus diisi',
             'nama_instansi.max' => 'Nama instansi maksimal 255 karakter',
@@ -47,6 +49,22 @@ class SettingController extends Controller
             'nomor_wa_instansi' => $request->nomor_wa_instansi,
             'alamat_instansi' => $request->alamat_instansi
         ];
+
+        // Proses upload logo jika ada
+        if ($request->hasFile('logo_instansi')) {
+            $file = $request->file('logo_instansi');
+            $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Hapus logo lama jika ada
+            $oldSettings = Setting::getInstansiSettings();
+            if ($oldSettings->logo_instansi) {
+                Storage::disk('public')->delete($oldSettings->logo_instansi);
+            }
+            
+            // Upload logo baru
+            $file->storeAs('', $filename, 'public');
+            $settings['logo_instansi'] = $filename;
+        }
 
         // Simpan ke database
         Setting::saveInstansiSettings($settings);

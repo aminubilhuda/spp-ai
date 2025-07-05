@@ -12,7 +12,8 @@ class Setting extends Model
         'nama_instansi',
         'email_instansi', 
         'nomor_wa_instansi',
-        'alamat_instansi'
+        'alamat_instansi',
+        'logo_instansi'
     ];
 
     /**

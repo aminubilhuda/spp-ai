@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat')
+@extends('layouts.app_sneat', ['title' => 'Bank Sekolah'])
 
 @section('content')
     <div class="row justify-content-center">

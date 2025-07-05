@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat')
+@extends('layouts.app_sneat', ['title' => 'Siswa'])
 
 @section('styles')
     <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" />

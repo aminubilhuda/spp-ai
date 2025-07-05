@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email_instansi')->nullable();
             $table->string('nomor_wa_instansi')->nullable();
             $table->text('alamat_instansi')->nullable();
+            $table->string('logo_instansi')->nullable();
             $table->timestamps();
         });
     }

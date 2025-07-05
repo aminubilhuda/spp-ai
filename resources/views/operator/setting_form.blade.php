@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat')
+@extends('layouts.app_sneat', ['title' => 'Pengaturan Instansi'])
 
 @section('content')
     <div class="row justify-content-center">
@@ -14,7 +14,7 @@
                 <h5 class="card-header">Pengaturan Instansi</h5>
 
                 <div class="card-body">
-                    <form action="{{ route('setting.store') }}" method="post">
+                    <form action="{{ route('setting.store') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         
                         <div class="mb-3 form-group">
@@ -45,6 +45,17 @@
                             <textarea class="form-control" id="alamat_instansi" name="alamat_instansi" 
                                 rows="4" placeholder="Masukkan alamat lengkap instansi">{{ old('alamat_instansi', $settings->alamat_instansi ?? '') }}</textarea>
                             <span class="text-danger">{{ $errors->first('alamat_instansi') }}</span>
+                        </div>
+                        
+                        <div class="mb-3 form-group">
+                            <label for="logo_instansi" class="form-label">Logo Instansi</label>
+                            <input type="file" class="form-control" id="logo_instansi" name="logo_instansi" accept="image/*">
+                            @if (!empty($settings->logo_instansi))
+                                <div class="mt-2">
+                                    <img src="{{ Storage::disk('public')->url($settings->logo_instansi) }}" alt="Logo Instansi" style="max-height: 80px;">
+                                </div>
+                            @endif
+                            <span class="text-danger">{{ $errors->first('logo_instansi') }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-end">

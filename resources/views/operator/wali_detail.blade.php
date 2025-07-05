@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat')
+@extends('layouts.app_sneat', ['title' => 'Detail Wali Murid'])
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
