@@ -64,6 +64,14 @@
             </a>
         </li>
 
+        <!-- Setting -->
+        <li class="menu-item {{ request()->is('operator/setting*') ? 'active' : '' }}">
+            <a href="{{ route('setting.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div data-i18n="Analytics">Pengaturan</div>
+            </a>
+        </li>
+
         <!-- Data Master -->
         <li class="menu-item {{ request()->is('operator/user*') || request()->is('operator/wali*') || request()->is('operator/siswa*') || request()->is('operator/jurusan*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

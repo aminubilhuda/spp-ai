@@ -14,6 +14,7 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "^3.1",
+        "qcod/laravel-app-settings": "^1.7",
         "spatie/laravel-model-status": "^1.18"
     },
     "require-dev": {

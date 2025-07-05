@@ -23,6 +23,7 @@ use App\Http\Controllers\KwitansiPembayaranController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\SettingController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -120,6 +121,12 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     //Status
     Route::controller(StatusController::class)->group(function () {
         Route::get('status/update/{id}', [StatusController::class, 'update'])->name('status.update');
+    });
+
+    //Setting
+    Route::controller(SettingController::class)->group(function () {
+        Route::get('setting', 'index')->name('setting.index');
+        Route::post('setting', 'store')->name('setting.store');
     });
 
     // WhatsApp Settings

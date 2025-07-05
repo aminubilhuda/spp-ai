@@ -19,6 +19,22 @@ function formatTanggalWaktuIndonesia($tanggal, $format = 'd F Y, H:i') {
 }
 
 /**
+ * Mendapatkan pengaturan instansi
+ * 
+ * @param string|null $key
+ * @return mixed
+ */
+function getInstansiSetting($key = null) {
+    $setting = \App\Models\Setting::getInstansiSettings();
+    
+    if ($key) {
+        return $setting->$key ?? '';
+    }
+    
+    return $setting;
+}
+
+/**
  * Check if payment can be cancelled
  * 
  * @param \App\Models\Pembayaran $pembayaran

@@ -11,25 +11,21 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
+        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
-        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
-        '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
+        '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
         '09f6b20656683369174dd6fa83b7e5fb' => __DIR__ . '/..' . '/symfony/polyfill-uuid/bootstrap.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '47e1160838b5e5a10346ac4084b58c23' => __DIR__ . '/..' . '/laravel/prompts/src/helpers.php',
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
-        '4a1f389d6ce373bda9e57857d3b61c84' => __DIR__ . '/..' . '/barryvdh/laravel-debugbar/src/helpers.php',
         '476ca15b8d69b04665cd879be9cb4c68' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/functions.php',
         '265b4faa2b3a9766332744949e83bf97' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/helpers.php',
         'c7a3c339e7e14b60e06a2d7fcce9476b' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Events/functions.php',
@@ -38,11 +34,17 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         '7f7ac2ddea9cc3fb4b2cc201d63dbc10' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Log/functions.php',
         '493c6aea52f6009bab023b26c21a386a' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/functions.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
+        '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
+        '98d15107539f263950011af925f9c349' => __DIR__ . '/..' . '/qcod/laravel-settings/src/helpers.php',
+        '4a1f389d6ce373bda9e57857d3b61c84' => __DIR__ . '/..' . '/barryvdh/laravel-debugbar/src/helpers.php',
         '062a54fe8f6f91078b197f2922521dd9' => __DIR__ . '/..' . '/laravel/pint/overrides/Runner/Parallel/ProcessFactory.php',
         'c72349b1fe8d0deeedd3a52e8aa814d8' => __DIR__ . '/..' . '/mockery/mockery/library/helpers.php',
         'ce9671a430e4846b44e1c68c7611f9f5' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery.php',
         'a1cfe24d14977df6878b9bf804af2d1c' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Phpunit/Autoload.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        'b8f016a5e1054c944175a1c164ac147a' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/helpers.php',
         '381c1f7485be5ec909ca0fe1ede4b928' => __DIR__ . '/../..' . '/app/Helpers/Helpers.php',
     );
 
@@ -103,6 +105,11 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         array (
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
+        ),
+        'Q' => 
+        array (
+            'QCod\\Settings\\' => 14,
+            'QCod\\AppSettings\\' => 17,
         ),
         'P' => 
         array (
@@ -366,6 +373,14 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Ramsey\\Collection\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
+        ),
+        'QCod\\Settings\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/qcod/laravel-settings/src',
+        ),
+        'QCod\\AppSettings\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/qcod/laravel-app-settings/src',
         ),
         'Psy\\' => 
         array (
@@ -659,6 +674,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     );
 
     public static $classMap = array (
+        'AddGroupColumnOnSettingsTable' => __DIR__ . '/..' . '/qcod/laravel-settings/src/migrations/2014_10_00_000001_add_group_column_on_settings_table.php',
         'App\\Console\\Commands\\BackupDatabaseCommand' => __DIR__ . '/../..' . '/app/Console/Commands/BackupDatabaseCommand.php',
         'App\\Console\\Commands\\RestoreDatabaseCommand' => __DIR__ . '/../..' . '/app/Console/Commands/RestoreDatabaseCommand.php',
         'App\\Console\\Commands\\SendReminderPembayaran' => __DIR__ . '/../..' . '/app/Console/Commands/SendReminderPembayaran.php',
@@ -684,6 +700,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\KwitansiPembayaranController' => __DIR__ . '/../..' . '/app/Http/Controllers/KwitansiPembayaranController.php',
         'App\\Http\\Controllers\\NotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/NotificationController.php',
         'App\\Http\\Controllers\\PembayaranController' => __DIR__ . '/../..' . '/app/Http/Controllers/PembayaranController.php',
+        'App\\Http\\Controllers\\SettingController' => __DIR__ . '/../..' . '/app/Http/Controllers/SettingController.php',
         'App\\Http\\Controllers\\SiswaController' => __DIR__ . '/../..' . '/app/Http/Controllers/SiswaController.php',
         'App\\Http\\Controllers\\StatusController' => __DIR__ . '/../..' . '/app/Http/Controllers/StatusController.php',
         'App\\Http\\Controllers\\TagihanController' => __DIR__ . '/../..' . '/app/Http/Controllers/TagihanController.php',
@@ -719,6 +736,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\Wali' => __DIR__ . '/../..' . '/app/Models/Wali.php',
         'App\\Notifications\\PembayaranNotification' => __DIR__ . '/../..' . '/app/Notifications/PembayaranNotification.php',
+        'App\\Notifications\\TagihanNotification' => __DIR__ . '/../..' . '/app/Notifications/TagihanNotification.php',
         'App\\Observers\\PembayaranObserver' => __DIR__ . '/../..' . '/app/Observers/PembayaranObserver.php',
         'App\\Policies\\BankSekolahPolicy' => __DIR__ . '/../..' . '/app/Policies/BankSekolahPolicy.php',
         'App\\Policies\\BiayaPolicy' => __DIR__ . '/../..' . '/app/Policies/BiayaPolicy.php',
@@ -928,6 +946,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Composer\\Semver\\Intervals' => __DIR__ . '/..' . '/composer/semver/src/Intervals.php',
         'Composer\\Semver\\Semver' => __DIR__ . '/..' . '/composer/semver/src/Semver.php',
         'Composer\\Semver\\VersionParser' => __DIR__ . '/..' . '/composer/semver/src/VersionParser.php',
+        'CreateSettingsTable' => __DIR__ . '/..' . '/qcod/laravel-settings/src/migrations/2014_10_00_000000_create_settings_table.php',
         'Cron\\AbstractField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/AbstractField.php',
         'Cron\\CronExpression' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/CronExpression.php',
         'Cron\\DayOfMonthField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/DayOfMonthField.php',
@@ -6726,6 +6745,16 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Psy\\VersionUpdater\\IntervalChecker' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/IntervalChecker.php',
         'Psy\\VersionUpdater\\NoopChecker' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/NoopChecker.php',
         'Psy\\VersionUpdater\\SelfUpdate' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/SelfUpdate.php',
+        'QCod\\AppSettings\\AppSettingsServiceProvider' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/AppSettingsServiceProvider.php',
+        'QCod\\AppSettings\\Controllers\\AppSettingController' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/Controllers/AppSettingController.php',
+        'QCod\\AppSettings\\Facade' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/Facade.php',
+        'QCod\\AppSettings\\SavesSettings' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/SavesSettings.php',
+        'QCod\\AppSettings\\Setting\\AppSettings' => __DIR__ . '/..' . '/qcod/laravel-app-settings/src/Setting/AppSettings.php',
+        'QCod\\Settings\\Facade' => __DIR__ . '/..' . '/qcod/laravel-settings/src/Facade.php',
+        'QCod\\Settings\\Setting\\Setting' => __DIR__ . '/..' . '/qcod/laravel-settings/src/Setting/Setting.php',
+        'QCod\\Settings\\Setting\\SettingEloquentStorage' => __DIR__ . '/..' . '/qcod/laravel-settings/src/Setting/SettingEloquentStorage.php',
+        'QCod\\Settings\\Setting\\SettingStorage' => __DIR__ . '/..' . '/qcod/laravel-settings/src/Setting/SettingStorage.php',
+        'QCod\\Settings\\SettingsServiceProvider' => __DIR__ . '/..' . '/qcod/laravel-settings/src/SettingsServiceProvider.php',
         'Ramsey\\Collection\\AbstractArray' => __DIR__ . '/..' . '/ramsey/collection/src/AbstractArray.php',
         'Ramsey\\Collection\\AbstractCollection' => __DIR__ . '/..' . '/ramsey/collection/src/AbstractCollection.php',
         'Ramsey\\Collection\\AbstractSet' => __DIR__ . '/..' . '/ramsey/collection/src/AbstractSet.php',

@@ -136,9 +136,10 @@
             <!-- Header Section -->
             <div class="header-section">
                 <div class="school-info">
-                    <div><strong>SMK ANTARA NUSA</strong></div>
-                    <div>Jl. Raya Bojong Soang No.12</div>
-                    <div>Telp. (022) 123456</div>
+                    <div><strong>{{ getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI' }}</strong></div>
+                    <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
+                    <div>Telp. {{ getInstansiSetting('nomor_wa_instansi') ?: 'NOMOR TELEPON' }}</div>
+                    <div>Email: {{ getInstansiSetting('email_instansi') ?: 'EMAIL INSTANSI' }}</div>
                 </div>
                 <h1 class="title">KWITANSI PEMBAYARAN</h1>
             </div>
