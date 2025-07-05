@@ -60,19 +60,19 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
                     continue;
                 }
                 
-                // Check if student already exists
-                if ($this->isStudentExists($data['nisn'])) {
-                    $this->errors[] = "Siswa dengan NISN: " . $data['nisn'] . " sudah ada dalam sistem.";
+                // Try to update existing student first
+                if ($this->handleExistingStudent($data, $data['nisn'])) {
                     continue;
                 }
                 
-                // Find jurusan
-                $jurusan = $this->findOrCreateJurusan($data['jurusan']);
-                
-                // Handle wali if provided
-                $waliData = $this->handleWali($data);
-                
+                // If student doesn't exist, create new one
                 try {
+                    // Find jurusan
+                    $jurusan = $this->findOrCreateJurusan($data['jurusan']);
+                    
+                    // Handle wali if provided
+                    $waliData = $this->handleWali($data);
+                    
                     // Final data for creating student
                     $siswaData = [
                         'nama' => $data['nama'],
@@ -97,7 +97,8 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
                     $this->processed[] = [
                         'id' => $siswa->id,
                         'nama' => $siswa->nama,
-                        'nisn' => $siswa->nisn
+                        'nisn' => $siswa->nisn,
+                        'status' => 'created'
                     ];
                     
                     $this->successCount++;
@@ -218,11 +219,54 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation
     }
     
     /**
-     * Check if student exists
+     * Check if student exists and update if found
      */
-    private function isStudentExists($nisn)
+    private function handleExistingStudent($data, $nisn)
     {
-        return Siswa::where('nisn', $nisn)->exists();
+        $existingStudent = Siswa::where('nisn', $nisn)->first();
+        
+        if ($existingStudent) {
+            try {
+                // Find jurusan
+                $jurusan = $this->findOrCreateJurusan($data['jurusan']);
+                
+                // Handle wali if provided
+                $waliData = $this->handleWali($data);
+                
+                // Update data siswa
+                $existingStudent->update([
+                    'nama' => $data['nama'],
+                    'nis' => $data['nis'],
+                    'jenis_kelamin' => $this->normalizeJenisKelamin($data['jenis_kelamin']),
+                    'kelas' => $data['kelas'],
+                    'angkatan' => $data['angkatan'],
+                    'jurusan_id' => $jurusan ? $jurusan->id : $existingStudent->jurusan_id,
+                    'wali_id' => $waliData['wali_id'] ?? $existingStudent->wali_id,
+                    'wali_status' => $waliData['wali_status'] ?? $existingStudent->wali_status,
+                    'user_id' => auth()->id(),
+                ]);
+
+                // Track for debugging
+                $this->processed[] = [
+                    'id' => $existingStudent->id,
+                    'nama' => $existingStudent->nama,
+                    'nisn' => $existingStudent->nisn,
+                    'status' => 'updated'
+                ];
+                
+                $this->successCount++;
+                Log::info("Success update student #" . $this->successCount . ": " . $existingStudent->nama);
+                
+                return true;
+            } catch (\Exception $e) {
+                $this->errors[] = "Error memperbarui siswa " . $data['nama'] . ": " . $e->getMessage();
+                Log::error("Error updating student: " . $e->getMessage());
+                Log::error($e->getTraceAsString());
+                return false;
+            }
+        }
+        
+        return false;
     }
     
     /**
