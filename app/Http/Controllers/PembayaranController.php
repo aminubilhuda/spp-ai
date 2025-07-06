@@ -30,7 +30,8 @@ class PembayaranController extends Controller
         
         // Atur aturan validasi dasar
         $validationRules = [
-            'tagihan_id' => 'required|exists:tagihans,id',
+            'detail_ids' => 'required|array|min:1',
+            'detail_ids.*' => 'exists:tagihan_details,id',
             'jumlah_dibayar' => 'required|numeric|min:0',
             'metode_pembayaran' => 'required|in:Bank Transfer,Cash',
             'tanggal_bayar' => 'required|date',
@@ -39,8 +40,6 @@ class PembayaranController extends Controller
 
         // Jika wali, hanya boleh Bank Transfer dan bukti wajib
         if ($isWali) {
-            $validationRules['detail_ids'] = 'required|array|min:1';
-            $validationRules['detail_ids.*'] = 'exists:tagihan_details,id';
             $validationRules['metode_pembayaran'] = 'required|in:Bank Transfer';
             $validationRules['bukti_bayar'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:2048';
             $validationRules['status_konfirmasi'] = 'required|in:Belum Dikonfirmasi';
@@ -54,14 +53,6 @@ class PembayaranController extends Controller
             $validationRules['status_konfirmasi'] = 'required|in:Belum Dikonfirmasi,Sudah Dikonfirmasi';
             $validationRules['no_rekening_pengirim'] = 'required_if:metode_pembayaran,Bank Transfer|string|max:50|nullable';
             $validationRules['bank_pengirim'] = 'required_if:metode_pembayaran,Bank Transfer|string|max:50|nullable';
-            
-            // Operator bisa menggunakan detail_ids atau detail_id
-            if ($request->has('detail_ids')) {
-                $validationRules['detail_ids'] = 'required|array|min:1';
-                $validationRules['detail_ids.*'] = 'exists:tagihan_details,id';
-            } else {
-                $validationRules['detail_id'] = 'required|exists:tagihan_details,id';
-            }
         }
 
         $request->validate($validationRules);
@@ -69,22 +60,17 @@ class PembayaranController extends Controller
         // Mulai transaksi database untuk memastikan konsistensi data
         DB::beginTransaction();
         try {
-            // Ambil data tagihan dan validasi
-            $tagihan = Tagihan::findOrFail($request->tagihan_id);
+            // Ambil semua detail tagihan yang dipilih
+            $tagihanDetails = TagihanDetail::whereIn('id', $request->detail_ids)->get();
             
-            // Validasi bahwa semua detail_ids milik tagihan yang sama
-            $detailIds = $request->detail_ids ?? [$request->detail_id];
-            $tagihanDetails = TagihanDetail::whereIn('id', $detailIds)
-                ->where('tagihan_id', $tagihan->id)
-                ->get();
-                
-            if ($tagihanDetails->count() !== count($detailIds)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Beberapa item tagihan tidak valid'
-                ], 400);
+            // Validasi bahwa semua detail tagihan ditemukan
+            if ($tagihanDetails->count() !== count($request->detail_ids)) {
+                throw new \Exception('Beberapa item tagihan tidak valid');
             }
 
+            // Kelompokkan detail berdasarkan tagihan_id
+            $detailsByTagihan = $tagihanDetails->groupBy('tagihan_id');
+            
             // Hitung total sisa tagihan untuk item yang dipilih
             $totalRemaining = 0;
             foreach ($tagihanDetails as $detail) {
@@ -110,60 +96,63 @@ class PembayaranController extends Controller
                 $buktiPath = $file->store('bukti_pembayaran', 'public');
             }
 
-            // Buat record pembayaran untuk setiap item yang dipilih
+            // Buat record pembayaran untuk setiap tagihan
             $pembayaranIds = [];
-            $totalSisaTagihan = 0;
             
-            // Hitung total sisa tagihan dari semua item yang dipilih
-            foreach ($tagihanDetails as $detail) {
-                $totalDibayarDetail = $detail->pembayaran()
-                    ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
-                    ->sum('jumlah_dibayar');
-                $sisaBayar = $detail->jumlah_biaya - $totalDibayarDetail;
-                $sisaBayar = max(0, $sisaBayar);
-                $totalSisaTagihan += $sisaBayar;
-            }
-
-            // Jika pembayaran parsial, hitung proporsi untuk setiap item
-            $jumlahDibayar = $request->jumlah_dibayar;
-            $isPembayaranParsial = $jumlahDibayar < $totalSisaTagihan;
-            
-            foreach ($tagihanDetails as $detail) {
-                $totalDibayarDetail = $detail->pembayaran()
-                    ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
-                    ->sum('jumlah_dibayar');
-                $sisaBayar = $detail->jumlah_biaya - $totalDibayarDetail;
-                $sisaBayar = max(0, $sisaBayar);
+            foreach ($detailsByTagihan as $tagihanId => $details) {
+                $tagihan = Tagihan::findOrFail($tagihanId);
                 
-                // Hitung jumlah pembayaran untuk item ini
-                if ($isPembayaranParsial && $totalSisaTagihan > 0) {
-                    // Pembayaran parsial: bagi secara proporsional berdasarkan sisa tagihan
-                    $proporsi = $sisaBayar / $totalSisaTagihan;
-                    $jumlahUntukItem = $jumlahDibayar * $proporsi;
-                } else {
-                    // Pembayaran penuh atau sesuai sisa tagihan
-                    $jumlahUntukItem = $sisaBayar;
+                // Hitung total sisa tagihan untuk tagihan ini
+                $totalSisaTagihan = 0;
+                foreach ($details as $detail) {
+                    $totalDibayarDetail = $detail->pembayaran()
+                        ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                        ->sum('jumlah_dibayar');
+                    $sisaBayar = $detail->jumlah_biaya - $totalDibayarDetail;
+                    $sisaBayar = max(0, $sisaBayar);
+                    $totalSisaTagihan += $sisaBayar;
                 }
 
-                // Buat record pembayaran baru
-                $pembayaran = Pembayaran::create([
-                    'tagihan_id' => $request->tagihan_id,
-                    'tagihan_detail_id' => $detail->id,
-                    'wali_id' => $tagihan->siswa->wali_id,
-                    'tanggal_bayar' => $request->tanggal_bayar,
-                    'jumlah_dibayar' => $jumlahUntukItem,
-                    'metode_pembayaran' => $request->metode_pembayaran,
-                    'bukti_bayar' => $buktiPath,
-                    'status_konfirmasi' => $isWali ? 'Belum Dikonfirmasi' : $request->status_konfirmasi,
-                    'bank_sekolah_id' => $request->bank_sekolah_id ?? null,
-                    'user_id' => auth()->id(),
-                ]);
-                
-                // Set status awal menggunakan package Spatie
-                $statusReason = $isWali ? 'Pembayaran dibuat oleh wali, menunggu konfirmasi' : 'Pembayaran dibuat oleh operator';
-                $pembayaran->setStatus('pending', $statusReason);
-                
-                $pembayaranIds[] = $pembayaran->id;
+                // Hitung proporsi pembayaran untuk tagihan ini
+                $proporsiPembayaran = ($totalSisaTagihan / $totalRemaining) * $request->jumlah_dibayar;
+
+                // Buat pembayaran untuk setiap detail dalam tagihan ini
+                foreach ($details as $detail) {
+                    $totalDibayarDetail = $detail->pembayaran()
+                        ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                        ->sum('jumlah_dibayar');
+                    $sisaBayar = $detail->jumlah_biaya - $totalDibayarDetail;
+                    $sisaBayar = max(0, $sisaBayar);
+                    
+                    // Hitung jumlah pembayaran untuk detail ini secara proporsional
+                    if ($totalSisaTagihan > 0) {
+                        $proporsiDetail = ($sisaBayar / $totalSisaTagihan) * $proporsiPembayaran;
+                    } else {
+                        $proporsiDetail = 0;
+                    }
+
+                    // Buat record pembayaran
+                    $pembayaran = Pembayaran::create([
+                        'tagihan_id' => $tagihanId,
+                        'tagihan_detail_id' => $detail->id,
+                        'wali_id' => $tagihan->siswa->wali_id,
+                        'tanggal_bayar' => $request->tanggal_bayar,
+                        'jumlah_dibayar' => $proporsiDetail,
+                        'metode_pembayaran' => $request->metode_pembayaran,
+                        'bukti_bayar' => $buktiPath,
+                        'status_konfirmasi' => $isWali ? 'Belum Dikonfirmasi' : $request->status_konfirmasi,
+                        'bank_sekolah_id' => $request->bank_sekolah_id ?? null,
+                        'user_id' => auth()->id(),
+                        'no_rekening_pengirim' => $request->no_rekening_pengirim,
+                        'bank_pengirim' => $request->bank_pengirim,
+                    ]);
+                    
+                    // Set status awal menggunakan package Spatie
+                    $statusReason = $isWali ? 'Pembayaran dibuat oleh wali, menunggu konfirmasi' : 'Pembayaran dibuat oleh operator';
+                    $pembayaran->setStatus('pending', $statusReason);
+                    
+                    $pembayaranIds[] = $pembayaran->id;
+                }
             }
 
             // Commit transaksi jika semua berhasil
@@ -173,9 +162,7 @@ class PembayaranController extends Controller
                 'success' => true,
                 'message' => 'Pembayaran berhasil disimpan',
                 'data' => [
-                    'pembayaran_ids' => $pembayaranIds,
-                    'details' => $tagihanDetails,
-                    'sisa_tagihan' => $totalRemaining
+                    'pembayaran_ids' => $pembayaranIds
                 ]
             ]);
         } catch (\Exception $e) {

@@ -212,7 +212,11 @@
             <div class="left">
                 <h1 style="margin: 0; font-size: 28px;">TAGIHAN</h1>
                 <p style="margin: 5px 0;">{{ $invoiceId }}</p>
-                <p style="margin: 5px 0;">{{ $tanggal }}</p>
+                @php
+                setlocale(LC_TIME, 'id_ID');
+                \Carbon\Carbon::setLocale('id');
+            @endphp
+            <p style="margin: 5px 0;">Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</p>
             </div>
             <div class="right">
                 <img src="data:image/png;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . str_replace('storage/', '', getInstansiSetting('logo_instansi'))))) }}" 

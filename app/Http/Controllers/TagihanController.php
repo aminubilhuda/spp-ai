@@ -8,6 +8,7 @@ use App\Models\Tagihan;
 use App\Models\Jurusan;
 use App\Models\TagihanDetail;
 use Illuminate\Http\Request;
+use PDF;
 
 class TagihanController extends Controller
 {
@@ -567,5 +568,23 @@ class TagihanController extends Controller
                 'error' => 'Gagal mengambil data tagihan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function rekapTagihanPdf($siswa_id)
+    {
+        $siswa = Siswa::with('jurusan')->findOrFail($siswa_id);
+        $tagihan_details = TagihanDetail::with(['tagihan', 'pembayaran'])
+            ->whereHas('tagihan', function ($q) use ($siswa_id) {
+                $q->where('siswa_id', $siswa_id);
+            })
+            ->get();
+
+        $pdf = PDF::loadView('operator.tagihan_rekap', [
+            'siswa' => $siswa,
+            'tagihan_details' => $tagihan_details
+        ]);
+        
+        $pdf->setPaper('A4', 'portrait');
+        return $pdf->stream('rekap_tagihan_' . $siswa->nama . '.pdf');
     }
 }

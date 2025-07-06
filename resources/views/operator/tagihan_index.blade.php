@@ -152,7 +152,7 @@
                                                     class="btn btn-info btn-sm" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <a href="{{ route('tagihan.rekap', $item->siswa_id) }}"
+                                                <a href="{{ route('tagihan.rekap.pdf', $item->siswa_id) }}"
                                                     class="btn btn-primary btn-sm" target="_blank" title="Cetak Rekap">
                                                     <i class="bx bx-printer"></i>
                                                 </a>

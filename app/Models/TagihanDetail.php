@@ -67,12 +67,18 @@ class TagihanDetail extends Model
 
     public function getStatusDetailAttribute()
     {
-        return match($this->status) {
-            'baru' => 'Baru',
-            'angsur' => 'Diangsur',
-            'lunas' => 'Lunas',
-            'belum_lunas' => 'Belum Lunas',
-            default => ucfirst(str_replace('_', ' ', $this->status))
-        };
+        // Hitung total pembayaran yang sudah dikonfirmasi
+        $total_pembayaran = $this->pembayaran()
+            ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->sum('jumlah_dibayar');
+
+        // Bandingkan dengan jumlah tagihan
+        if ($total_pembayaran >= $this->jumlah_biaya) {
+            return 'Lunas';
+        } elseif ($total_pembayaran > 0) {
+            return 'Angsur';
+        } else {
+            return 'Belum Di Bayar';
+        }
     }
 }

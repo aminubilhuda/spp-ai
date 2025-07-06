@@ -205,6 +205,11 @@
                 <h5 class="card-header">Daftar Tagihan Siswa</h5>
                 <div class="card-body">
                     <div class="table-responsive">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" onclick="openBatchPaymentModal()">
+                                <i class="bx bx-money"></i> Bayar Serentak
+                            </button>
+                        </div>
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -399,12 +404,66 @@
                         <div id="payment-alert" class="alert" style="display: none;"></div>
                         <input type="hidden" name="tagihan_id" id="tagihan_id">
                         <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
-                        <input type="hidden" name="detail_ids[]" id="detail_id">
+                        <input type="hidden" name="is_batch_payment" id="is_batch_payment" value="0">
+                        <div id="detail_ids_container"></div>
+
+                        <!-- Filter Periode untuk pembayaran serentak -->
+                        <div id="batch_payment_filter" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Periode</label>
+                                    <select class="form-select" id="batch_payment_month" onchange="filterBatchPayments()">
+                                        <option value="">Semua Bulan</option>
+                                        <option value="01">Januari</option>
+                                        <option value="02">Februari</option>
+                                        <option value="03">Maret</option>
+                                        <option value="04">April</option>
+                                        <option value="05">Mei</option>
+                                        <option value="06">Juni</option>
+                                        <option value="07">Juli</option>
+                                        <option value="08">Agustus</option>
+                                        <option value="09">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Desember</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tahun</label>
+                                    <select class="form-select" id="batch_payment_year" onchange="filterBatchPayments()">
+                                        <option value="">Semua Tahun</option>
+                                        @php
+                                            $currentYear = date('Y');
+                                            $startYear = $currentYear - 2;
+                                            $endYear = $currentYear + 2;
+                                        @endphp
+                                        @for($year = $startYear; $year <= $endYear; $year++)
+                                            <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
+                                                {{ $year }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Item yang akan dibayar</label>
-                            <div id="tagihan_details_list">
-                                <!-- Tagihan details will be loaded here -->
+                            <label class="form-label">Detail Tagihan</label>
+                            <div id="tagihan_details_list" class="card">
+                                <div class="card-body" id="single_payment_view">
+                                    <h6 id="detail_nama_biaya" class="mb-1"></h6>
+                                    <div class="text-muted small">
+                                        Total Tagihan: <span id="detail_total_tagihan"></span><br>
+                                        Sisa Tagihan: <span id="detail_sisa_tagihan"></span>
+                                    </div>
+                                </div>
+                                <div class="card-body" id="batch_payment_view" style="display: none;">
+                                    <div id="batch_items_list"></div>
+                                    <div class="text-muted small mt-2">
+                                        Total Tagihan: <span id="batch_total_tagihan"></span><br>
+                                        Total Sisa: <span id="batch_sisa_tagihan"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -617,72 +676,233 @@
             });
         }
 
-        function openPaymentModal(detailId, tagihanId) {
-            console.log('Opening modal for detail:', detailId, 'tagihan:', tagihanId);
-
-            // First show the modal
+        function openBatchPaymentModal() {
+            // Reset form
+            document.getElementById('paymentForm').reset();
+            document.getElementById('payment-alert').style.display = 'none';
+            
+            // Show modal
             var modalElement = document.getElementById('paymentModal');
             var modal = new bootstrap.Modal(modalElement);
             modal.show();
 
-            // Set the tagihan_id and detail_id in the form
-            document.getElementById('tagihan_id').value = tagihanId;
-            document.getElementById('detail_id').value = detailId;
+            // Set batch payment flag and show filter
+            document.getElementById('is_batch_payment').value = '1';
+            document.getElementById('batch_payment_filter').style.display = 'block';
+            document.getElementById('single_payment_view').style.display = 'none';
+            document.getElementById('batch_payment_view').style.display = 'block';
 
-            // Reset form and alert
-            document.getElementById('payment-alert').style.display = 'none';
+            // Load all tagihan details initially
+            loadBatchPaymentDetails();
+        }
+
+        function loadBatchPaymentDetails(month = '', year = '') {
+            // Get all unpaid or partially paid tagihan details
+            const rows = document.querySelectorAll('table tbody tr');
+            let selectedDetails = [];
+            let totalTagihan = 0;
+            let totalSisa = 0;
+
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.badge');
+                if (statusBadge && (statusBadge.textContent === 'Belum Lunas' || statusBadge.textContent === 'Angsur')) {
+                    // Get periode from the row
+                    const periodeText = row.querySelector('td:nth-child(3)').textContent.trim();
+                    const [periodeBulan, periodeTahun] = periodeText.split(' ');
+                    
+                    // Skip if doesn't match filter
+                    if (month && year) {
+                        const bulanMap = {
+                            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                            'Mei': '05', 'Jun': '06', 'Jul': '07', 'Agu': '08',
+                            'Sep': '09', 'Okt': '10', 'Nov': '11', 'Des': '12'
+                        };
+                        
+                        if (bulanMap[periodeBulan] !== month || periodeTahun !== year) {
+                            return;
+                        }
+                    } else if (month) {
+                        const bulanMap = {
+                            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                            'Mei': '05', 'Jun': '06', 'Jul': '07', 'Agu': '08',
+                            'Sep': '09', 'Okt': '10', 'Nov': '11', 'Des': '12'
+                        };
+                        if (bulanMap[periodeBulan] !== month) {
+                            return;
+                        }
+                    } else if (year) {
+                        if (periodeTahun !== year) {
+                            return;
+                        }
+                    }
+
+                    const paymentButton = row.querySelector('button[onclick*="openPaymentModal"]');
+                    const matches = paymentButton.getAttribute('onclick').match(/openPaymentModal\('(\d+)',\s*'(\d+)'/);
+                    const detailId = matches[1];
+                    const tagihanId = matches[2];
+                    
+                    const namaBiaya = row.querySelector('td:nth-child(2)').textContent.trim();
+                    const jumlahBiaya = row.querySelector('td:nth-child(6)').textContent.trim();
+                    const sisaBiaya = row.querySelector('td:nth-child(7)').textContent.trim();
+
+                    // Convert currency string to number
+                    const sisaNumeric = parseFloat(sisaBiaya.replace(/[^0-9,-]/g, '').replace(/\./g, '').replace(',', '.'));
+                    
+                    selectedDetails.push({
+                        id: detailId,
+                        tagihan_id: tagihanId,
+                        nama: namaBiaya,
+                        periode: periodeText,
+                        jumlah: jumlahBiaya,
+                        sisa: sisaBiaya,
+                        sisaNumeric: sisaNumeric
+                    });
+
+                    totalSisa += sisaNumeric;
+                }
+            });
+
+            // Update batch payment view
+            const batchItemsList = document.getElementById('batch_items_list');
+            const detailIdsContainer = document.getElementById('detail_ids_container');
+            batchItemsList.innerHTML = '';
+            detailIdsContainer.innerHTML = '';
+
+            if (selectedDetails.length === 0) {
+                batchItemsList.innerHTML = '<div class="alert alert-info">Tidak ada tagihan yang sesuai dengan filter</div>';
+                document.getElementById('jumlah_dibayar').value = 0;
+                document.getElementById('sisa_tagihan').textContent = formatRupiah(0);
+                return;
+            }
+
+            // Group items by tagihan_id
+            const groupedDetails = selectedDetails.reduce((acc, detail) => {
+                if (!acc[detail.tagihan_id]) {
+                    acc[detail.tagihan_id] = [];
+                }
+                acc[detail.tagihan_id].push(detail);
+                return acc;
+            }, {});
+
+            // Create sections for each tagihan
+            Object.entries(groupedDetails).forEach(([tagihanId, details]) => {
+                const tagihanSection = document.createElement('div');
+                tagihanSection.className = 'mb-3';
+                
+                // Add hidden input for tagihan_id
+                const hiddenTagihanInput = document.createElement('input');
+                hiddenTagihanInput.type = 'hidden';
+                hiddenTagihanInput.name = 'tagihan_id';
+                hiddenTagihanInput.value = tagihanId;
+                detailIdsContainer.appendChild(hiddenTagihanInput);
+
+                details.forEach(detail => {
+                    // Add checkbox for each item
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'form-check mb-2';
+                    itemDiv.innerHTML = `
+                        <input class="form-check-input batch-item-checkbox" type="checkbox" 
+                               id="detail_${detail.id}" value="${detail.id}" 
+                               data-sisa="${detail.sisaNumeric}"
+                               data-tagihan="${detail.tagihan_id}"
+                               onchange="updateBatchTotal()">
+                        <label class="form-check-label" for="detail_${detail.id}">
+                            <strong>${detail.nama}</strong><br>
+                            <small class="text-muted">
+                                Periode: ${detail.periode}<br>
+                                Sisa: ${detail.sisa}
+                            </small>
+                        </label>
+                    `;
+                    tagihanSection.appendChild(itemDiv);
+                });
+
+                batchItemsList.appendChild(tagihanSection);
+            });
+
+            document.getElementById('batch_total_tagihan').textContent = formatRupiah(totalSisa);
+            document.getElementById('batch_sisa_tagihan').textContent = formatRupiah(totalSisa);
+            
+            // Set initial total to 0 since no checkboxes are checked yet
+            document.getElementById('jumlah_dibayar').value = 0;
+            document.getElementById('sisa_tagihan').textContent = formatRupiah(0);
+        }
+
+        function filterBatchPayments() {
+            const month = document.getElementById('batch_payment_month').value;
+            const year = document.getElementById('batch_payment_year').value;
+            loadBatchPaymentDetails(month, year);
+        }
+
+        function updateBatchTotal() {
+            const checkboxes = document.querySelectorAll('.batch-item-checkbox:checked');
+            let total = 0;
+
+            // Clear existing detail_ids
+            const detailIdsContainer = document.getElementById('detail_ids_container');
+            detailIdsContainer.innerHTML = '';
+
+            checkboxes.forEach(checkbox => {
+                // Add detail_id
+                const hiddenDetailInput = document.createElement('input');
+                hiddenDetailInput.type = 'hidden';
+                hiddenDetailInput.name = 'detail_ids[]';
+                hiddenDetailInput.value = checkbox.value;
+                detailIdsContainer.appendChild(hiddenDetailInput);
+
+                total += parseFloat(checkbox.dataset.sisa);
+            });
+
+            // Update the payment amount and display
+            document.getElementById('jumlah_dibayar').value = total;
+            document.getElementById('sisa_tagihan').textContent = formatRupiah(total);
+        }
+
+        function openPaymentModal(detailId, tagihanId) {
+            // Reset form and show modal
             document.getElementById('paymentForm').reset();
+            document.getElementById('payment-alert').style.display = 'none';
+            
+            var modalElement = document.getElementById('paymentModal');
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
 
-            // Set values again after reset
+            // Set single payment mode
+            document.getElementById('is_batch_payment').value = '0';
+            document.getElementById('single_payment_view').style.display = 'block';
+            document.getElementById('batch_payment_view').style.display = 'none';
+            document.getElementById('batch_payment_filter').style.display = 'none';
+
+            // Set the tagihan_id and detail_id
             document.getElementById('tagihan_id').value = tagihanId;
-            document.getElementById('detail_id').value = detailId;
+            document.getElementById('detail_ids_container').innerHTML = `
+                <input type="hidden" name="detail_ids[]" value="${detailId}">
+            `;
+            
+            // Set default date
             document.querySelector('input[name="tanggal_bayar"]').value = new Date().toISOString().split('T')[0];
 
-            // Then fetch the details
+            // Fetch detail info
             fetch(`{{ url('/operator') }}/tagihan-detail/${detailId}/info`)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
+                    if (data.error) throw new Error(data.error);
 
-                    // Populate tagihan details
-                    const detailsList = document.getElementById('tagihan_details_list');
-                    detailsList.innerHTML = '';
+                    // Update single payment view
+                    document.getElementById('detail_nama_biaya').textContent = data.detail.nama_biaya;
+                    document.getElementById('detail_total_tagihan').textContent = formatRupiah(data.total_tagihan);
+                    document.getElementById('detail_sisa_tagihan').textContent = formatRupiah(data.remaining_amount);
 
-                    // Create single detail card
-                    const detailDiv = document.createElement('div');
-                    detailDiv.className = 'card mb-2';
-                    detailDiv.innerHTML = `
-                        <div class="card-body">
-                            <div class="form-check">
-                                <input class="form-check-input detail-checkbox" type="checkbox" 
-                                       id="detail_${detailId}" value="${detailId}" 
-                                       data-sisa="${data.remaining_amount}" data-nama="${data.detail.nama_biaya}" checked>
-                                <label class="form-check-label" for="detail_${detailId}">
-                                    <strong>${data.detail.nama_biaya}</strong><br>
-                                    <small class="text-muted">
-                                        Total: ${formatRupiah(data.total_tagihan)} | 
-                                        Sisa: ${formatRupiah(data.remaining_amount)}
-                                    </small>
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                    detailsList.appendChild(detailDiv);
-
-                    // Set initial amount
+                    // Set payment amount
                     document.getElementById('jumlah_dibayar').value = data.remaining_amount;
                     document.getElementById('sisa_tagihan').textContent = formatRupiah(data.remaining_amount);
 
-                    // Update form title with student details
+                    // Update modal title
                     if (data.detail && data.detail.nama_siswa) {
-                        document.querySelector('#paymentModalLabel').textContent =
+                        document.querySelector('#paymentModalLabel').textContent = 
                             `Form Pembayaran - ${data.detail.nama_siswa}`;
                     }
                 })
@@ -705,19 +925,7 @@
             }).format(amount);
         }
 
-        // Function to calculate total from selected checkboxes
-        function calculateTotal() {
-            const checkboxes = document.querySelectorAll('.detail-checkbox:checked');
-            let total = 0;
-
-            checkboxes.forEach(checkbox => {
-                total += parseFloat(checkbox.dataset.sisa);
-            });
-
-            document.getElementById('jumlah_dibayar').value = total;
-            document.getElementById('sisa_tagihan').textContent = formatRupiah(total);
-        }
-
+        // Function to open edit modal
         function openEditModal(detailId) {
             // Fetch detail data
             fetch(`{{ url('/operator') }}/tagihan-detail/${detailId}/info`)

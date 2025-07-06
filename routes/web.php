@@ -140,6 +140,8 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     Route::post('whatsapp/settings', [WhatsappController::class, 'updateSettings'])->name('whatsapp.update-settings');
     Route::post('whatsapp/test', [WhatsappController::class, 'test'])->name('whatsapp.test');
     Route::post('whatsapp/send-signed-url/{pembayaranId}/{waliId}', [WhatsappController::class, 'sendPembayaranSignedUrl'])->name('whatsapp.send-signed-url');
+
+    Route::get('tagihan/{siswa}/rekap-pdf', [TagihanController::class, 'rekapTagihanPdf'])->name('tagihan.rekap.pdf');
 });
 
 // ============================================================================
