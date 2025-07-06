@@ -39,14 +39,10 @@
                             <thead>
                                 <tr>
                                     <td>No</td>
-                                    {{-- <td>Nama Wali Murid</td> --}}
                                     <td>Nama</td>
                                     <td>NISN</td>
-                                    <td>NIS</td>
-                                    <td>Foto</td>
                                     <td>Jurusan</td>
                                     <td>Kelas</td>
-                                    <td>Angkatan</td>
                                     <td>Aksi</td>
                                 </tr>
                             </thead>
@@ -55,22 +51,10 @@
                                 @forelse ($models as $siswa)
                                     <tr>
                                         <td>{{ $no++ }}</td>
-                                        {{-- <td>{{ $siswa->wali->name }}</td> --}}
                                         <td>{{ $siswa->nama }}</td>
                                         <td>{{ $siswa->nisn }}</td>
-                                        <td>{{ $siswa->nis }}</td>
-                                        <td>
-                                            @if ($siswa->foto)
-                                                <img src="{{ asset('storage/' . $siswa->foto) }}"
-                                                    alt="Foto {{ $siswa->nama }}" class="img-thumbnail"
-                                                    style="max-height: 50px">
-                                            @else
-                                                <span class="badge bg-label-warning">Belum ada foto</span>
-                                            @endif
-                                        </td>
                                         <td>{{ $siswa->jurusan->nama }}</td>
                                         <td>{{ $siswa->kelas }}</td>
-                                        <td>{{ $siswa->angkatan }}</td>
                                         <td>
                                             <a href="{{ route('wali.siswa.show', $siswa->id) }}"
                                                 class="btn btn-sm btn-info"> <i class="fas fa-eye"></i> Detail</a>

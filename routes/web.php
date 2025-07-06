@@ -24,6 +24,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\PanduanPembayaranController;
+use App\Http\Controllers\WaliMuridInvoiceController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -41,6 +43,10 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+//Panduan Pembayaran
+Route::get('panduan-pembayaran/{id}', [PanduanPembayaranController::class, 'index'])->name('panduan.pembayaran');
+
 
 // Login routes wali
 Route::get('login-wali', [LoginController::class, 'showLoginFormWali'])->name('login.wali');
@@ -153,7 +159,10 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     });
     Route::resource('tagihan', WaliMuridTagihanController::class);
     
-    // Pembayaran Management - Menggunakan WaliMuridPembayaranController
+    // Invoice
+    Route::get('invoice/{id}', [WaliMuridInvoiceController::class, 'show'])->name('invoice.show');
+    
+    // Pembayaran Management
     Route::controller(WaliMuridPembayaranController::class)->group(function () {
         Route::get('pembayaran', 'index')->name('pembayaran.index');
         Route::post('pembayaran/store', 'store')->name('pembayaran.store');
@@ -165,6 +174,10 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     
     // Kwitansi
     Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
+
+    // Route untuk profile wali murid
+    Route::get('profile', [WaliMuridProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [WaliMuridProfileController::class, 'update'])->name('profile.update');
 });
 
 // ============================================================================

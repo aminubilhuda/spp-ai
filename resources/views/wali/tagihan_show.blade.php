@@ -216,9 +216,17 @@
 
                     <div class="row mt-4">
                         <div class="col-md-12">
-                            <a href="{{ route('wali.tagihan.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </a>
+                            <div class="btn-group">
+                                <a href="{{ route('wali.tagihan.index') }}" class="btn btn-secondary">
+                                    <i class="bx bx-arrow-back"></i> Kembali
+                                </a>
+                                <a href="{{ route('panduan.pembayaran', ['id' => $tagihan->id]) }}" class="btn btn-info" target="_blank">
+                                    <i class="bx bx-help-circle"></i> Panduan Pembayaran
+                                </a>
+                                <a href="{{ route('wali.invoice.show', ['id' => $tagihan->id]) }}" class="btn btn-primary" target="_blank">
+                                    <i class="bx bx-receipt"></i> Lihat Invoice
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

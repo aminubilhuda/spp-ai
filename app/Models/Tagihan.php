@@ -14,7 +14,12 @@ class Tagihan extends Model
     use HasStatuses;
 
     protected $guarded = [];
-    protected $dates = ['tanggal_tagihan', 'tanggal_jatuh_tempo'];
+    protected $dates = [
+        'tanggal_tagihan',
+        'tanggal_jatuh_tempo',
+        'created_at',
+        'updated_at'
+    ];
 
     public function getJumlahTagihanAttribute()
     {

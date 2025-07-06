@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('wali.beranda') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -45,7 +45,7 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">SPP</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -57,43 +57,56 @@
 
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
-        <li class="menu-item {{ request()->is('walimurid/beranda') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->is('wali/beranda*') ? 'active' : '' }}">
             <a href="{{ route('wali.beranda') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Beranda</div>
             </a>
         </li>
 
-        <!-- Cards -->
-        <li class="menu-item {{ request()->is('walimurid/siswa*') ? 'active' : '' }}">
+        <!-- Data -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Data</span>
+        </li>
+
+        <li class="menu-item {{ request()->is('wali/siswa*') ? 'active' : '' }}">
             <a href="{{ route('wali.siswa.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Basic">Data Siswa</div>
             </a>
         </li>
-        <!-- Cards -->
-        <li class="menu-item {{ request()->is('walimurid/tagihan*') ? 'active' : '' }}">
+
+        <li class="menu-item {{ request()->is('wali/tagihan*') ? 'active' : '' }}">
             <a href="{{ route('wali.tagihan.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
                 <div data-i18n="Basic">Data Tagihan</div>
             </a>
         </li>
 
-        <!-- Pembayaran -->
-        <li class="menu-item {{ request()->is('walimurid/pembayaran*') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->is('wali/pembayaran*') ? 'active' : '' }}">
             <a href="{{ route('wali.pembayaran.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Basic">Data Pembayaran</div>
+            </a>
+        </li>
+
+        <!-- Settings -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Pengaturan</span>
+        </li>
+
+        <li class="menu-item {{ request()->is('wali/profile*') ? 'active' : '' }}">
+            <a href="{{ route('wali.profile.edit') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                <div data-i18n="Basic">Profile</div>
             </a>
         </li>
 
         <li class="menu-item">
             <a href="{{ route('logout') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-log-out"></i>
+                <i class="menu-icon tf-icons bx bx-power-off"></i>
                 <div data-i18n="Basic">Logout</div>
             </a>
         </li>
-        <!-- User interface -->
-
     </ul>
 </aside>
