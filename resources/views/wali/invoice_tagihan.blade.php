@@ -4,329 +4,468 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tagihan - {{ $invoiceId }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            line-height: 1.6;
-            color: #2D3748;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Nunito', sans-serif;
-            color: #1A202C;
-        }
-
-        .invoice-container {
-            width: 100%;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-        }
-
-        .invoice-header {
-            margin-bottom: 30px;
-        }
-
-        .invoice-header .left h1 {
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #2D3748;
-        }
-
-        .invoice-header .left p {
-            color: #4A5568;
-            font-size: 14px;
-        }
-
-        .invoice-header .right {
-            float: right;
-            width: 40%;
-            text-align: right;
-        }
-
-        .invoice-header .right img {
-            max-height: 70px;
-            width: auto;
-            object-fit: contain;
-            margin-bottom: 10px;
-        }
-
-        .invoice-header .right h2 {
-            font-weight: 600;
-            color: #2D3748;
-        }
-
-        .invoice-header .right p {
-            color: #4A5568;
-            font-size: 14px;
-        }
-
-        .info-section h3 {
-            font-weight: 600;
-            font-size: 16px;
-            color: #2D3748;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 15px;
-        }
-
-        .info-section p {
-            color: #4A5568;
-            margin: 0 0 8px 0;
-            font-size: 14px;
-        }
-
-        .info-section strong {
-            font-weight: 600;
-            color: #2D3748;
-        }
-
-        .invoice-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 25px 0;
-            font-size: 14px;
-        }
-
-        .invoice-table th {
-            background: #F7FAFC;
-            color: #2D3748;
-            font-weight: 600;
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 2px solid #E2E8F0;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-        }
-
-        .invoice-table td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #E2E8F0;
-            color: #4A5568;
-        }
-
-        .invoice-table .total-row {
-            font-weight: 600;
-            color: #2D3748;
-            background: #F7FAFC;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .signature-section {
-            margin-top: 50px;
-            text-align: left;
-            color: #2D3748;
-            font-size: 14px;
-        }
-
-        .signature-section .signature-line {
-            width: 150px;
-            border-bottom: 1px solid #4A5568;
-            margin: 80px 0 10px;
-        }
-
-        .signature-section p {
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        /* Button Styles */
-        .button-group {
-            margin-top: 30px;
-            text-align: right;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            margin-left: 12px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 0.3px;
-        }
-
-        .btn i {
-            margin-right: 8px;
-            font-size: 18px;
-        }
-
-        .btn-secondary {
-            background: #EDF2F7;
-            color: #2D3748;
-            border: 1px solid #E2E8F0;
-        }
-
-        .btn-secondary:hover {
-            background: #E2E8F0;
-            color: #1A202C;
-        }
-
-        .btn-primary {
-            background: #4299E1;
-            color: white;
-            box-shadow: 0 1px 3px 0 rgba(66, 153, 225, 0.1), 0 1px 2px 0 rgba(66, 153, 225, 0.06);
-        }
-
-        .btn-primary:hover {
-            background: #3182CE;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(66, 153, 225, 0.1), 0 2px 4px -1px rgba(66, 153, 225, 0.06);
-        }
-
-        @media print {
-            body {
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    @if(request('html') == 'true' || request()->is('*/html'))
+        <link href="{{ asset('css/invoice.css') }}" rel="stylesheet">
+    @else
+        <style>
+            /* CSS untuk PDF - DomPDF tidak mendukung CSS eksternal */
+            * {
+                margin: 0;
                 padding: 0;
+                box-sizing: border-box;
             }
-            
+
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.4;
+                color: #333;
+                background: #f9fafb;
+                margin: 0;
+                padding: 20px;
+                font-size: 12px;
+            }
+
+            .invoice-container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .invoice-header {
+                background: #374151;
+                color: white;
+                padding: 30px;
+                position: relative;
+            }
+
+            .header-content {
+                display: table;
+                width: 100%;
+            }
+
+            .header-left {
+                display: table-cell;
+                vertical-align: top;
+                width: 60%;
+            }
+
+            .header-right {
+                display: table-cell;
+                vertical-align: top;
+                width: 40%;
+                text-align: right;
+            }
+
+            .header-left h1 {
+                font-size: 28px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+
+            .header-left .invoice-meta {
+                font-size: 12px;
+                opacity: 0.9;
+                line-height: 1.4;
+            }
+
+            .logo-container {
+                margin-bottom: 15px;
+            }
+
+            .logo-container img {
+                max-height: 60px;
+                width: auto;
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 5px;
+            }
+
+            .school-info h2 {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+
+            .school-info p {
+                font-size: 11px;
+                opacity: 0.9;
+                margin-bottom: 3px;
+            }
+
+            .invoice-body {
+                padding: 30px;
+            }
+
+            .info-grid {
+                display: table;
+                width: 100%;
+                margin-bottom: 30px;
+            }
+
+            .info-section {
+                display: table-cell;
+                width: 50%;
+                vertical-align: top;
+                padding-right: 20px;
+            }
+
+            .info-section:last-child {
+                padding-right: 0;
+                padding-left: 20px;
+            }
+
+            .info-section h3 {
+                font-size: 14px;
+                font-weight: bold;
+                color: #374151;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 5px;
+            }
+
+            .info-section .info-item {
+                margin-bottom: 8px;
+            }
+
+            .info-section .info-label {
+                font-size: 11px;
+                color: #6b7280;
+                margin-bottom: 2px;
+                font-weight: bold;
+            }
+
+            .info-section .info-value {
+                font-size: 12px;
+                font-weight: normal;
+                color: #1f2937;
+            }
+
+            .invoice-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 25px 0;
+                background: white;
+                border: 1px solid #e5e7eb;
+            }
+
+            .invoice-table th {
+                background: #f8fafc;
+                color: #374151;
+                font-weight: bold;
+                padding: 12px 8px;
+                text-align: left;
+                font-size: 11px;
+                text-transform: uppercase;
+                border-bottom: 2px solid #e5e7eb;
+            }
+
+            .invoice-table td {
+                padding: 10px 8px;
+                border-bottom: 1px solid #f3f4f6;
+                color: #374151;
+                font-size: 11px;
+            }
+
+            .invoice-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .invoice-table .total-row {
+                background: #f8fafc;
+                font-weight: bold;
+            }
+
+            .invoice-table .total-row td {
+                color: #1f2937;
+                font-size: 12px;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 9px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .badge-success {
+                background: #d1fae5;
+                color: #065f46;
+                border: 1px solid #10b981;
+            }
+
+            .badge-warning {
+                background: #fef3c7;
+                color: #92400e;
+                border: 1px solid #f59e0b;
+            }
+
+            .badge-info {
+                background: #dbeafe;
+                color: #1e40af;
+                border: 1px solid #3b82f6;
+            }
+
+            .signature-section {
+                margin-top: 40px;
+                text-align: right;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .signature-section .signature-info {
+                display: inline-block;
+                text-align: left;
+            }
+
+            .signature-section .date {
+                font-size: 11px;
+                color: #6b7280;
+                margin-bottom: 5px;
+            }
+
+            .signature-section .title {
+                font-size: 12px;
+                font-weight: bold;
+                color: #374151;
+                margin-bottom: 30px;
+            }
+
+            .signature-section .signature-line {
+                width: 150px;
+                border-bottom: 2px solid #374151;
+                margin-bottom: 8px;
+            }
+
+            .signature-section .name {
+                font-size: 12px;
+                font-weight: bold;
+                color: #1f2937;
+                margin-bottom: 2px;
+            }
+
+            .signature-section .nip {
+                font-size: 10px;
+                color: #6b7280;
+            }
+
             .button-group {
-                display: none;
+                margin-top: 30px;
+                text-align: center;
+                padding: 15px;
+                background: #f8fafc;
+                border-top: 1px solid #e5e7eb;
             }
-        }
-    </style>
+
+            .btn {
+                display: inline-block;
+                padding: 8px 16px;
+                border-radius: 4px;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 11px;
+                margin: 0 5px;
+                border: 1px solid #d1d5db;
+            }
+
+            .btn-secondary {
+                background: #f3f4f6;
+                color: #374151;
+            }
+
+            .btn-primary {
+                background: #3b82f6;
+                color: white;
+                border-color: #2563eb;
+            }
+
+            /* Print styles untuk PDF */
+            @media print {
+                body {
+                    background: white;
+                    padding: 0;
+                }
+                
+                .invoice-container {
+                    border: none;
+                    border-radius: 0;
+                }
+
+                .button-group {
+                    display: none;
+                }
+
+                .invoice-header {
+                    background: #374151 !important;
+                }
+            }
+        </style>
+    @endif
 </head>
 <body>
     <div class="invoice-container">
         <!-- Header -->
         <div class="invoice-header">
-            <div class="left">
-                <h1 style="margin: 0; font-size: 28px;">TAGIHAN</h1>
-                <p style="margin: 5px 0;">{{ $invoiceId }}</p>
-                @php
-                setlocale(LC_TIME, 'id_ID');
-                \Carbon\Carbon::setLocale('id');
-            @endphp
-            <p style="margin: 5px 0;">Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</p>
-            </div>
-            <div class="right">
-                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . str_replace('storage/', '', getInstansiSetting('logo_instansi'))))) }}" 
-                    alt="Logo Sekolah" 
-                    style="max-height: 70px; width: auto; object-fit: contain;"
-                >
-                <h2 style="margin: 5px 0; font-size: 18px;">{{ getInstansiSetting('nama_instansi') }}</h2>
-                <p style="margin: 2px 0;">{{ getInstansiSetting('alamat_instansi') }}</p>
-                <p style="margin: 2px 0;">Surel: {{ getInstansiSetting('email_instansi') }}</p>
-                <p style="margin: 2px 0;">Telp: {{ getInstansiSetting('nomor_wa_instansi') }}</p>
-            </div>
-            <div class="clear"></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Info Sections -->
-        <div class="info-sections">
-            <div class="info-section">
-                <h3>Data Siswa</h3>
-                <p><strong>{{ $tagihan->siswa->nama }}</strong></p>
-                <p>NISN: {{ $tagihan->siswa->nisn }}</p>
-                <p>NIS: {{ $tagihan->siswa->nis }}</p>
-                <p>Kelas: {{ $tagihan->siswa->kelas }} - {{ $tagihan->siswa->jurusan->nama }}</p>
-            </div>
-            <div class="info-section right">
-                <h3>Wali Murid</h3>
-                <p><strong>{{ $tagihan->siswa->wali->name }}</strong></p>
-                <p>{{ $tagihan->siswa->wali->email }}</p>
-                <p>{{ $tagihan->siswa->wali->nohp }}</p>
-            </div>
-            <div class="clear"></div>
-        </div>
-
-        <!-- Table -->
-        <table class="invoice-table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Tanggal Tagihan</th>
-                    <th>Item Tagihan</th>
-                    <th class="text-right">Jumlah</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php 
-                    $total = 0;
-                    $no = 1;
-                @endphp
-                @foreach($semuaTagihan as $tagihan)
-                    @foreach($tagihan->tagihan_details as $detail)
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>TAGIHAN</h1>
+                    <div class="invoice-meta">
+                        <div>{{ $invoiceId }}</div>
                         @php
-                            $total += $detail->jumlah_biaya;
-                            $totalDibayar = $detail->pembayaran()
-                                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
-                                ->sum('jumlah_dibayar');
-                            $sisaBayar = $detail->jumlah_biaya - $totalDibayar;
-                            
-                            if ($sisaBayar <= 0) {
-                                $statusClass = 'success';
-                                $statusText = 'Lunas';
-                            } elseif ($totalDibayar > 0) {
-                                $statusClass = 'info';
-                                $statusText = 'Sebagian';
-                            } else {
-                                $statusClass = 'warning';
-                                $statusText = 'Belum Lunas';
-                            }
+                            setlocale(LC_TIME, 'id_ID');
+                            \Carbon\Carbon::setLocale('id');
                         @endphp
-                        <tr>
-                            <td>{{ $no++ }}</td>
-                            <td>{{ \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->translatedFormat('d/m/Y') }}</td>
-                            <td>{{ $detail->nama_biaya }}</td>
-                            <td class="text-right">{{ formatRupiah($detail->jumlah_biaya) }}</td>
-                            <td><span class="badge badge-{{ $statusClass }}">{{ $statusText }}</span></td>
-                        </tr>
-                    @endforeach
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="3" class="text-right">Total:</td>
-                    <td class="text-right">{{ formatRupiah($total) }}</td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <!-- Signature -->
-        <div class="signature-section">
-            @php
-                setlocale(LC_TIME, 'id_ID');
-                \Carbon\Carbon::setLocale('id');
-            @endphp
-            <p>Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</p>
-            <p>Bendahara</p>
-            <div class="signature-line"></div>
-            <p>{{ getInstansiSetting('nama_bendahara') ?? '.........................' }}</p>
-            <p>NIP. {{ getInstansiSetting('nip_bendahara') ?? '.........................' }}</p>
+                        <div>Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    @php
+                        $logoUrl = getInstansiLogoUrl();
+                    @endphp
+                    @if($logoUrl)
+                        <div class="logo-container">
+                            <img src="{{ $logoUrl }}" alt="Logo Sekolah">
+                        </div>
+                    @endif
+                    <div class="school-info">
+                        <h2>{{ getInstansiSetting('nama_instansi') }}</h2>
+                        <p>{{ getInstansiSetting('alamat_instansi') }}</p>
+                        <p>Surel: {{ getInstansiSetting('email_instansi') }}</p>
+                        <p>Telp: {{ getInstansiSetting('nomor_wa_instansi') }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        @if(!request('output'))
+        <!-- Body -->
+        <div class="invoice-body">
+            <!-- Info Sections -->
+            <div class="info-grid">
+                <div class="info-section">
+                    <h3>Data Siswa</h3>
+                    <div class="info-item">
+                        <div class="info-label">Nama</div>
+                        <div class="info-value">{{ $tagihan->siswa->nama }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">NISN</div>
+                        <div class="info-value">{{ $tagihan->siswa->nisn }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">NIS</div>
+                        <div class="info-value">{{ $tagihan->siswa->nis }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Kelas</div>
+                        <div class="info-value">{{ $tagihan->siswa->kelas }} - {{ $tagihan->siswa->jurusan->nama }}</div>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <h3>Wali Murid</h3>
+                    <div class="info-item">
+                        <div class="info-label">Nama</div>
+                        <div class="info-value">{{ $tagihan->siswa->wali->name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ $tagihan->siswa->wali->email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">No. HP</div>
+                        <div class="info-value">{{ $tagihan->siswa->wali->nohp }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal Tagihan</th>
+                        <th>Item Tagihan</th>
+                        <th class="text-right">Jumlah</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php 
+                        $total = 0;
+                        $no = 1;
+                    @endphp
+                    @foreach($semuaTagihan as $tagihan)
+                        @foreach($tagihan->tagihan_details as $detail)
+                            @php
+                                $total += $detail->jumlah_biaya;
+                                $totalDibayar = $detail->pembayaran()
+                                    ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                    ->sum('jumlah_dibayar');
+                                $sisaBayar = $detail->jumlah_biaya - $totalDibayar;
+                                
+                                if ($sisaBayar <= 0) {
+                                    $statusClass = 'success';
+                                    $statusText = 'Lunas';
+                                } elseif ($totalDibayar > 0) {
+                                    $statusClass = 'info';
+                                    $statusText = 'Sebagian';
+                                } else {
+                                    $statusClass = 'warning';
+                                    $statusText = 'Belum Lunas';
+                                }
+                            @endphp
+                            <tr>
+                                <td>{{ $no++ }}</td>
+                                <td>{{ \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->translatedFormat('d/m/Y') }}</td>
+                                <td>{{ $detail->nama_biaya }}</td>
+                                <td class="text-right">{{ formatRupiah($detail->jumlah_biaya) }}</td>
+                                <td><span class="badge badge-{{ $statusClass }}">{{ $statusText }}</span></td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" class="text-right">Total:</td>
+                        <td class="text-right">{{ formatRupiah($total) }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Signature -->
+            <div class="signature-section">
+                <div class="signature-info">
+                    @php
+                        setlocale(LC_TIME, 'id_ID');
+                        \Carbon\Carbon::setLocale('id');
+                    @endphp
+                    <div class="date">Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</div>
+                    <div class="title">Bendahara</div>
+                    <div class="signature-line"></div>
+                    <div class="name">{{ getInstansiSetting('nama_bendahara') ?? '.........................' }}</div>
+                    <div class="nip">NIP. {{ getInstansiSetting('nip_bendahara') ?? '.........................' }}</div>
+                </div>
+            </div>
+        </div>
+
+        @if(request('html') == 'true')
         <!-- Buttons -->
         <div class="button-group">
             <a href="{{ url()->previous() }}" class="btn btn-secondary">
                 <i class="bx bx-arrow-left"></i>
                 <span>Kembali</span>
             </a>
-            <a href="{{ request()->fullUrlWithQuery(['output' => 'pdf']) }}" class="btn btn-primary">
+            <a href="{{ request()->fullUrlWithQuery(['download' => 'true']) }}" class="btn btn-primary">
                 <i class="bx bx-download"></i>
                 <span>Unduh PDF</span>
             </a>

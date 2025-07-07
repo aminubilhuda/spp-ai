@@ -42,11 +42,46 @@ class WaliMuridInvoiceController extends Controller
             'invoiceId' => 'INV/' . date('Ymd') . '/' . $tagihan->id,
         ];
 
-        if (request('output') == 'pdf') {
-            $pdf = PDF::loadView('wali.invoice_tagihan', $data);
-            return $pdf->download('invoice_tagihan.pdf');
+        // Jika ada parameter 'html', tampilkan versi HTML
+        if (request('html') == 'true' || request()->is('*/html')) {
+            return view('wali.invoice_tagihan', $data);
         }
+
+        // Jika ada parameter 'download', download PDF
+        if (request('download') == 'true') {
+            $pdf = $this->generatePDF($data);
+            return $pdf->download('invoice_tagihan_' . $tagihan->siswa->nama . '.pdf');
+        }
+
+        // Default: tampilkan PDF di browser
+        $pdf = $this->generatePDF($data);
+        return $pdf->stream('invoice_tagihan_' . $tagihan->siswa->nama . '.pdf');
+    }
+
+    /**
+     * Generate PDF dengan konfigurasi yang optimal
+     */
+    private function generatePDF($data)
+    {
+        $pdf = PDF::loadView('wali.invoice_tagihan', $data);
         
-        return view('wali.invoice_tagihan', $data);
+        // Konfigurasi DomPDF yang sederhana dan kompatibel
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Arial',
+            'chroot' => public_path(),
+            'default_paper_size' => 'a4',
+            'dpi' => 96,
+            'font_height_ratio' => 0.9,
+            'enable_php' => false,
+            'enable_javascript' => false,
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+        ]);
+
+        return $pdf;
     }
 }

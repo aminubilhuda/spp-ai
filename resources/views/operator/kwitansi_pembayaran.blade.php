@@ -100,9 +100,12 @@
 
     <div class="receipt-container">
         <div class="header">
-            @if(getInstansiSetting('logo_instansi'))
+            @php
+                $logoUrl = getInstansiLogoUrl();
+            @endphp
+            @if($logoUrl)
                 <div class="logo">
-                    <img src="{{ Storage::disk('public')->url(getInstansiSetting('logo_instansi')) }}" alt="Logo Instansi">
+                    <img src="{{ $logoUrl }}" alt="Logo Instansi">
                 </div>
             @endif
             <div class="school-info">

@@ -2,7 +2,12 @@
     <div class="app-brand demo">
         <a href="index.html" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img src="{{ Storage::disk('public')->url(getInstansiSetting('logo_instansi')) ?? '' }}" alt="Logo Sekolah" style="max-height: 50px;">
+                @php
+                    $logoUrl = getInstansiLogoUrl();
+                @endphp
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="Logo Sekolah" style="max-height: 50px;">
+                @endif
             </span>
             <span class="app-brand-text demo menu-text fw-bolder ms-2">SPP SMK AN</span>
         </a>

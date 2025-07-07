@@ -10,6 +10,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Bank Model.
@@ -39,4 +40,12 @@ class Bank extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * Get the bank sekolah records for this bank.
+     */
+    public function bankSekolahs(): HasMany
+    {
+        return $this->hasMany(BankSekolah::class, 'kode_bank', 'sandi_bank');
+    }
 }

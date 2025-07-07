@@ -163,6 +163,7 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     
     // Invoice
     Route::get('invoice/{id}', [WaliMuridInvoiceController::class, 'show'])->name('invoice.show');
+    Route::get('invoice/{id}/html', [WaliMuridInvoiceController::class, 'show'])->name('invoice.show.html');
     
     // Pembayaran Management
     Route::controller(WaliMuridPembayaranController::class)->group(function () {

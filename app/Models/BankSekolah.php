@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BankSekolah extends Model
 {
@@ -17,4 +18,12 @@ class BankSekolah extends Model
         'atas_nama',
         'keterangan'
     ];
+
+    /**
+     * Get the bank that owns this bank sekolah.
+     */
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(Bank::class, 'kode_bank', 'sandi_bank');
+    }
 }
