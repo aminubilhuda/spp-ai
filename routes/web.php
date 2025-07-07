@@ -26,6 +26,7 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PanduanPembayaranController;
 use App\Http\Controllers\WaliMuridInvoiceController;
+use App\Http\Controllers\KartuSppController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -109,6 +110,7 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     
     // Reports & Kwitansi
     Route::get('tagihan-rekap/{siswa_id}', [TagihanRekapController::class, 'show'])->name('tagihan.rekap');
+    Route::get('kartu-spp/{siswa_id}', [KartuSppController::class, 'show'])->name('kartu.spp');
     Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
     Route::post('kwitansi/batch', [KwitansiPembayaranController::class, 'showBatch'])->name('kwitansi.showBatch');
     Route::get('kwitansi/batch/pdf', [KwitansiPembayaranController::class, 'showBatch'])->name('kwitansi.showBatch.pdf');

@@ -1,4 +1,11 @@
 <?php
+
+function bulanSPP() {
+    return [
+        7,6,5,4,3,2,1,12,11,10,9,8
+    ];
+}
+
 function formatRupiah($nominal, $prefix = null) {
     $prefix = $prefix ? $prefix : 'Rp. ';
     return $prefix . number_format($nominal, 0, ',', '.');

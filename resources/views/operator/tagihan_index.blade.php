@@ -152,8 +152,8 @@
                                                     class="btn btn-info btn-sm" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <a href="{{ route('tagihan.rekap.pdf', $item->siswa_id) }}"
-                                                    class="btn btn-primary btn-sm" target="_blank" title="Cetak Rekap">
+                                                <a href="{{ route('kartu.spp', $item->siswa_id) }}"
+                                                    class="btn btn-primary btn-sm" target="_blank" title="Cetak Kartu SPP">
                                                     <i class="bx bx-printer"></i>
                                                 </a>
                                                 <button type="submit" class="btn btn-danger btn-sm" title="Hapus">

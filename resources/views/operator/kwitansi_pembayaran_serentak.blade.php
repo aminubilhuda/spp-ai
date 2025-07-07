@@ -24,33 +24,40 @@
         </div>
     </div>
     <style>
+        @page {
+            size: 105mm 330mm;
+            margin: 5mm;
+        }
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
-            line-height: 1.5;
+            font-size: 9pt;
+            line-height: 1.3;
+            width: 95mm;
+            margin: 0;
+            padding: 0;
         }
 
         .receipt-container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
+            width: 100%;
+            margin: 2mm auto;
+            padding: 2mm;
         }
 
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 3mm;
             border-bottom: 1px dashed #000;
-            padding-bottom: 10px;
+            padding-bottom: 2mm;
             position: relative;
         }
 
         .logo {
             position: absolute;
             left: 0;
-            width: 60px;
-            height: 60px;
+            width: 12mm;
+            height: 12mm;
         }
 
         .logo img {
@@ -60,62 +67,53 @@
 
         .school-info {
             text-align: center;
-            padding-left: 70px;
-            padding-right: 70px;
+            padding-left: 14mm;
+            padding-right: 14mm;
             width: 100%;
         }
 
         .school-name {
-            font-size: 16px;
+            font-size: 11pt;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 1mm;
         }
 
         .title {
             text-align: center;
             font-weight: bold;
-            margin: 20px 0;
-            font-size: 14px;
+            margin: 3mm 0;
+            font-size: 10pt;
         }
 
         .transaction-info {
             display: grid;
             grid-template-columns: auto 1fr auto auto;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 2mm;
+            margin-bottom: 3mm;
+            font-size: 9pt;
         }
 
         .payment-table {
             width: 100%;
-            margin: 20px 0;
+            margin: 2mm 0;
             border-top: 1px dashed #000;
             border-bottom: 1px dashed #000;
+            font-size: 8pt;
         }
 
         .payment-table th, .payment-table td {
-            padding: 8px 4px;
+            padding: 1mm 0.5mm;
         }
 
         .payment-table th {
             text-align: left;
-        }
-
-        .total-section {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .signature {
-            text-align: right;
-            margin-top: 30px;
+            border-bottom: 1px solid #000;
         }
 
         @media print {
             .receipt-container {
                 margin: 0;
-                padding: 10px;
+                padding: 2mm;
             }
             .container-fluid {
                 display: none;
@@ -141,29 +139,33 @@
 
         <div class="title">BUKTI PEMBAYARAN SERENTAK</div>
 
-        <div class="transaction-info">
-            <div>No Transaksi</div>
-            <div>: {{ $pembayaranIds[0] ?? 'BATCH-' . date('YmdHis') }}</div>
-            <div>Tanggal</div>
-            <div>: {{ $pembayaran->tanggal_bayar ? date('d-m-Y H:i:s', strtotime($pembayaran->tanggal_bayar)) : '-' }}</div>
-            
-            <div>No Induk</div>
-            <div>: {{ $pembayaran->tagihan->siswa->nisn }}</div>
-            <div>Kelas</div>
-            <div>: {{ $pembayaran->tagihan->siswa->kelas }}</div>
-            
-            <div>Nama</div>
-            <div>: {{ $pembayaran->tagihan->siswa->nama }}</div>
-            <div>Metode</div>
-            <div>: {{ $pembayaran->metode_pembayaran }}</div>
-        </div>
+        <table class="info-table" style="width: 100%; font-size: 8pt; margin-bottom: 3mm;">
+            <tr>
+                <td style="width: 25%">No Transaksi</td>
+                <td style="width: 35%">: {{ $pembayaranIds[0] ?? 'BATCH-' . date('YmdHis') }}</td>
+                <td style="width: 15%">Tanggal</td>
+                <td style="width: 25%">: {{ $pembayaran->tanggal_bayar ? date('d-m-Y', strtotime($pembayaran->tanggal_bayar)) : '-' }}</td>
+            </tr>
+            <tr>
+                <td>No Induk</td>
+                <td>: {{ $pembayaran->tagihan->siswa->nisn }}</td>
+                <td>Kelas</td>
+                <td>: {{ $pembayaran->tagihan->siswa->kelas }}</td>
+            </tr>
+            <tr>
+                <td>Nama</td>
+                <td>: {{ $pembayaran->tagihan->siswa->nama }}</td>
+                <td>Metode</td>
+                <td>: {{ $pembayaran->metode_pembayaran }}</td>
+            </tr>
+        </table>
 
         <table class="payment-table">
             <thead>
                 <tr>
                     <th style="width: 5%">No</th>
                     <th>Nama Pembayaran</th>
-                    <th style="width: 15%">Periode</th>
+                    <th style="width: 25%">Periode</th>
                     <th style="width: 25%; text-align: right">Nominal</th>
                 </tr>
             </thead>
@@ -196,20 +198,34 @@
             </tbody>
         </table>
 
-        <div class="total-section">
-            <div></div>
-            <div>
-                <div>Total : {{ number_format($totalBayar, 0, ',', '.') }}</div>
-                <div>{{ $pembayaran->metode_pembayaran }} : {{ number_format($totalBayar, 0, ',', '.') }}</div>
-                <div>Kembali : 0</div>
-            </div>
-        </div>
-
-        <div class="signature">
-            <div>{{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}</div>
-            <div>Petugas</div>
-            <br><br><br>
-            <div>{{ auth()->user()->name }}</div>
-        </div>
+        <table style="width: 100%; font-size: 8pt;">
+            <tr>
+                <td style="width: 60%"></td>
+                <td style="width: 40%; text-align: right;">
+                    <table style="width: 100%">
+                        <tr>
+                            <td style="text-align: left">Total</td>
+                            <td style="text-align: right">: {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">{{ $pembayaran->metode_pembayaran }}</td>
+                            <td style="text-align: right">: {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">Kembali</td>
+                            <td style="text-align: right">: 0</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: right; padding-top: 3mm;">
+                    {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
+                    Petugas<br><br><br>
+                    {{ auth()->user()->name }}
+                </td>
+            </tr>
+        </table>
     </div>
 @endsection 
