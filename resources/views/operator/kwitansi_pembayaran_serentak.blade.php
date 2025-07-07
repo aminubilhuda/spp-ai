@@ -30,7 +30,7 @@
         }
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 9pt;
+            font-size: 8pt;
             line-height: 1.3;
             width: 95mm;
             margin: 0;
@@ -41,6 +41,34 @@
             width: 100%;
             margin: 2mm auto;
             padding: 2mm;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 5mm 0;
+            position: relative;
+            text-align: center;
+        }
+
+        .divider::after {
+            content: "✂ gunting di sini";
+            position: absolute;
+            top: -7pt;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 5mm;
+            font-size: 7pt;
+            color: #666;
+        }
+
+        .copy-label {
+            position: absolute;
+            top: 2mm;
+            right: 2mm;
+            font-size: 7pt;
+            font-weight: bold;
+            color: #666;
         }
 
         .header {
@@ -121,11 +149,123 @@
         }
     </style>
 
+    <!-- Bagian Untuk Sekolah -->
     <div class="receipt-container">
+        <div class="copy-label">ARSIP SEKOLAH</div>
         <div class="header">
             @php
                 $logoUrl = getInstansiLogoUrl();
             @endphp
+            @if($logoUrl)
+                <div class="logo">
+                    <img src="{{ $logoUrl }}" alt="Logo Instansi">
+                </div>
+            @endif
+            <div class="school-info">
+                <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI') }}</div>
+                <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
+            </div>
+        </div>
+
+        <div class="title">BUKTI PEMBAYARAN SERENTAK</div>
+
+        <table class="info-table" style="width: 100%; font-size: 8pt; margin-bottom: 3mm;">
+            <tr>
+                <td style="width: 25%">No Transaksi</td>
+                <td style="width: 35%">: {{ $pembayaranIds[0] ?? 'BATCH-' . date('YmdHis') }}</td>
+                <td style="width: 15%">Tanggal</td>
+                <td style="width: 25%">: {{ $pembayaran->tanggal_bayar ? date('d-m-Y', strtotime($pembayaran->tanggal_bayar)) : '-' }}</td>
+            </tr>
+            <tr>
+                <td>No Induk</td>
+                <td>: {{ $pembayaran->tagihan->siswa->nisn }}</td>
+                <td>Kelas</td>
+                <td>: {{ $pembayaran->tagihan->siswa->kelas }}</td>
+            </tr>
+            <tr>
+                <td>Nama</td>
+                <td>: {{ $pembayaran->tagihan->siswa->nama }}</td>
+                <td>Metode</td>
+                <td>: {{ $pembayaran->metode_pembayaran }}</td>
+            </tr>
+        </table>
+
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%">No</th>
+                    <th>Nama Pembayaran</th>
+                    <th style="width: 25%">Periode</th>
+                    <th style="width: 25%; text-align: right">Nominal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $no = 1; $totalBayar = 0; @endphp
+                @foreach($pembayaranList as $pembayaranItem)
+                    <tr>
+                        <td>{{ $no++ }}</td>
+                        <td>{{ $pembayaranItem->tagihan_detail->nama_biaya }}</td>
+                        <td>
+                            @if($pembayaranItem->tagihan->tanggal_tagihan)
+                                @php
+                                    $bulan = \Carbon\Carbon::parse($pembayaranItem->tagihan->tanggal_tagihan)->format('m');
+                                    $tahun = \Carbon\Carbon::parse($pembayaranItem->tagihan->tanggal_tagihan)->format('Y');
+                                    $namaBulan = [
+                                        '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
+                                        '05' => 'Mei', '06' => 'Jun', '07' => 'Jul', '08' => 'Agu',
+                                        '09' => 'Sep', '10' => 'Okt', '11' => 'Nov', '12' => 'Des',
+                                    ];
+                                @endphp
+                                {{ $namaBulan[$bulan] }} {{ $tahun }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td style="text-align: right">{{ number_format($pembayaranItem->jumlah_dibayar, 0, ',', '.') }}</td>
+                    </tr>
+                    @php $totalBayar += $pembayaranItem->jumlah_dibayar; @endphp
+                @endforeach
+            </tbody>
+        </table>
+
+        <table style="width: 100%; font-size: 8pt;">
+            <tr>
+                <td style="width: 60%"></td>
+                <td style="width: 40%; text-align: right;">
+                    <table style="width: 100%">
+                        <tr>
+                            <td style="text-align: left">Total</td>
+                            <td style="text-align: right">: {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">{{ $pembayaran->metode_pembayaran }}</td>
+                            <td style="text-align: right">: {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">Kembali</td>
+                            <td style="text-align: right">: 0</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: right; padding-top: 3mm;">
+                    {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
+                    Petugas<br><br><br>
+                    {{ auth()->user()->name }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Garis Pemisah -->
+    <div class="divider"></div>
+
+    <!-- Bagian Untuk Siswa -->
+    <div class="receipt-container">
+        <div class="copy-label">ARSIP SISWA</div>
+        <div class="header">
             @if($logoUrl)
                 <div class="logo">
                     <img src="{{ $logoUrl }}" alt="Logo Instansi">
