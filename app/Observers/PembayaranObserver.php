@@ -41,6 +41,11 @@ class PembayaranObserver
         if ($pembayaran->user && in_array($pembayaran->user->akses, ['admin', 'operator'])) {
             $this->sendNotificationToOperators($pembayaran);
         }
+
+        // Jika pembayaran baru langsung dikonfirmasi
+        if ($pembayaran->status_konfirmasi === 'Sudah Dikonfirmasi') {
+            $this->updateTagihanDetailStatus($pembayaran);
+        }
     }
 
     /**
@@ -53,6 +58,13 @@ class PembayaranObserver
         // Jika status pembayaran berubah menjadi dikonfirmasi
         if ($pembayaran->wasChanged('status') && $pembayaran->status === 'dikonfirmasi') {
             $this->whatsappService->sendKonfirmasiPembayaran($pembayaran);
+        }
+
+        // Jika status konfirmasi berubah menjadi "Sudah Dikonfirmasi"
+        if ($pembayaran->isDirty('status_konfirmasi') && 
+            $pembayaran->status_konfirmasi === 'Sudah Dikonfirmasi') {
+            
+            $this->updateTagihanDetailStatus($pembayaran);
         }
     }
 
@@ -115,5 +127,28 @@ class PembayaranObserver
     public function forceDeleted(Pembayaran $pembayaran): void
     {
         //
+    }
+
+    protected function updateTagihanDetailStatus(Pembayaran $pembayaran)
+    {
+        $tagihanDetail = $pembayaran->tagihan_detail;
+        
+        if ($tagihanDetail) {
+            // Hitung total pembayaran yang sudah dikonfirmasi
+            $totalPembayaran = $tagihanDetail->pembayaran()
+                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                ->sum('jumlah_dibayar');
+
+            // Update status berdasarkan total pembayaran
+            if ($totalPembayaran >= $tagihanDetail->jumlah_biaya) {
+                $tagihanDetail->status = 'lunas';
+            } elseif ($totalPembayaran > 0) {
+                $tagihanDetail->status = 'angsur';
+            } else {
+                $tagihanDetail->status = 'belum_lunas';
+            }
+
+            $tagihanDetail->save();
+        }
     }
 } 

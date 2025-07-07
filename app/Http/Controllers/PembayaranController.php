@@ -151,6 +151,9 @@ class PembayaranController extends Controller
                     $statusReason = $isWali ? 'Pembayaran dibuat oleh wali, menunggu konfirmasi' : 'Pembayaran dibuat oleh operator';
                     $pembayaran->setStatus('pending', $statusReason);
                     
+                    // Update pembayaran_id di tagihan_details
+                    $detail->update(['pembayaran_id' => $pembayaran->id]);
+                    
                     $pembayaranIds[] = $pembayaran->id;
                 }
             }

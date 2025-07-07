@@ -62,9 +62,9 @@ class Pembayaran extends Model
     /**
      * Get the tagihan detail that owns the payment
      */
-    public function tagihan_detail(): BelongsTo
+    public function tagihan_detail()
     {
-        return $this->belongsTo(TagihanDetail::class);
+        return $this->belongsTo(TagihanDetail::class, 'tagihan_detail_id');
     }
 
     /**

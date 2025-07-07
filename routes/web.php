@@ -27,6 +27,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PanduanPembayaranController;
 use App\Http\Controllers\WaliMuridInvoiceController;
 use App\Http\Controllers\KartuSppController;
+use App\Http\Controllers\LaporanFormController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -146,6 +147,9 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     Route::post('whatsapp/send-signed-url/{pembayaranId}/{waliId}', [WhatsappController::class, 'sendPembayaranSignedUrl'])->name('whatsapp.send-signed-url');
 
     Route::get('tagihan/{siswa}/rekap-pdf', [TagihanController::class, 'rekapTagihanPdf'])->name('tagihan.rekap.pdf');
+
+    //Laporan
+    Route::get('laporanform/create', [LaporanFormController::class, 'create'])->name('laporanform.create');
 });
 
 // ============================================================================

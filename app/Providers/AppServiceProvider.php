@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Pembayaran;
+use App\Observers\PembayaranObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 
@@ -23,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
         
         // Register observers
-        \App\Models\Pembayaran::observe(\App\Observers\PembayaranObserver::class);
+        Pembayaran::observe(PembayaranObserver::class);
     }
 }

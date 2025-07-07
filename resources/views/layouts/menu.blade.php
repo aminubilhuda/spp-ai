@@ -67,6 +67,23 @@
             </ul>
         </li>
 
+        <!-- Rekening Sekolah -->
+        <li class="menu-item {{ request()->is('operator/bank-sekolah*') ? 'active' : '' }}">
+            <a href="{{ route('bank-sekolah.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Basic">Rekening Sekolah</div>
+            </a>
+        </li>
+
+        
+        <!-- Biaya -->
+        <li class="menu-item {{ request()->is('operator/biaya*') ? 'active' : '' }}">
+            <a href="{{ route('biaya.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Basic">Data Biaya</div>
+            </a>
+        </li>
+
         <!-- Tagihan -->
         <li class="menu-item {{ request()->is('operator/tagihan*') ? 'active' : '' }}">
             <a href="{{ route('tagihan.index') }}" class="menu-link">
@@ -80,6 +97,14 @@
             <a href="{{ route('pembayaran.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-credit-card"></i>
                 <div data-i18n="Basic">Data Pembayaran</div>
+            </a>
+        </li>
+
+        <!-- Laporan -->
+        <li class="menu-item {{ request()->is('operator/laporanform*') ? 'active' : '' }}">
+            <a href="{{ route('laporanform.create') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-file"></i>
+                <div data-i18n="Basic">Laporan</div>
             </a>
         </li>
 
@@ -97,25 +122,10 @@
             </a>
         </li>
 
-        <!-- Biaya -->
-        <li class="menu-item {{ request()->is('operator/bank-sekolah*') ? 'active' : '' }}">
-            <a href="{{ route('bank-sekolah.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
-                <div data-i18n="Basic">Rekening Sekolah</div>
-            </a>
-        </li>
-
-        <!-- Biaya -->
-        <li class="menu-item {{ request()->is('operator/biaya*') ? 'active' : '' }}">
-            <a href="{{ route('biaya.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
-                <div data-i18n="Basic">Data Biaya</div>
-            </a>
-        </li>
 
         <li class="menu-item {{ request()->is('operator/whatsapp*') ? 'active' : '' }}">
             <a href="{{ route('whatsapp.settings') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-whatsapp"></i>
+                <i class="menu-icon tf-icons bx bx-phone"></i>
                 <div data-i18n="WhatsApp">Pengaturan WhatsApp</div>
             </a>
         </li>

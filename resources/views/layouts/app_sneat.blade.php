@@ -38,7 +38,9 @@
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <!-- Page CSS -->
-    @yield('styles') <!-- Helpers -->
+    @yield('styles')
+
+    <!-- Helpers -->
     <script src="{{ asset('sneat') }}/assets/vendor/js/helpers.js"></script>
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -183,6 +185,48 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .layout-navbar .navbar-nav .nav-item .nav-link {
+            color: #697a8d;
+        }
+
+        /* Search bar styling */
+        .navbar-nav .nav-item.d-flex {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-item.d-flex input {
+            padding-left: 2.5rem;
+            transition: all 0.3s ease;
+            background-color: transparent;
+        }
+
+        .navbar-nav .nav-item.d-flex input:focus {
+            background-color: #f5f5f9;
+            box-shadow: none;
+            width: 300px;
+        }
+
+        .navbar-nav .nav-item.d-flex .bx-search {
+            position: absolute;
+            left: 0.75rem;
+            color: #697a8d;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-item.d-flex input:focus + .bx-search {
+            color: #696cff;
+        }
+
+        @media (max-width: 576px) {
+            .navbar-nav .nav-item.d-flex input {
+                width: 180px;
+            }
+            .navbar-nav .nav-item.d-flex input:focus {
+                width: 220px;
+            }
+        }
     </style>
     
     <script>
@@ -255,11 +299,19 @@
                     <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
                         <!-- Search -->
                         <div class="navbar-nav align-items-center">
-                            <div class="nav-item d-flex align-items-center">
+                            <form action="{{ route('tagihan.index') }}" method="GET" class="nav-item d-flex align-items-center">
+                                <input 
+                                    type="text" 
+                                    class="form-control border-0 shadow-none" 
+                                    name="search"
+                                    placeholder="Cari tagihan (nama/NISN)..." 
+                                    value="{{ request('search') }}"
+                                    aria-label="Search..."
+                                    style="min-width: 250px;"
+                                    onkeypress="if(event.key === 'Enter') { this.form.submit(); return false; }"
+                                />
                                 <i class="bx bx-search fs-4 lh-0"></i>
-                                <input type="text" class="form-control border-0 shadow-none" placeholder="Search..."
-                                    aria-label="Search..." />
-                            </div>
+                            </form>
                         </div>
                         <!-- /Search -->
 
