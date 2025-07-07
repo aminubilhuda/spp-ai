@@ -7,17 +7,103 @@
             display: none;
         }
 
-        .status-badge {
-            font-size: 0.85em;
-            padding: 5px 10px;
+        .table > :not(caption) > * > * {
+            padding: 0.6rem 0.75rem;
+            vertical-align: middle;
         }
 
-        .summary-card {
-            transition: all 0.3s ease;
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
-        .summary-card:hover {
-            transform: translateY(-5px);
+        .total-amount {
+            font-weight: 600;
+            color: #566a7f;
+        }
+
+        .search-box {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .search-box .form-control {
+            border-radius: 8px 0 0 8px;
+            border-right: none;
+        }
+
+        .search-box .btn {
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Styling untuk filter tahun */
+        select.form-select {
+            border-radius: 8px;
+            border: 1px solid #d9dee3;
+            padding: 0.4375rem 2rem 0.4375rem 0.875rem;
+            font-size: 0.9375rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #566a7f;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23697a8d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            background-size: 16px 12px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        select.form-select:focus {
+            border-color: #696cff;
+            box-shadow: 0 0 0.25rem rgba(105, 108, 255, 0.1);
+            outline: 0;
+        }
+
+        .d-flex.gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        /* Styling untuk tabel */
+        .table thead th {
+            background-color: #f5f5f9;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #566a7f;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon i {
+            font-size: 1rem;
+        }
+
+        .badge.bg-label-primary {
+            background-color: #e7e7ff !important;
+            color: #696cff;
+            font-weight: 500;
+        }
+
+        .text-primary {
+            color: #696cff !important;
+        }
+
+        /* Card styling */
+        .card {
+            box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
+            border: none;
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid #d9dee3;
         }
     </style>
 @endsection
@@ -34,7 +120,7 @@
         <!-- Summary Cards -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card summary-card">
+                <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -50,7 +136,7 @@
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card summary-card">
+                <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -85,9 +171,9 @@
                 <div class="card-body">
                     <!-- Search Section -->
                     <div class="row mb-4">
-                        <div class="col-md-12">
-                            <form action="{{ route($routePrefix . '.index') }}" method="GET">
-                                <div class="input-group">
+                        <div class="col-md-8">
+                            <form action="{{ route($routePrefix . '.index') }}" method="GET" class="d-flex gap-2">
+                                <div class="input-group search-box flex-grow-1">
                                     <input type="text" name="search" class="form-control"
                                         placeholder="Cari siswa berdasarkan nama/NISN" value="{{ request('search') }}">
                                     <button class="btn btn-outline-primary" type="submit">
@@ -99,19 +185,29 @@
                                         </a>
                                     @endif
                                 </div>
+                                <select name="tahun" class="form-select" style="width: auto" onchange="this.form.submit()">
+                                    @foreach($tahunList as $tahun)
+                                        <option value="{{ $tahun }}" {{ $tahun == $tahunSelected ? 'selected' : '' }}>
+                                            Tahun {{ $tahun }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </form>
                         </div>
                     </div>
 
                     <!-- Table Section -->
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" id="tagihan-table">
+                        <table class="table table-hover align-middle table-sm" id="tagihan-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%">No</th>
-                                    <th style="width: 35%">Nama Siswa</th>
-                                    <th style="width: 15%">Total Tagihan</th>
-                                    <th style="width: 25%">Total Nilai Tagihan</th>
+                                    <th style="width: 3%">No</th>
+                                    <th style="width: 15%">Nama</th>
+                                    <th style="width: 10%">NISN</th>
+                                    <th style="width: 7%">Kelas</th>
+                                    <th style="width: 15%">Jurusan</th>
+                                    <th style="width: 10%">Tagihan</th>
+                                    <th style="width: 20%">Total</th>
                                     <th style="width: 20%">Aksi</th>
                                 </tr>
                             </thead>
@@ -119,52 +215,70 @@
                                 @forelse ($models as $item)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
+                                        <td class="fw-semibold text-primary">
+                                            @if ($item->siswa)
+                                                {{ $item->siswa->nama }}
+                                            @else
+                                                <span class="text-muted">Data tidak tersedia</span>
+                                            @endif
+                                        </td>
                                         <td>
-                                            <div class="d-flex flex-column">
-                                                @if ($item->siswa)
-                                                    <h6 class="mb-0">{{ $item->siswa->nama }}</h6>
-                                                    <small class="text-muted">
-                                                        NISN: {{ $item->siswa->nisn }}
-                                                        <br>
-                                                        <span class="badge bg-label-info">
-                                                            {{ optional($item->siswa->jurusan)->nama ?? 'Jurusan tidak tersedia' }}
-                                                            - {{ $item->siswa->kelas }}
-                                                        </span>
-                                                    </small>
-                                                @else
-                                                    <h6 class="mb-0 text-muted">Data siswa tidak tersedia</h6>
-                                                    <small class="text-danger">ID Siswa: {{ $item->siswa_id }}</small>
-                                                @endif
-                                            </div>
+                                            @if ($item->siswa)
+                                                {{ $item->siswa->nisn }}
+                                            @else
+                                                <span class="text-danger">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->siswa)
+                                                {{ $item->siswa->kelas }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->siswa && $item->siswa->jurusan)
+                                                {{ $item->siswa->jurusan->nama }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-label-primary">{{ $item->total_tagihan }}</span>
                                         </td>
                                         <td>
-                                            <h6 class="mb-0">{{ formatRupiah($item->total_nilai) }}</h6>
+                                            <span class="fw-semibold">{{ formatRupiah($item->total_nilai) }}</span>
                                         </td>
                                         <td>
-                                            <form action="{{ route($routePrefix . '.destroy', $item->siswa_id) }}"
-                                                method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')"
-                                                class="d-inline">
-                                                @csrf
-                                                @method('DELETE')                                                <a href="{{ route($routePrefix . '.showByStudent', $item->siswa_id) }}"
-                                                    class="btn btn-info btn-sm" title="Lihat Detail">
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route($routePrefix . '.showByStudent', $item->siswa_id) }}"
+                                                    class="btn btn-icon btn-sm btn-info" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
                                                 <a href="{{ route('kartu.spp', $item->siswa_id) }}"
-                                                    class="btn btn-primary btn-sm" target="_blank" title="Cetak Kartu SPP">
+                                                    class="btn btn-icon btn-sm btn-primary" target="_blank" title="Cetak Kartu SPP">
                                                     <i class="bx bx-printer"></i>
                                                 </a>
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
-                                            </form>
+                                                <form action="{{ route($routePrefix . '.destroy', $item->siswa_id) }}"
+                                                    method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-icon btn-sm btn-danger" title="Hapus">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">Tidak ada data</td>
+                                        <td colspan="8" class="text-center py-3">
+                                            <div class="text-muted">
+                                                <i class="bx bx-folder-open mb-2" style="font-size: 2rem;"></i>
+                                                <div>Tidak ada data</div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>

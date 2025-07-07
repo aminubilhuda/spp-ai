@@ -33,6 +33,10 @@ class TagihanController extends Controller
             }])
             ->groupBy('tagihans.siswa_id');
         
+        // Filter tahun (default tahun sekarang)
+        $tahun = $request->get('tahun', date('Y'));
+        $baseQuery->whereYear('tagihans.tanggal_tagihan', $tahun);
+        
         // Filter pencarian
         if ($request->has('search')) {
             $search = $request->search;
@@ -73,12 +77,17 @@ class TagihanController extends Controller
         // Urutkan berdasarkan latest_created yang sudah diagregasi
         $models = $baseQuery->orderBy('latest_created', 'desc')->paginate(10)->withQueryString();
 
+        // Generate array tahun untuk filter (5 tahun ke belakang sampai tahun sekarang)
+        $tahunList = collect(range(date('Y')-4, date('Y')))->sortDesc();
+
         return view('operator.' . $this->viewIndex, [
             'models' => $models,
             'routePrefix' => $this->routePrefix,
             'title' => 'Data Tagihan Siswa',
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
-            'jurusan' => Jurusan::pluck('nama', 'id')
+            'jurusan' => Jurusan::pluck('nama', 'id'),
+            'tahunList' => $tahunList,
+            'tahunSelected' => $tahun
         ]);
     }
 

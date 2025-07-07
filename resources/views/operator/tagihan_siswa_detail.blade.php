@@ -751,11 +751,11 @@
                     const tagihanId = matches[2];
                     
                     const namaBiaya = row.querySelector('td:nth-child(2)').textContent.trim();
-                    const jumlahBiaya = row.querySelector('td:nth-child(6)').textContent.trim();
-                    const sisaBiaya = row.querySelector('td:nth-child(7)').textContent.trim();
+                    const jumlahBiaya = row.querySelector('td:nth-child(4)').textContent.trim();
+                    const sisaBiaya = row.querySelector('td:nth-child(5)').textContent.trim();
 
-                    // Convert currency string to number
-                    const sisaNumeric = parseFloat(sisaBiaya.replace(/[^0-9,-]/g, '').replace(/\./g, '').replace(',', '.'));
+                    // Convert currency string to number (handle Rp and dot thousand separators)
+                    const sisaNumeric = parseCurrency(sisaBiaya);
                     
                     selectedDetails.push({
                         id: detailId,
@@ -801,7 +801,7 @@
                 // Add hidden input for tagihan_id
                 const hiddenTagihanInput = document.createElement('input');
                 hiddenTagihanInput.type = 'hidden';
-                hiddenTagihanInput.name = 'tagihan_id';
+                hiddenTagihanInput.name = 'tagihan_ids[]';
                 hiddenTagihanInput.value = tagihanId;
                 detailIdsContainer.appendChild(hiddenTagihanInput);
 
@@ -849,7 +849,18 @@
 
             // Clear existing detail_ids
             const detailIdsContainer = document.getElementById('detail_ids_container');
+            const existingTagihanIds = Array.from(detailIdsContainer.querySelectorAll('input[name="tagihan_ids[]"]')).map(input => input.value);
+
             detailIdsContainer.innerHTML = '';
+
+            // Restore tagihan_ids
+            existingTagihanIds.forEach(id => {
+                const hiddenTagihanInput = document.createElement('input');
+                hiddenTagihanInput.type = 'hidden';
+                hiddenTagihanInput.name = 'tagihan_ids[]';
+                hiddenTagihanInput.value = id;
+                detailIdsContainer.appendChild(hiddenTagihanInput);
+            });
 
             checkboxes.forEach(checkbox => {
                 // Add detail_id
@@ -859,12 +870,35 @@
                 hiddenDetailInput.value = checkbox.value;
                 detailIdsContainer.appendChild(hiddenDetailInput);
 
-                total += parseFloat(checkbox.dataset.sisa);
+                // Parse the sisa value and add to total
+                const sisa = parseFloat(checkbox.dataset.sisa) || 0;
+                total += sisa;
             });
 
             // Update the payment amount and display
-            document.getElementById('jumlah_dibayar').value = total;
+            document.getElementById('jumlah_dibayar').value = Math.round(total);
             document.getElementById('sisa_tagihan').textContent = formatRupiah(total);
+        }
+
+        // Helper function to parse currency string to number
+        function parseCurrency(currencyString) {
+            // Remove currency symbol, dots, and replace comma with dot
+            return parseFloat(
+                currencyString
+                    .replace(/[^\d,-]/g, '')
+                    .replace(/\./g, '')
+                    .replace(',', '.')
+            ) || 0;
+        }
+
+        // Helper function to format currency
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
         }
 
         function openPaymentModal(detailId, tagihanId) {
@@ -922,16 +956,6 @@
                     alert.textContent = 'Terjadi kesalahan saat mengambil data tagihan: ' + error.message;
                     alert.style.display = 'block';
                 });
-        }
-
-        // Helper function to format currency
-        function formatRupiah(amount) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(amount);
         }
 
         // Function to open edit modal
