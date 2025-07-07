@@ -216,8 +216,8 @@
                                     <th>No</th>
                                     <th>Nama Tagihan</th>
                                     <th>Periode</th>
-                                    <th>Tanggal Tagihan</th>
-                                    <th>Jatuh Tempo</th>
+                                    {{-- <th>Tanggal Tagihan</th>
+                                    <th>Jatuh Tempo</th> --}}
                                     <th>Jumlah</th>
                                     <th>Sisa</th>
                                     <th>Status</th>
@@ -262,10 +262,10 @@
                                                     -
                                                 @endif
                                             </td>
-                                            <td>{{ $item->tanggal_tagihan ? \Carbon\Carbon::parse($item->tanggal_tagihan)->format('d/m/Y') : '-' }}
+                                            {{-- <td>{{ $item->tanggal_tagihan ? \Carbon\Carbon::parse($item->tanggal_tagihan)->format('d/m/Y') : '-' }}
                                             </td>
                                             <td>{{ $item->tanggal_jatuh_tempo ? \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d/m/Y') : '-' }}
-                                            </td>
+                                            </td> --}}
                                             <td><strong>{{ formatRupiah($detail->jumlah_biaya) }}</strong></td>
                                             <td>
                                                 @php
@@ -1035,6 +1035,11 @@
             document.body.appendChild(form);
             form.submit();
             document.body.removeChild(form);
+
+            // Refresh halaman setelah form di-submit
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         }
     </script>
 @endpush
