@@ -1,6 +1,28 @@
-@extends('layouts.app_sneat_blank', ['title' => 'Bukti Pembayaran'])
-@section('title', 'Bukti Pembayaran')
+@extends('layouts.app_sneat_blank', ['title' => 'Bukti Pembayaran Serentak'])
+@section('title', 'Bukti Pembayaran Serentak')
 @section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Bukti Pembayaran Serentak</h4>
+                    <div>
+                        <form method="GET" action="{{ route('kwitansi.showBatch.pdf') }}" target="_blank" style="display: inline;">
+                            @foreach($pembayaranIds as $id)
+                                <input type="hidden" name="pembayaran_ids[]" value="{{ $id }}">
+                            @endforeach
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bx bx-download"></i> Download PDF
+                            </button>
+                        </form>
+                        <button onclick="window.print()" class="btn btn-secondary btn-sm">
+                            <i class="bx bx-printer"></i> Cetak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -95,6 +117,9 @@
                 margin: 0;
                 padding: 10px;
             }
+            .container-fluid {
+                display: none;
+            }
         }
     </style>
 
@@ -114,11 +139,11 @@
             </div>
         </div>
 
-        <div class="title">BUKTI PEMBAYARAN</div>
+        <div class="title">BUKTI PEMBAYARAN SERENTAK</div>
 
         <div class="transaction-info">
             <div>No Transaksi</div>
-            <div>: {{ $pembayaran->id }}</div>
+            <div>: {{ $pembayaranIds[0] ?? 'BATCH-' . date('YmdHis') }}</div>
             <div>Tanggal</div>
             <div>: {{ $pembayaran->tanggal_bayar ? date('d-m-Y H:i:s', strtotime($pembayaran->tanggal_bayar)) : '-' }}</div>
             
@@ -129,8 +154,8 @@
             
             <div>Nama</div>
             <div>: {{ $pembayaran->tagihan->siswa->nama }}</div>
-            <div></div>
-            <div></div>
+            <div>Metode</div>
+            <div>: {{ $pembayaran->metode_pembayaran }}</div>
         </div>
 
         <table class="payment-table">
@@ -143,35 +168,39 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>{{ $pembayaran->tagihan_detail->nama_biaya }}</td>
-                    <td>
-                        @if($pembayaran->tagihan->tanggal_tagihan)
-                            @php
-                                $bulan = \Carbon\Carbon::parse($pembayaran->tagihan->tanggal_tagihan)->format('m');
-                                $tahun = \Carbon\Carbon::parse($pembayaran->tagihan->tanggal_tagihan)->format('Y');
-                                $namaBulan = [
-                                    '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
-                                    '05' => 'Mei', '06' => 'Jun', '07' => 'Jul', '08' => 'Agu',
-                                    '09' => 'Sep', '10' => 'Okt', '11' => 'Nov', '12' => 'Des',
-                                ];
-                            @endphp
-                            {{ $namaBulan[$bulan] }} {{ $tahun }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td style="text-align: right">{{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</td>
-                </tr>
+                @php $no = 1; $totalBayar = 0; @endphp
+                @foreach($pembayaranList as $pembayaranItem)
+                    <tr>
+                        <td>{{ $no++ }}</td>
+                        <td>{{ $pembayaranItem->tagihan_detail->nama_biaya }}</td>
+                        <td>
+                            @if($pembayaranItem->tagihan->tanggal_tagihan)
+                                @php
+                                    $bulan = \Carbon\Carbon::parse($pembayaranItem->tagihan->tanggal_tagihan)->format('m');
+                                    $tahun = \Carbon\Carbon::parse($pembayaranItem->tagihan->tanggal_tagihan)->format('Y');
+                                    $namaBulan = [
+                                        '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
+                                        '05' => 'Mei', '06' => 'Jun', '07' => 'Jul', '08' => 'Agu',
+                                        '09' => 'Sep', '10' => 'Okt', '11' => 'Nov', '12' => 'Des',
+                                    ];
+                                @endphp
+                                {{ $namaBulan[$bulan] }} {{ $tahun }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td style="text-align: right">{{ number_format($pembayaranItem->jumlah_dibayar, 0, ',', '.') }}</td>
+                    </tr>
+                    @php $totalBayar += $pembayaranItem->jumlah_dibayar; @endphp
+                @endforeach
             </tbody>
         </table>
 
         <div class="total-section">
             <div></div>
             <div>
-                <div>Total : {{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</div>
-                <div>Tunai : {{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</div>
+                <div>Total : {{ number_format($totalBayar, 0, ',', '.') }}</div>
+                <div>{{ $pembayaran->metode_pembayaran }} : {{ number_format($totalBayar, 0, ',', '.') }}</div>
                 <div>Kembali : 0</div>
             </div>
         </div>
@@ -183,4 +212,4 @@
             <div>{{ auth()->user()->name }}</div>
         </div>
     </div>
-@endsection
+@endsection 

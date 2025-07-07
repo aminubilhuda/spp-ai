@@ -5,5 +5,17 @@
         "500": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/inter_500_4efc23ce37e6e22aee754d42cd63ca44",
         "600": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/inter_600_d63a7c0c8732180c323356ba08cac7d8",
         "bold": "inter_bold_c60e16028ab46ac4c30f16a14b5aab03"
+    },
+    "public sans": {
+        "300_italic": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_300_italic_c7e1fc7a4e189e1eb64152a91781ff78",
+        "italic": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_italic_d4778d29553c6169e4ba4075caa3b201",
+        "500_italic": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_500_italic_6e49d9c7c3b7c9af1d28190d467652e2",
+        "600_italic": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_600_italic_2a8fb095ceed5fc56cad135162cba0c3",
+        "bold_italic": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_bold_italic_58b0fcd89e3742e0dadfa0a9ccb834d5",
+        "300": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_300_cf1e2abd72a8614599c0c9208a1ab5e5",
+        "normal": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_normal_81d990769b503059ec9f1d49078abfef",
+        "500": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_500_1ec04d4dff3e4aea9f06ed1f3c977978",
+        "600": "E:\\project\\spp-ai\\vendor\\dompdf\\dompdf\/lib\/fonts\/public_sans_600_234a775040eff0a9f7f2afa7d16ee51e",
+        "bold": "public_sans_bold_e0702a9760361ed77fe03f198dbdf223"
     }
 }

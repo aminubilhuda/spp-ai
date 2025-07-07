@@ -110,6 +110,8 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     // Reports & Kwitansi
     Route::get('tagihan-rekap/{siswa_id}', [TagihanRekapController::class, 'show'])->name('tagihan.rekap');
     Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
+    Route::post('kwitansi/batch', [KwitansiPembayaranController::class, 'showBatch'])->name('kwitansi.showBatch');
+    Route::get('kwitansi/batch/pdf', [KwitansiPembayaranController::class, 'showBatch'])->name('kwitansi.showBatch.pdf');
     
     // Notifications
     Route::controller(NotificationController::class)->group(function () {

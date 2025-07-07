@@ -644,12 +644,21 @@
                             alert.textContent = data.message;
                             alert.style.display = 'block';
 
-                            // Auto close modal after 2 seconds and reload page
+                            // Auto close modal after 2 seconds
                             setTimeout(() => {
                                 var modal = bootstrap.Modal.getInstance(document.getElementById(
                                     'paymentModal'));
                                 modal.hide();
-                                window.location.reload();
+                                
+                                // Check if this is a batch payment and show kwitansi
+                                const isBatchPayment = document.getElementById('is_batch_payment').value === '1';
+                                if (isBatchPayment && data.data && data.data.pembayaran_ids && data.data.pembayaran_ids.length > 0) {
+                                    // Show batch kwitansi
+                                    showBatchKwitansi(data.data.pembayaran_ids);
+                                } else {
+                                    // Reload page for single payment
+                                    window.location.reload();
+                                }
                             }, 2000);
                         } else {
                             throw new Error(data.message);
@@ -997,5 +1006,35 @@
                     alert.style.display = 'block';
                 });
         });
+
+        // Function to show batch kwitansi
+        function showBatchKwitansi(pembayaranIds) {
+            // Create form to submit pembayaran IDs
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("kwitansi.showBatch") }}';
+            form.target = '_blank';
+
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfToken);
+
+            // Add pembayaran IDs
+            pembayaranIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'pembayaran_ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            // Append form to body and submit
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
     </script>
 @endpush
