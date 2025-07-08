@@ -1,6 +1,14 @@
 @extends('layouts.app_sneat', ['title' => 'Tagihan'])
 
+@section('styles')
+{{-- Tambahkan Select2 CSS --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+@endsection
+
 @section('js')
+{{-- Tambahkan Select2 JS --}}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 {{-- Tambahkan Moment.js --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script>
@@ -152,6 +160,110 @@
             $('#total-tagihan').text(formatRupiah(total));
         });
         
+        // Toggle mode pemilihan siswa
+        $('input[name="mode_siswa"]').change(function() {
+            const mode = $(this).val();
+            
+            if (mode === 'single') {
+                $('#single-student-section').show();
+                $('#filter-siswa-section').hide();
+                // Disable filter inputs
+                $('#filter-siswa-section select').prop('disabled', true);
+            } else {
+                $('#single-student-section').hide();
+                $('#filter-siswa-section').show();
+                // Enable filter inputs
+                $('#filter-siswa-section select').prop('disabled', false);
+            }
+        });
+        
+        // Tampilkan informasi siswa yang dipilih
+        $('#siswa-select').on('select2:select', function(e) {
+            const data = e.params.data;
+            const siswaInfo = $('#siswa-info');
+            const siswaDetails = $('#siswa-details');
+            
+            if (data && data.id) {
+                siswaDetails.html(`
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr><td><strong>Nama:</strong></td><td>${data.nama}</td></tr>
+                        <tr><td><strong>NISN:</strong></td><td>${data.nisn}</td></tr>
+                        <tr><td><strong>NIS:</strong></td><td>${data.nis}</td></tr>
+                        <tr><td><strong>Kelas:</strong></td><td>${data.kelas}</td></tr>
+                        <tr><td><strong>Jurusan:</strong></td><td>${data.jurusan}</td></tr>
+                        <tr><td><strong>Angkatan:</strong></td><td>${data.angkatan}</td></tr>
+                        <tr><td><strong>Jenis Kelamin:</strong></td><td>${data.jenis_kelamin}</td></tr>
+                    </table>
+                `);
+                siswaInfo.show();
+            } else {
+                siswaInfo.hide();
+            }
+        });
+        
+        // Sembunyikan info siswa ketika dropdown dikosongkan
+        $('#siswa-select').on('select2:clear', function(e) {
+            $('#siswa-info').hide();
+        });
+        
+        // Inisialisasi Select2 untuk dropdown siswa
+        $('#siswa-select').select2({
+            placeholder: 'Cari siswa berdasarkan nama atau NISN...',
+            allowClear: true,
+            width: '100%',
+            theme: 'bootstrap-5',
+            language: 'id',
+            ajax: {
+                url: '{{ route("siswa.search") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term, // search term
+                        page: params.page
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.data,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true
+            },
+            templateResult: formatSiswaOption,
+            templateSelection: formatSiswaSelection,
+            minimumInputLength: 2
+        });
+        
+        // Format untuk dropdown option
+        function formatSiswaOption(siswa) {
+            if (siswa.loading) return siswa.text;
+            if (!siswa.id) return siswa.text;
+            
+            return $(`
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${siswa.nama}</strong><br>
+                        <small class="text-muted">NISN: ${siswa.nisn}</small>
+                    </div>
+                    <div class="text-end">
+                        <small class="badge bg-primary">${siswa.kelas}</small><br>
+                        <small class="text-muted">${siswa.jurusan}</small>
+                    </div>
+                </div>
+            `);
+        }
+        
+        // Format untuk selected option
+        function formatSiswaSelection(siswa) {
+            if (!siswa.id) return siswa.text;
+            return `${siswa.nama} - ${siswa.nisn} (${siswa.kelas})`;
+        }
+        
         // Format number to Rupiah
         function formatRupiah(number) {
             return new Intl.NumberFormat('id-ID', {
@@ -225,8 +337,64 @@
                             </div>
                         </div>
 
+                        {{-- Mode Selection --}}
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Mode Pemilihan Siswa</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="mode_siswa" id="mode_filter" value="filter" checked>
+                                            <label class="form-check-label" for="mode_filter">
+                                                <i class="bx bx-filter-alt"></i> Filter Siswa (Bulk)
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="mode_siswa" id="mode_single" value="single">
+                                            <label class="form-check-label" for="mode_single">
+                                                <i class="bx bx-user"></i> Pilih Siswa Spesifik
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Single Student Selection --}}
+                        <div class="row mb-3" id="single-student-section" style="display: none;">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Pilih Siswa Spesifik</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cari Siswa</label>
+                                                <select name="siswa_id" class="form-control @error('siswa_id') is-invalid @enderror" id="siswa-select">
+                                                    <option value="">Cari siswa berdasarkan nama atau NISN...</option>
+                                                </select>
+                                                @error('siswa_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div id="siswa-info" class="alert alert-info" style="display: none;">
+                                                    <h6>Informasi Siswa:</h6>
+                                                    <div id="siswa-details"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Filter Siswa (Bulk) --}}
+                        <div class="row mb-3" id="filter-siswa-section">
+                            <div class="col-md-3">
                                 <label class="form-label">Angkatan <small class="text-muted">(opsional)</small></label>
                                 <select name="angkatan" class="form-control @error('angkatan') is-invalid @enderror">
                                     <option value="">Pilih Angkatan</option>
@@ -241,7 +409,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Jurusan <small class="text-muted">(opsional)</small></label>
                                 <select name="jurusan" class="form-control @error('jurusan') is-invalid @enderror">
                                     <option value="">Semua Jurusan</option>
@@ -256,7 +424,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Kelas <small class="text-muted">(opsional)</small></label>
                                 <select name="kelas" class="form-control @error('kelas') is-invalid @enderror">
                                     <option value="">Semua Kelas</option>
@@ -267,6 +435,21 @@
                                     @endforeach
                                 </select>
                                 @error('kelas')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Jenis Kelamin <small class="text-muted">(opsional)</small></label>
+                                <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror">
+                                    <option value="">Semua Jenis Kelamin</option>
+                                    <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>
+                                        Laki-laki
+                                    </option>
+                                    <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>
+                                        Perempuan
+                                    </option>
+                                </select>
+                                @error('jenis_kelamin')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

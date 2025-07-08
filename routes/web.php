@@ -74,6 +74,7 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     
     // Master Data - Siswa
     Route::controller(SiswaController::class)->group(function () {
+        Route::get('siswa/search', 'search')->name('siswa.search');
         Route::get('siswa/export', 'export')->name('siswa.export');
         Route::get('siswa/import/template', 'importTemplate')->name('siswa.import.template');
         Route::get('siswa/import', 'importForm')->name('siswa.import.form');
@@ -106,6 +107,7 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
         Route::get('pembayaran', 'index')->name('pembayaran.index');
         Route::post('pembayaran/store', 'store')->name('pembayaran.store');
         Route::post('pembayaran/confirm/{id}', 'confirm')->name('pembayaran.confirm');
+        Route::delete('pembayaran/{id}', 'destroy')->name('pembayaran.destroy');
     });
     Route::resource('pembayaran', PembayaranController::class);
     

@@ -327,4 +327,144 @@ class PembayaranController extends Controller
             'tanggal_sampai' => $request->tanggal_sampai
         ]);
     }
+
+    /**
+     * Menghapus pembayaran (hanya untuk operator/admin)
+     * Dengan validasi dan audit trail
+     */
+    public function destroy($id)
+    {
+        try {
+            // Cek apakah user adalah operator/admin
+            if (!in_array(auth()->user()->akses, ['admin', 'operator'])) {
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menghapus pembayaran');
+            }
+            
+            $pembayaran = Pembayaran::with(['tagihan.siswa', 'tagihan_detail'])->findOrFail($id);
+            
+            // Validasi apakah pembayaran bisa dihapus
+            $canDelete = $this->canDeletePembayaran($pembayaran);
+            
+            if (!$canDelete['can_delete']) {
+                return redirect()->back()->with('error', $canDelete['message']);
+            }
+            
+            \DB::beginTransaction();
+            
+            // Log audit trail sebelum dihapus
+            \Log::info('Pembayaran akan dihapus', [
+                'pembayaran_id' => $pembayaran->id,
+                'siswa' => $pembayaran->tagihan->siswa->nama,
+                'jumlah' => $pembayaran->jumlah_dibayar,
+                'status' => $pembayaran->status_konfirmasi,
+                'deleted_by' => auth()->user()->name,
+                'deleted_at' => now()
+            ]);
+            
+            // Hapus file bukti pembayaran jika ada
+            if ($pembayaran->bukti_bayar) {
+                Storage::disk('public')->delete($pembayaran->bukti_bayar);
+                Storage::disk('public')->delete(str_replace('bukti_pembayaran/', '', $pembayaran->bukti_bayar));
+            }
+            
+            // Update tagihan_detail jika ada pembayaran_id
+            if ($pembayaran->tagihan_detail && $pembayaran->tagihan_detail->pembayaran_id == $pembayaran->id) {
+                $pembayaran->tagihan_detail->update(['pembayaran_id' => null]);
+            }
+            
+            // Hapus pembayaran
+            $pembayaran->delete();
+            
+            // Update status tagihan detail
+            if ($pembayaran->tagihan_detail) {
+                $this->updateTagihanDetailStatusAfterDelete($pembayaran->tagihan_detail);
+            }
+            
+            \DB::commit();
+            
+            return redirect()->back()->with('success', 'Pembayaran berhasil dihapus');
+            
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Gagal menghapus pembayaran: ' . $e->getMessage());
+            
+            return redirect()->back()->with('error', 'Gagal menghapus pembayaran: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Validasi apakah pembayaran bisa dihapus
+     */
+    private function canDeletePembayaran(Pembayaran $pembayaran)
+    {
+        // Jika pembayaran sudah dikonfirmasi, perlu approval khusus
+        if ($pembayaran->status_konfirmasi === 'Sudah Dikonfirmasi') {
+            // Cek apakah user adalah admin atau operator
+            if (!in_array(auth()->user()->akses, ['admin', 'operator'])) {
+                return [
+                    'can_delete' => false,
+                    'message' => 'Hanya admin dan operator yang dapat menghapus pembayaran yang sudah dikonfirmasi'
+                ];
+            }
+            
+            // Cek apakah pembayaran sudah lebih dari 7 hari
+            if ($pembayaran->created_at->diffInDays(now()) > 7) {
+                return [
+                    'can_delete' => false,
+                    'message' => 'Pembayaran yang sudah dikonfirmasi lebih dari 7 hari tidak dapat dihapus'
+                ];
+            }
+        }
+        
+        // Jika pembayaran belum dikonfirmasi, operator dan admin bisa hapus
+        if ($pembayaran->status_konfirmasi === 'Belum Dikonfirmasi') {
+            // Cek apakah user adalah admin atau operator
+            if (!in_array(auth()->user()->akses, ['admin', 'operator'])) {
+                return [
+                    'can_delete' => false,
+                    'message' => 'Hanya admin dan operator yang dapat menghapus pembayaran'
+                ];
+            }
+            
+            // Cek apakah pembayaran sudah lebih dari 30 hari
+            if ($pembayaran->created_at->diffInDays(now()) > 30) {
+                return [
+                    'can_delete' => false,
+                    'message' => 'Pembayaran yang belum dikonfirmasi lebih dari 30 hari tidak dapat dihapus'
+                ];
+            }
+        }
+        
+        return [
+            'can_delete' => true,
+            'message' => 'Pembayaran dapat dihapus'
+        ];
+    }
+    
+    /**
+     * Update status tagihan detail setelah pembayaran dihapus
+     */
+    private function updateTagihanDetailStatusAfterDelete($tagihanDetail)
+    {
+        // Hitung ulang total pembayaran yang sudah dikonfirmasi
+        $totalPembayaran = $tagihanDetail->pembayaran()
+            ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->sum('jumlah_dibayar');
+
+        // Update status berdasarkan total pembayaran
+        if ($totalPembayaran >= $tagihanDetail->jumlah_biaya) {
+            $tagihanDetail->status = 'lunas';
+            if (!$tagihanDetail->tanggal_lunas) {
+                $tagihanDetail->tanggal_lunas = now();
+            }
+        } elseif ($totalPembayaran > 0) {
+            $tagihanDetail->status = 'angsur';
+            $tagihanDetail->tanggal_lunas = null;
+        } else {
+            $tagihanDetail->status = 'belum_lunas';
+            $tagihanDetail->tanggal_lunas = null;
+        }
+
+        $tagihanDetail->save();
+    }
 }

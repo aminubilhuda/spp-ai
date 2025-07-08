@@ -294,6 +294,51 @@ class SiswaController extends Controller
     }
     
     /**
+     * Search siswa for Select2 dropdown
+     */
+    public function search(Request $request)
+    {
+        $search = $request->get('search');
+        $page = $request->get('page', 1);
+        $limit = 30;
+        
+        $query = Model::with('jurusan')
+                     ->currentStatus('Aktif')
+                     ->orderBy('nama');
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'LIKE', "%{$search}%")
+                  ->orWhere('nisn', 'LIKE', "%{$search}%")
+                  ->orWhere('nis', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $siswa = $query->paginate($limit, ['*'], 'page', $page);
+        
+        $data = $siswa->getCollection()->map(function($item) {
+            return [
+                'id' => $item->id,
+                'nama' => $item->nama,
+                'nisn' => $item->nisn,
+                'nis' => $item->nis,
+                'kelas' => $item->kelas,
+                'jurusan' => $item->jurusan->nama ?? 'Belum ada jurusan',
+                'angkatan' => $item->angkatan,
+                'jenis_kelamin' => $item->jenis_kelamin
+            ];
+        });
+        
+        return response()->json([
+            'data' => $data,
+            'total_count' => $siswa->total(),
+            'pagination' => [
+                'more' => $siswa->hasMorePages()
+            ]
+        ]);
+    }
+    
+    /**
      * Import excel to database
      */
     public function importStore(Request $request)

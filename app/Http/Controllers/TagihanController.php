@@ -120,9 +120,12 @@ class TagihanController extends Controller
             $requestData = $request->validate([
                 'biaya_id' => 'required|array',
                 'biaya_id.*' => 'exists:biayas,id',
+                'mode_siswa' => 'required|in:filter,single',
+                'siswa_id' => 'nullable|exists:siswas,id',
                 'angkatan' => 'nullable|string',
                 'jurusan' => 'nullable|exists:jurusans,id',
                 'kelas' => 'nullable',
+                'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
                 'tanggal_tagihan' => 'required|date',
                 'tanggal_jatuh_tempo' => 'required|date',
                 'keterangan' => 'nullable|string'
@@ -130,35 +133,61 @@ class TagihanController extends Controller
                 'biaya_id.required' => 'Pilih minimal satu biaya',
                 'biaya_id.array' => 'Format biaya tidak valid',
                 'biaya_id.*.exists' => 'Biaya yang dipilih tidak valid',
+                'mode_siswa.required' => 'Pilih mode pemilihan siswa',
+                'mode_siswa.in' => 'Mode pemilihan siswa tidak valid',
+                'siswa_id.exists' => 'Siswa yang dipilih tidak valid',
+                'jenis_kelamin.in' => 'Jenis kelamin yang dipilih tidak valid',
                 'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi',
                 'tanggal_tagihan.date' => 'Format tanggal tagihan tidak valid',
                 'tanggal_jatuh_tempo.required' => 'Tanggal jatuh tempo wajib diisi',
                 'tanggal_jatuh_tempo.date' => 'Format tanggal jatuh tempo tidak valid',
             ]);
 
+            // Validasi tambahan berdasarkan mode
+            if ($requestData['mode_siswa'] === 'single' && empty($requestData['siswa_id'])) {
+                throw new \Exception('Pilih siswa yang akan ditagih');
+            }
+
             // Data biaya
             $biaya_id_array = $requestData['biaya_id'];
             
-            // Data siswa yang akan ditagih
-            $siswaQuery = Siswa::query();
+            // Data siswa yang akan ditagih berdasarkan mode
+            if ($requestData['mode_siswa'] === 'single') {
+                // Mode single student
+                $siswa = Siswa::with('jurusan')
+                             ->currentStatus('Aktif')
+                             ->where('id', $requestData['siswa_id'])
+                             ->get();
+                             
+                if ($siswa->isEmpty()) {
+                    throw new \Exception('Siswa yang dipilih tidak ditemukan atau tidak aktif');
+                }
+            } else {
+                // Mode filter (bulk)
+                $siswaQuery = Siswa::query();
+                
+                // Tambahkan filter status Aktif
+                $siswaQuery->currentStatus('Aktif');
 
-            // Tambahkan filter status Aktif
-            $siswaQuery->currentStatus('Aktif');
+                if (!empty($requestData['angkatan'])) {
+                    $siswaQuery->where('angkatan', $requestData['angkatan']);
+                }
 
-            if (!empty($requestData['angkatan'])) {
-                $siswaQuery->where('angkatan', $requestData['angkatan']);
-            }
-
-            if (!empty($requestData['jurusan'])) {
-                $siswaQuery->where('jurusan_id', $requestData['jurusan']);
+                if (!empty($requestData['jurusan'])) {
+                    $siswaQuery->where('jurusan_id', $requestData['jurusan']);
+                }
+                
+                if (!empty($requestData['kelas'])) {
+                    $siswaQuery->where('kelas', $requestData['kelas']);
+                }
+                
+                if (!empty($requestData['jenis_kelamin'])) {
+                    $siswaQuery->where('jenis_kelamin', $requestData['jenis_kelamin']);
+                }
+                
+                $siswa = $siswaQuery->get();
             }
             
-            if (!empty($requestData['kelas'])) {
-                $siswaQuery->where('kelas', $requestData['kelas']);
-            }
-            
-            $siswa = $siswaQuery->get();
-
             // Validasi jika tidak ada siswa yang ditemukan
             if ($siswa->isEmpty()) {
                 throw new \Exception('Tidak ada siswa yang sesuai dengan kriteria yang dipilih');
@@ -171,7 +200,7 @@ class TagihanController extends Controller
                     'user_id' => auth()->user()->id,
                     'denda' => 0,
                     'siswa_id' => $item->id,
-                    'angkatan' => $requestData['angkatan'] ?? $item->angkatan,
+                    'angkatan' => !empty($requestData['angkatan']) ? $requestData['angkatan'] : $item->angkatan,
                     'jurusan' => !empty($requestData['jurusan']) ? $requestData['jurusan'] : $item->jurusan_id,
                     'kelas' => !empty($requestData['kelas']) ? $requestData['kelas'] : $item->kelas,
                     'tanggal_tagihan' => $requestData['tanggal_tagihan'],

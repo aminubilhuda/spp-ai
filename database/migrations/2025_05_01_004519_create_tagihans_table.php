@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('siswa_id')->index();
             $table->foreignId('user_id')->index();
-            $table->integer('angkatan')->nullable();
+            $table->string('angkatan')->nullable();
             $table->integer('jurusan')->nullable();
             $table->string('kelas')->nullable();
             $table->date('tanggal_tagihan');

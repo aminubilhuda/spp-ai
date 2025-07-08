@@ -213,6 +213,17 @@
                                                     class="btn btn-sm btn-primary" title="Cetak Kwitansi">
                                                     <i class="fas fa-print"></i>
                                                 </a>
+                                                
+                                                {{-- Tombol Hapus Pembayaran --}}
+                                                <form method="POST" action="{{ route('pembayaran.destroy', $item->id) }}" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirmDelete('{{ $item->tagihan->siswa->nama }}', '{{ formatRupiah($item->jumlah_dibayar) }}', '{{ $item->status_konfirmasi }}')"
+                                                            title="Hapus Pembayaran">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -256,6 +267,26 @@
                 // Fallback jika popup diblokir
                 alert('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
             }
+        }
+        
+        // Function untuk konfirmasi hapus pembayaran
+        function confirmDelete(siswaName, amount, status) {
+            let message = 'Apakah Anda yakin ingin menghapus pembayaran ini?\n\n';
+            message += 'Siswa: ' + siswaName + '\n';
+            message += 'Jumlah: ' + amount + '\n';
+            message += 'Status: ' + status + '\n\n';
+            
+            if (status === 'Sudah Dikonfirmasi') {
+                message += '⚠️ PERINGATAN: Pembayaran ini sudah dikonfirmasi!\n';
+                message += 'Hanya admin dan operator yang dapat menghapus pembayaran yang sudah dikonfirmasi.\n';
+                message += 'Pembayaran yang sudah dikonfirmasi lebih dari 7 hari tidak dapat dihapus.\n\n';
+            } else {
+                message += 'Pembayaran yang belum dikonfirmasi lebih dari 30 hari tidak dapat dihapus.\n\n';
+            }
+            
+            message += 'Tindakan ini tidak dapat dibatalkan!';
+            
+            return confirm(message);
         }
         
         // JavaScript untuk notifikasi dan fitur lainnya bisa ditambahkan di sini
