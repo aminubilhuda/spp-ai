@@ -64,33 +64,13 @@
         }
 
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             margin-bottom: 3mm;
             border-bottom: 1px dashed #000;
             padding-bottom: 2mm;
             position: relative;
         }
 
-        .logo {
-            position: absolute;
-            left: 0;
-            width: 12mm;
-            height: 12mm;
-        }
 
-        .logo img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .school-info {
-            text-align: center;
-            padding-left: 14mm;
-            padding-right: 14mm;
-            width: 100%;
-        }
 
         .school-name {
             font-size: 11pt;
@@ -137,18 +117,22 @@
     <div class="receipt-container">
         {{-- <div class="copy-label">ARSIP SEKOLAH</div> --}}
         <div class="header">
-            @php
-                $logoUrl = getInstansiLogoUrl();
-            @endphp
-            @if($logoUrl)
-                <div class="logo">
-                    <img src="{{ $logoUrl }}" alt="Logo Instansi">
-                </div>
-            @endif
-            <div class="school-info">
-                <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI') }}</div>
-                <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
-            </div>
+            <table style="width: 100%; border: none;">
+                <tr>
+                    <td style="width: 15mm; vertical-align: top; border: none;">
+                        @php
+                            $logoUrl = getInstansiLogoUrl();
+                        @endphp
+                        @if($logoUrl)
+                            <img src="{{ $logoUrl }}" alt="Logo Instansi" style="width: 12mm; height: 12mm;">
+                        @endif
+                    </td>
+                    <td style="vertical-align: middle; border: none; text-align: center;">
+                        <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI') }}</div>
+                        <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <div class="title">BUKTI PEMBAYARAN</div>
@@ -203,20 +187,36 @@
                             -
                         @endif
                     </td>
-                    <td style="text-align: right">{{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</td>
+                    <td style="text-align: right">{{ number_format($pembayaran->tagihan_detail->jumlah_biaya, 0, ',', '.') }}</td>
                 </tr>
             </tbody>
         </table>
 
         <table style="width: 100%; font-size: 8pt;">
             <tr>
-                <td style="width: 60%"></td>
-                <td style="width: 40%; text-align: right;">
+                <td style="width: 50%"></td>
+                <td style="width: 50%; text-align: right;">
                     <table style="width: 100%">
                         <tr>
-                            <td style="text-align: left">Total</td>
+                            <td style="text-align: left;">Nominal Tagihan</td>
+                            <td>:</td>
+                            <td style="text-align: right"> {{ number_format($pembayaran->tagihan_detail->jumlah_biaya, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">Total Bayar</td>
                             <td>:</td>
                             <td style="text-align: right"> {{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</td>
+                        </tr>
+                        @php
+                            $totalDibayar = $pembayaran->tagihan_detail->pembayaran()
+                                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                ->sum('jumlah_dibayar');
+                            $sisaTagihan = max(0, $pembayaran->tagihan_detail->jumlah_biaya - $totalDibayar);
+                        @endphp
+                        <tr>
+                            <td style="text-align: left">Sisa Tagihan</td>
+                            <td>:</td>
+                            <td style="text-align: right"> {{ number_format($sisaTagihan, 0, ',', '.') }}</td>
                         </tr>
                         <tr>
                             <td style="text-align: left">{{ $pembayaran->metode_pembayaran }}</td>
@@ -234,8 +234,8 @@
             <tr>
                 <td></td>
                 <td style="text-align: right; padding-top: 3mm;">
-                    {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
-                    Petugas<br><br><br>
+                    {{ getInstansiSetting('nama_instansi') }}<br> {{ date('d-m-Y') }} <br>
+                    Bendahara<br><br><br>
                     {{ auth()->user()->name }}
                 </td>
             </tr>
@@ -249,15 +249,19 @@
     <div class="receipt-container">
         {{-- <div class="copy-label">ARSIP SISWA</div> --}}
         <div class="header">
-            @if($logoUrl)
-                <div class="logo">
-                    <img src="{{ $logoUrl }}" alt="Logo Instansi">
-                </div>
-            @endif
-            <div class="school-info">
-                <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI') }}</div>
-                <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
-            </div>
+            <table style="width: 100%; border: none;">
+                <tr>
+                    <td style="width: 15mm; vertical-align: top; border: none;">
+                        @if($logoUrl)
+                            <img src="{{ $logoUrl }}" alt="Logo Instansi" style="width: 12mm; height: 12mm;">
+                        @endif
+                    </td>
+                    <td style="vertical-align: middle; border: none; text-align: center;">
+                        <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi') ?: 'NAMA INSTANSI') }}</div>
+                        <div>{{ getInstansiSetting('alamat_instansi') ?: 'ALAMAT INSTANSI' }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <div class="title">BUKTI PEMBAYARAN</div>
@@ -312,20 +316,36 @@
                             -
                         @endif
                     </td>
-                    <td style="text-align: right">{{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</td>
+                    <td style="text-align: right">{{ number_format($pembayaran->tagihan_detail->jumlah_biaya, 0, ',', '.') }}</td>
                 </tr>
             </tbody>
         </table>
 
         <table style="width: 100%; font-size: 8pt;">
             <tr>
-                <td style="width: 60%"></td>
-                <td style="width: 40%; text-align: right;">
+                <td style="width: 50%"></td>
+                <td style="width: 50%; text-align: right;">
                     <table style="width: 100%">
                         <tr>
-                            <td style="text-align: left">Total</td>
+                            <td style="text-align: left">Nominal Tagihan</td>
+                            <td>:</td>
+                            <td style="text-align: right"> {{ number_format($pembayaran->tagihan_detail->jumlah_biaya, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">Total Bayar</td>
                             <td>:</td>
                             <td style="text-align: right"> {{ number_format($pembayaran->jumlah_dibayar, 0, ',', '.') }}</td>
+                        </tr>
+                        @php
+                            $totalDibayar = $pembayaran->tagihan_detail->pembayaran()
+                                ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+                                ->sum('jumlah_dibayar');
+                            $sisaTagihan = max(0, $pembayaran->tagihan_detail->jumlah_biaya - $totalDibayar);
+                        @endphp
+                        <tr>
+                            <td style="text-align: left">Sisa Tagihan</td>
+                            <td>:</td>
+                            <td style="text-align: right"> {{ number_format($sisaTagihan, 0, ',', '.') }}</td>
                         </tr>
                         <tr>
                             <td style="text-align: left">{{ $pembayaran->metode_pembayaran }}</td>
@@ -335,7 +355,7 @@
                         <tr>
                             <td style="text-align: left">Kembali</td>
                             <td>:</td>
-                            <td style="text-align: right">: 0</td>
+                            <td style="text-align: right"> 0</td>
                         </tr>
                     </table>
                 </td>
@@ -343,8 +363,8 @@
             <tr>
                 <td></td>
                 <td style="text-align: right; padding-top: 3mm;">
-                    {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
-                    Petugas<br><br><br>
+                    {{ getInstansiSetting('nama_instansi') }}<br> {{ date('d-m-Y') }} <br>
+                    Bendahara<br><br><br>
                     {{ auth()->user()->name }}
                 </td>
             </tr>

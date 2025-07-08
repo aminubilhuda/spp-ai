@@ -18,7 +18,14 @@ class TagihanDetail extends Model
         'pembayaran_id',  // Tambahkan pembayaran_id 
         'nama_biaya', 
         'jumlah_biaya', 
-        'status'
+        'status',
+        'tanggal_lunas'
+    ];
+
+    protected $dates = [
+        'tanggal_lunas',
+        'created_at',
+        'updated_at'
     ];
 
     /**
@@ -80,5 +87,25 @@ class TagihanDetail extends Model
         } else {
             return 'Belum Di Bayar';
         }
+    }
+
+    /**
+     * Get formatted tanggal lunas
+     */
+    public function getTanggalLunasFormattedAttribute()
+    {
+        return $this->tanggal_lunas ? $this->tanggal_lunas->format('d-m-Y H:i') : '-';
+    }
+
+    /**
+     * Check if tagihan detail is fully paid
+     */
+    public function isLunas()
+    {
+        $totalPembayaran = $this->pembayaran()
+            ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->sum('jumlah_dibayar');
+        
+        return $totalPembayaran >= $this->jumlah_biaya;
     }
 }

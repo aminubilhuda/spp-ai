@@ -142,10 +142,18 @@ class PembayaranObserver
             // Update status berdasarkan total pembayaran
             if ($totalPembayaran >= $tagihanDetail->jumlah_biaya) {
                 $tagihanDetail->status = 'lunas';
+                // Set tanggal lunas jika belum ada
+                if (!$tagihanDetail->tanggal_lunas) {
+                    $tagihanDetail->tanggal_lunas = now();
+                }
             } elseif ($totalPembayaran > 0) {
                 $tagihanDetail->status = 'angsur';
+                // Reset tanggal lunas jika status berubah dari lunas
+                $tagihanDetail->tanggal_lunas = null;
             } else {
                 $tagihanDetail->status = 'belum_lunas';
+                // Reset tanggal lunas jika status berubah dari lunas
+                $tagihanDetail->tanggal_lunas = null;
             }
 
             $tagihanDetail->save();

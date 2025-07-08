@@ -21,12 +21,7 @@
             min-height: 60px;
         }
         .school-logo {
-            float: left;
             width: 45px;
-            margin-right: 10px;
-        }
-        .school-info {
-            margin-left: 55px;
         }
         .school-name {
             font-size: 14px;
@@ -77,13 +72,20 @@
 </head>
 <body>
     <div class="header">
-        <img src="{{ getInstansiLogoUrl() }}" alt="Logo Sekolah" class="school-logo">
-        <div class="school-info">
-            <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi')) }}</div>
-            <div class="school-address">{{ getInstansiSetting('alamat_instansi') }}</div>
-        </div>
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="width: 60px; vertical-align: top; border: none;">
+                    <img src="{{ getInstansiLogoUrl() }}" alt="Logo Sekolah" class="school-logo">
+                </td>
+                <td style="vertical-align: top; border: none;">
+                    <div class="school-name">{{ strtoupper(getInstansiSetting('nama_instansi')) }}</div>
+                    <div class="school-address">{{ getInstansiSetting('alamat_instansi') }}</div>
+                    <div class="school-address">{{ getInstansiSetting('email_instansi') }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
-    <div class="clear"></div>
+    {{-- <div class="clear"></div> --}}
 
     <div class="student-info">
         <div class="info-row">Nama Siswa: {{ $siswa->nama }} ({{ $siswa->nisn }})</div>
@@ -93,13 +95,13 @@
 
     <table>
         <thead>
-            <tr>
-                <th style="width: 5%">No</th>
+            <tr style="border: 1px solid black;">
+                <th style="width: 5%;">No</th>
                 <th style="width: 20%">Bulan</th>
-                <th style="width: 25%">Jumlah Tagihan</th>
-                <th style="width: 20%">Tanggal Bayar</th>
+                <th style="width: 15%">Jumlah Tagihan</th>
+                <th style="width: 13%">Tanggal Bayar</th>
                 <th style="width: 15%">Paraf</th>
-                <th style="width: 15%">Keterangan</th>
+                <th style="width: 25%">Keterangan</th>
             </tr>
         </thead>
         <tbody>
@@ -127,7 +129,7 @@
                     }
                 @endphp
                 <tr>
-                    <td>{{ $no++ }}</td>
+                    <td style="height: 30px;">{{ $no++ }}</td>
                     <td>{{ $namaBulan }}</td>
                     <td class="amount">{{ $tagihan ? formatRupiah($tagihan['total_tagihan'], 'Rp. ') : '-' }}</td>
                     <td>{{ $tagihan ? $tagihan['tanggal_bayar'] : '' }}</td>

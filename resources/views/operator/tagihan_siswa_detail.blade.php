@@ -493,7 +493,7 @@
                         <div class="mb-3">
                             <label class="form-label">Jumlah yang akan dibayar</label>
                             <input type="number" name="jumlah_dibayar" id="jumlah_dibayar" class="form-control"
-                                required step="0.01" min="0" readonly>
+                                required step="0.01" min="0">
                             <small class="text-muted">Total dari item yang dipilih: <span
                                     id="sisa_tagihan">0</span></small>
                         </div>
@@ -522,8 +522,8 @@
                         <div class="mb-3">
                             <label class="form-label">Status Konfirmasi</label>
                             <select name="status_konfirmasi" class="form-select" required>
-                                <option value="Belum Dikonfirmasi">Belum Dikonfirmasi</option>
                                 <option value="Sudah Dikonfirmasi">Sudah Dikonfirmasi</option>
+                                <option value="Belum Dikonfirmasi">Belum Dikonfirmasi</option>
                             </select>
                         </div>
                     </div>
