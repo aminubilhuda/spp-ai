@@ -87,6 +87,10 @@
     </div>
     {{-- <div class="clear"></div> --}}
 
+    <div style="margin-bottom: 10px; font-weight: bold; font-size: 13px;">
+        Tahun Pelajaran: {{ $tahun_ajaran }}
+    </div>
+
     <div class="student-info">
         <div class="info-row">Nama Siswa: {{ $siswa->nama }} ({{ $siswa->nisn }})</div>
         <div class="info-row">Kelas: {{ $siswa->kelas }}</div>
@@ -106,22 +110,19 @@
         </thead>
         <tbody>
             @php
-                $tahun = Carbon\Carbon::now()->year;
-                $bulan_sekarang = Carbon\Carbon::now()->month;
-                
-                // Jika bulan sekarang >= 7 (Juli), gunakan tahun sekarang, jika tidak tahun sebelumnya
-                $tahun_awal = $bulan_sekarang >= 7 ? $tahun : $tahun - 1;
+                // Ambil tahun awal dan akhir dari tahun pelajaran aktif
+                preg_match('/(\d{4})[\/\-](\d{4})/', $tahun_ajaran, $matches);
+                $tahunAwal = $matches[1] ?? date('Y');
+                $tahunAkhir = $matches[2] ?? (date('Y')+1);
+                $bulanList = [7,8,9,10,11,12,1,2,3,4,5,6];
                 $no = 1;
             @endphp
 
-            @foreach(bulanSPP() as $bulan)
+            @foreach($bulanList as $bulan)
                 @php
-                    // Tentukan tahun untuk setiap bulan
-                    $tahun_bulan = $bulan >= 7 ? $tahun_awal : $tahun_awal + 1;
-                    $namaBulan = Carbon\Carbon::create(null, $bulan, 1)->locale('id')->translatedFormat('F Y');
-                    $tagihan = isset($tagihan_per_bulan[$bulan]) ? $tagihan_per_bulan[$bulan] : null;
-                    
-                    // Siapkan keterangan jika ada tagihan
+                    $tahunBulan = $bulan >= 7 ? $tahunAwal : $tahunAkhir;
+                    $namaBulan = Carbon\Carbon::create($tahunBulan, $bulan, 1)->locale('id')->translatedFormat('F Y');
+                    $tagihan = $tagihan_per_bulan[$bulan] ?? null;
                     $keterangan = '';
                     if ($tagihan) {
                         $items = collect($tagihan['items']);

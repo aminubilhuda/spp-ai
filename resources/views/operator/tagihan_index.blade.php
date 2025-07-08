@@ -255,7 +255,7 @@
                                                     class="btn btn-icon btn-sm btn-info" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
                                                 </a>
-                                                <a href="{{ route('kartu.spp', $item->siswa_id) }}"
+                                                <a href="{{ route('kartu.spp', [$item->siswa_id, 'tahun_pelajaran_id' => $tahunPelajaranId]) }}"
                                                     class="btn btn-icon btn-sm btn-primary" target="_blank" title="Cetak Kartu SPP">
                                                     <i class="bx bx-printer"></i>
                                                 </a>

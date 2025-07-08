@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tagihan;
 use App\Models\Siswa;
 use App\Models\BankSekolah;
+use App\Models\TahunPelajaran;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -18,11 +19,23 @@ class WaliMuridInvoiceController extends Controller
         $tagihan = Tagihan::with(['siswa.wali', 'tagihan_details'])
             ->findOrFail($id);
             
-        // Ambil semua tagihan siswa yang sama
-        $semuaTagihan = Tagihan::with(['tagihan_details'])
-            ->where('siswa_id', $tagihan->siswa_id)
-            ->get();
-            
+        // Ambil tahun pelajaran aktif
+        $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
+        if ($tahunAktif) {
+            $tahunAwal = substr($tahunAktif->nama, 0, 4);
+            $tahunAkhir = substr($tahunAktif->nama, 5, 4);
+            $start = $tahunAwal . '-07-01';
+            $end = $tahunAkhir . '-06-30';
+            $semuaTagihan = Tagihan::with(['tagihan_details'])
+                ->where('siswa_id', $tagihan->siswa_id)
+                ->whereBetween('tanggal_tagihan', [$start, $end])
+                ->get();
+        } else {
+            $semuaTagihan = Tagihan::with(['tagihan_details'])
+                ->where('siswa_id', $tagihan->siswa_id)
+                ->get();
+        }
+        
         // Hitung total tagihan
         $totalTagihan = 0;
         foreach ($semuaTagihan as $item) {

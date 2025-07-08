@@ -456,9 +456,17 @@
                             </div>
                         </div>
                         <div class="form-check mt-3">
+                            @php
+                                // Ambil tahun pelajaran aktif, fallback ke string default jika tidak ada
+                                $tpNama = $tahunAktif?->nama ?? '2025/2026';
+                                // Ekstrak tahun awal dan akhir
+                                preg_match('/(\d{4})[\/\-](\d{4})/', $tpNama, $matches);
+                                $tahunAwal = $matches[1] ?? '2025';
+                                $tahunAkhir = $matches[2] ?? '2026';
+                            @endphp
                             <input class="form-check-input" type="checkbox" name="generate_1_tahun" id="generate_1_tahun" value="1" {{ old('generate_1_tahun') ? 'checked' : '' }}>
                             <label class="form-check-label" for="generate_1_tahun">
-                                Generate Tagihan 1 Tahun (Juli 2025 - Juni 2026)
+                                Generate Tagihan 1 Tahun (Juli {{ $tahunAwal }} - Juni {{ $tahunAkhir }})
                             </label>
                         </div>
                     </div>
