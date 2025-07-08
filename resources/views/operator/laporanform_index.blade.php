@@ -10,101 +10,95 @@
             <div class="card-body">
                 <!-- Laporan Tagihan -->
                 <div class="mb-4">
-                    <div class="d-flex align-items-center gap-4">
-                        <h6 class="text-muted mb-0" style="width: 150px;">Laporan Tagihan</h6>
-                        <div class="d-flex gap-2 flex-grow-1">
-                            <select name="status" class="form-select" style="width: 180px;">
-                                <option value="">Pilih Status</option>
-                                <option value="lunas">Lunas</option>
-                                <option value="baru">Baru</option>
-                                <option value="angsur">Angsur</option>
-                            </select>
-                            <select name="kelas" class="form-select" style="width: 120px;">
-                                <option value="">Pilih Kelas</option>
-                                @for($i = 10; $i <= 12; $i++)
-                                    <option value="{{ $i }}">Kelas {{ $i }}</option>
-                                @endfor
-                            </select>
-                            <select name="bulan" class="form-select" style="width: 180px;">
-                                <option value="">Pilih Bulan</option>
-                                <option value="01">Januari</option>
-                                <option value="02">Februari</option>
-                                <option value="03">Maret</option>
-                                <option value="04">April</option>
-                                <option value="05">Mei</option>
-                                <option value="06">Juni</option>
-                                <option value="07">Juli</option>
-                                <option value="08">Agustus</option>
-                                <option value="09">September</option>
-                                <option value="10">Oktober</option>
-                                <option value="11">November</option>
-                                <option value="12">Desember</option>
-                            </select>
-                            <select name="tahun" class="form-select" style="width: 120px;">
-                                @php
-                                    $currentYear = date('Y');
-                                    $startYear = $currentYear - 2;
-                                @endphp
-                                @for($year = $currentYear; $year >= $startYear; $year--)
-                                    <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endfor
-                            </select>
-                            <button type="submit" class="btn btn-primary" style="width: 120px;">
-                                <i class="bx bx-search me-1"></i> Tampil
-                            </button>
+                    <form method="GET" action="{{ route('laporan.tagihan') }}" class="w-100">
+                        <div class="d-flex align-items-center gap-4">
+                            <h6 class="text-muted mb-0" style="width: 150px;">Laporan Tagihan</h6>
+                            <div class="d-flex gap-2 flex-grow-1">
+                                <select name="status" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Status</option>
+                                    <option value="lunas">Lunas</option>
+                                    <option value="baru">Baru</option>
+                                    <option value="angsur">Angsur</option>
+                                </select>
+                                <select name="kelas" class="form-select" style="width: 120px;">
+                                    <option value="">Pilih Kelas</option>
+                                    @for($i = 10; $i <= 12; $i++)
+                                        <option value="{{ $i }}">Kelas {{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <select name="bulan" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Bulan</option>
+                                    <option value="01">Januari</option>
+                                    <option value="02">Februari</option>
+                                    <option value="03">Maret</option>
+                                    <option value="04">April</option>
+                                    <option value="05">Mei</option>
+                                    <option value="06">Juni</option>
+                                    <option value="07">Juli</option>
+                                    <option value="08">Agustus</option>
+                                    <option value="09">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                                <select name="tahun_pelajaran_id" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Tahun Pelajaran</option>
+                                    @foreach($tahunPelajarans as $tp)
+                                        <option value="{{ $tp->id }}" {{ (request('tahun_pelajaran_id', $tahunPelajarans->firstWhere('is_aktif', 1)?->id) == $tp->id ? 'selected' : '') }}>{{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-primary" style="width: 120px;">
+                                    <i class="bx bx-search me-1"></i> Tampil
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Laporan Pembayaran -->
                 <div>
-                    <div class="d-flex align-items-center gap-4">
-                        <h6 class="text-muted mb-0" style="width: 150px;">Laporan Pembayaran</h6>
-                        <div class="d-flex gap-2 flex-grow-1">
-                            <select name="status_pembayaran" class="form-select" style="width: 180px;">
-                                <option value="">Pilih Status Pembayaran</option>
-                                <option value="sudah_dikonfirmasi">Sudah Dikonfirmasi</option>
-                                <option value="belum_dikonfirmasi">Belum Dikonfirmasi</option>
-                            </select>
-                            <select name="kelas" class="form-select" style="width: 120px;">
-                                <option value="">Pilih Kelas</option>
-                                @for($i = 10; $i <= 12; $i++)
-                                    <option value="{{ $i }}">Kelas {{ $i }}</option>
-                                @endfor
-                            </select>
-                            <select name="bulan" class="form-select" style="width: 180px;">
-                                <option value="">Pilih Bulan</option>
-                                <option value="01">Januari</option>
-                                <option value="02">Februari</option>
-                                <option value="03">Maret</option>
-                                <option value="04">April</option>
-                                <option value="05">Mei</option>
-                                <option value="06">Juni</option>
-                                <option value="07">Juli</option>
-                                <option value="08">Agustus</option>
-                                <option value="09">September</option>
-                                <option value="10">Oktober</option>
-                                <option value="11">November</option>
-                                <option value="12">Desember</option>
-                            </select>
-                            <select name="tahun" class="form-select" style="width: 120px;">
-                                @php
-                                    $currentYear = date('Y');
-                                    $startYear = $currentYear - 2;
-                                @endphp
-                                @for($year = $currentYear; $year >= $startYear; $year--)
-                                    <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endfor
-                            </select>
-                            <button type="submit" class="btn btn-primary" style="width: 120px;">
-                                <i class="bx bx-search me-1"></i> Tampil
-                            </button>
+                    <form method="GET" action="{{ route('laporan.rekap_pembayaran') }}" class="w-100">
+                        <div class="d-flex align-items-center gap-4">
+                            <h6 class="text-muted mb-0" style="width: 150px;">Laporan Pembayaran</h6>
+                            <div class="d-flex gap-2 flex-grow-1">
+                                <select name="status_pembayaran" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Status Pembayaran</option>
+                                    <option value="sudah_dikonfirmasi">Sudah Dikonfirmasi</option>
+                                    <option value="belum_dikonfirmasi">Belum Dikonfirmasi</option>
+                                </select>
+                                <select name="kelas" class="form-select" style="width: 120px;">
+                                    <option value="">Pilih Kelas</option>
+                                    @for($i = 10; $i <= 12; $i++)
+                                        <option value="{{ $i }}">Kelas {{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <select name="bulan" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Bulan</option>
+                                    <option value="01">Januari</option>
+                                    <option value="02">Februari</option>
+                                    <option value="03">Maret</option>
+                                    <option value="04">April</option>
+                                    <option value="05">Mei</option>
+                                    <option value="06">Juni</option>
+                                    <option value="07">Juli</option>
+                                    <option value="08">Agustus</option>
+                                    <option value="09">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                                <select name="tahun_pelajaran_id" class="form-select" style="width: 180px;">
+                                    <option value="">Pilih Tahun Pelajaran</option>
+                                    @foreach($tahunPelajarans as $tp)
+                                        <option value="{{ $tp->id }}" {{ (request('tahun_pelajaran_id', $tahunPelajarans->firstWhere('is_aktif', 1)?->id) == $tp->id ? 'selected' : '') }}>{{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-primary" style="width: 120px;">
+                                    <i class="bx bx-search me-1"></i> Tampil
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

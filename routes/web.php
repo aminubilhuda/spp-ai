@@ -29,6 +29,8 @@ use App\Http\Controllers\WaliMuridInvoiceController;
 use App\Http\Controllers\KartuSppController;
 use App\Http\Controllers\LaporanFormController;
 use App\Http\Controllers\TahunPelajaranController;
+use App\Http\Controllers\LaporanTagihanController;
+use App\Http\Controllers\LaporanRekapPembayaranController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -155,6 +157,8 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
 
     //Laporan
     Route::get('laporanform/create', [LaporanFormController::class, 'create'])->name('laporanform.create');
+    Route::get('laporan/tagihan', [LaporanTagihanController::class, 'index'])->name('laporan.tagihan');
+    Route::get('/laporan/rekap-pembayaran', [LaporanRekapPembayaranController::class, 'index'])->name('laporan.rekap_pembayaran');
 
     // Tahun Pelajaran
     Route::resource('tahun-pelajaran', TahunPelajaranController::class);
@@ -216,3 +220,4 @@ Route::get('logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
+

@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Tagihan;
 use App\Models\Pembayaran;
+use App\Models\TahunPelajaran;
 
 class LaporanFormController extends Controller
 {
     public function create(Request $request)
     {
-        return view('operator.laporanform_index');
+        $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+        return view('operator.laporanform_index', compact('tahunPelajarans'));
     }
 
     public function tagihan(Request $request)
