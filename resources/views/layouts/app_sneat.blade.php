@@ -773,6 +773,7 @@
 
     @stack('scripts')
     @yield('js')
+    @yield('scripts')
 
     <!-- Custom JS -->
     <script>

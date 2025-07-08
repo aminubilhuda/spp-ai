@@ -21,7 +21,6 @@ use App\Http\Controllers\WaliMuridTagihanController;
 use App\Http\Controllers\WaliMuridPembayaranController;
 use App\Http\Controllers\KwitansiPembayaranController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PanduanPembayaranController;
@@ -31,6 +30,7 @@ use App\Http\Controllers\LaporanFormController;
 use App\Http\Controllers\TahunPelajaranController;
 use App\Http\Controllers\LaporanTagihanController;
 use App\Http\Controllers\LaporanRekapPembayaranController;
+use App\Http\Controllers\WhatsappFonnteController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -148,10 +148,10 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     });
 
     // WhatsApp Settings
-    Route::get('whatsapp/settings', [WhatsappController::class, 'settings'])->name('whatsapp.settings');
-    Route::post('whatsapp/settings', [WhatsappController::class, 'updateSettings'])->name('whatsapp.update-settings');
-    Route::post('whatsapp/test', [WhatsappController::class, 'test'])->name('whatsapp.test');
-    Route::post('whatsapp/send-signed-url/{pembayaranId}/{waliId}', [WhatsappController::class, 'sendPembayaranSignedUrl'])->name('whatsapp.send-signed-url');
+    Route::get('whatsapp/settings', [WhatsappFonnteController::class, 'settings'])->name('whatsapp.settings');
+    Route::post('whatsapp/settings', [WhatsappFonnteController::class, 'updateSettings'])->name('whatsapp.update-settings');
+    Route::post('/operator/whatsapp/test', [WhatsappFonnteController::class, 'test'])->name('whatsapp.test');
+    Route::post('whatsapp/send-signed-url/{pembayaranId}/{waliId}', [WhatsappFonnteController::class, 'sendPembayaranSignedUrl'])->name('whatsapp.send-signed-url');
 
     Route::get('tagihan/{siswa}/rekap-pdf', [TagihanController::class, 'rekapTagihanPdf'])->name('tagihan.rekap.pdf');
 
@@ -220,4 +220,6 @@ Route::get('logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
+
+Route::get('/whatsapp/test-tagihan/{id}', [WhatsappFonnteController::class, 'testTagihan']);
 

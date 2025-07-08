@@ -386,4 +386,39 @@ class WhatsappFonnteServices
         $this->countryCode = $countryCode;
         return $this;
     }
+
+    /**
+     * Format custom pesan tagihan SPP
+     */
+    public function formatTagihanMessage($tagihan)
+    {
+        $siswa = $tagihan->siswa;
+        $total = number_format($tagihan->jumlah_tagihan, 0, ',', '.');
+        $jatuhTempo = \Carbon\Carbon::parse($tagihan->tanggal_jatuh_tempo)->format('d/m/Y');
+
+        return "\uD83D\uDCE2 *TAGIHAN SPP BARU*\n\n" .
+               "Nama Siswa : {$siswa->nama}\n" .
+               "Kelas      : {$siswa->kelas}\n" .
+               "Total      : Rp {$total}\n" .
+               "Jatuh Tempo: {$jatuhTempo}\n\n" .
+               "Silakan segera melakukan pembayaran sebelum jatuh tempo.";
+    }
+
+    /**
+     * Kirim pesan tagihan custom ke wali
+     */
+    public function sendTagihanNotificationCustom($tagihan)
+    {
+        if (!$this->isNotificationEnabled('sistem')) {
+            return false;
+        }
+        $siswa = $tagihan->siswa;
+        $wali = $siswa->wali;
+        if (!$wali || !$wali->no_wa) {
+            \Log::warning('Wali tidak memiliki nomor WhatsApp', ['siswa_id' => $siswa->id]);
+            return false;
+        }
+        $message = $this->formatTagihanMessage($tagihan);
+        return $this->sendMessage($wali->no_wa, $message);
+    }
 }
