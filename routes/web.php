@@ -39,7 +39,7 @@ use App\Http\Controllers\LaporanFormController;
 Route::get('login/login-url', [LoginController::class, 'loginUrl'])->name('login.url');
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing_page');
 });
 
 Auth::routes();
@@ -64,6 +64,8 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     // Master Data - Users & Wali
     Route::resource('user', UserController::class);
     Route::resource('wali', WaliController::class);
+    Route::get('wali/{id}/reset-password', [WaliController::class, 'resetPassword'])->name('wali.reset-password');
+    Route::get('wali/{id}/siswa', [WaliController::class, 'siswa'])->name('wali.siswa');
     Route::resource('bank-sekolah', BankSekolahController::class);
     
     // Bank Management

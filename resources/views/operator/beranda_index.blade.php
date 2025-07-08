@@ -122,7 +122,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Tanggal</th>
+                                <th>Tanggal & Waktu</th>
                                 <th>Siswa</th>
                                 <th>Tagihan</th>
                                 <th>Jumlah</th>
@@ -133,7 +133,12 @@
                         <tbody>
                             @forelse($recentPayments as $payment)
                                 <tr>
-                                    <td>{{ $payment->tanggal_bayar ? Carbon\Carbon::parse($payment->tanggal_bayar)->format('d/m/Y') : '-' }}
+                                    <td>
+                                        @if($payment->tanggal_bayar)
+                                            {{ Carbon\Carbon::parse($payment->tanggal_bayar)->format('d/m/Y H:i') }}
+                                        @else
+                                            {{ Carbon\Carbon::parse($payment->created_at)->format('d/m/Y H:i') }}
+                                        @endif
                                     </td>
                                     <td>{{ $payment->tagihan->siswa->nama ?? 'N/A' }}</td>
                                     <td>{{ $payment->tagihan_detail->nama_biaya ?? 'N/A' }}</td>

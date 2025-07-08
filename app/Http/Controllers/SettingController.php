@@ -30,7 +30,10 @@ class SettingController extends Controller
             'email_instansi' => 'required|email|max:255',
             'nomor_wa_instansi' => 'required|string|max:20',
             'alamat_instansi' => 'required|string|max:500',
-            'logo_instansi' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'logo_instansi' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'nama_penanggung_jawab' => 'nullable|string|max:255',
+            'nama_jabatan' => 'nullable|string|max:255',
+            'ttd_penanggung_jawab' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ], [
             'nama_instansi.required' => 'Nama instansi harus diisi',
             'nama_instansi.max' => 'Nama instansi maksimal 255 karakter',
@@ -40,14 +43,18 @@ class SettingController extends Controller
             'nomor_wa_instansi.required' => 'Nomor WhatsApp instansi harus diisi',
             'nomor_wa_instansi.max' => 'Nomor WhatsApp maksimal 20 karakter',
             'alamat_instansi.required' => 'Alamat instansi harus diisi',
-            'alamat_instansi.max' => 'Alamat instansi maksimal 500 karakter'
+            'alamat_instansi.max' => 'Alamat instansi maksimal 500 karakter',
+            'nama_penanggung_jawab.max' => 'Nama penanggung jawab maksimal 255 karakter',
+            'nama_jabatan.max' => 'Nama jabatan maksimal 255 karakter'
         ]);
 
         $settings = [
             'nama_instansi' => $request->nama_instansi,
             'email_instansi' => $request->email_instansi,
             'nomor_wa_instansi' => $request->nomor_wa_instansi,
-            'alamat_instansi' => $request->alamat_instansi
+            'alamat_instansi' => $request->alamat_instansi,
+            'nama_penanggung_jawab' => $request->nama_penanggung_jawab,
+            'nama_jabatan' => $request->nama_jabatan
         ];
 
         // Proses upload logo jika ada
@@ -64,6 +71,22 @@ class SettingController extends Controller
             // Upload logo baru
             $file->storeAs('', $filename, 'public');
             $settings['logo_instansi'] = $filename;
+        }
+
+        // Proses upload TTD jika ada
+        if ($request->hasFile('ttd_penanggung_jawab')) {
+            $file = $request->file('ttd_penanggung_jawab');
+            $filename = 'ttd_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Hapus TTD lama jika ada
+            $oldSettings = Setting::getInstansiSettings();
+            if ($oldSettings->ttd_penanggung_jawab) {
+                Storage::disk('public')->delete($oldSettings->ttd_penanggung_jawab);
+            }
+            
+            // Upload TTD baru ke folder ttd/
+            $file->storeAs('ttd/', $filename, 'public');
+            $settings['ttd_penanggung_jawab'] = 'ttd/' . $filename;
         }
 
         // Simpan ke database

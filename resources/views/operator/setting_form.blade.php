@@ -50,12 +50,43 @@
                         <div class="mb-3 form-group">
                             <label for="logo_instansi" class="form-label">Logo Instansi</label>
                             <input type="file" class="form-control" id="logo_instansi" name="logo_instansi" accept="image/*">
-                            @if (!empty($settings->logo_instansi))
+                                @if (!empty($settings->logo_instansi))
+                                    <div class="mt-2">
+                                        <img src="{{ getInstansiLogoUrl() }}" alt="Logo Instansi" style="max-height: 80px;">
+                                    </div>
+                                @endif
+                            <span class="text-danger">{{ $errors->first('logo_instansi') }}</span>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="mb-3">Data Penanggung Jawab / Bendahara</h6>
+                        
+                        <div class="mb-3 form-group">
+                            <label for="nama_penanggung_jawab" class="form-label">Nama Penanggung Jawab</label>
+                            <input type="text" class="form-control" id="nama_penanggung_jawab" name="nama_penanggung_jawab" 
+                                value="{{ old('nama_penanggung_jawab', $settings->nama_penanggung_jawab ?? '') }}"
+                                placeholder="Contoh: Nama Bendahara">
+                            <span class="text-danger">{{ $errors->first('nama_penanggung_jawab') }}</span>
+                        </div>
+                        
+                        <div class="mb-3 form-group">
+                            <label for="nama_jabatan" class="form-label">Nama Jabatan</label>
+                            <input type="text" class="form-control" id="nama_jabatan" name="nama_jabatan" 
+                                value="{{ old('nama_jabatan', $settings->nama_jabatan ?? '') }}"
+                                placeholder="Contoh: Bendahara">
+                            <span class="text-danger">{{ $errors->first('nama_jabatan') }}</span>
+                        </div>
+                        
+                        <div class="mb-3 form-group">
+                            <label for="ttd_penanggung_jawab" class="form-label">Tanda Tangan Penanggung Jawab</label>
+                            <input type="file" class="form-control" id="ttd_penanggung_jawab" name="ttd_penanggung_jawab" accept="image/*">
+                            @if (!empty($settings->ttd_penanggung_jawab))
                                 <div class="mt-2">
-                                    <img src="{{ Storage::disk('public')->url($settings->logo_instansi) }}" alt="Logo Instansi" style="max-height: 80px;">
+                                    <img src="{{ getInstansiTtdStorageUrl() }}" alt="Tanda Tangan" style="max-height: 80px;">
                                 </div>
                             @endif
-                            <span class="text-danger">{{ $errors->first('logo_instansi') }}</span>
+                            <small class="form-text text-muted">Upload file gambar tanda tangan (JPG, PNG, WebP). Maksimal 2MB.</small>
+                            <span class="text-danger">{{ $errors->first('ttd_penanggung_jawab') }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-end">

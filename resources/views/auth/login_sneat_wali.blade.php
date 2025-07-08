@@ -59,7 +59,9 @@
                         <div class="app-brand justify-content-center">
                             <a href="index.html" class="app-brand-link gap-2">
                                 <span class="app-brand-logo demo">
-                                    LOGO
+                                    @if(getInstansiLogoUrl())
+                                        <img src="{{ getInstansiLogoUrl() }}" alt="Logo Instansi" style="max-height: 40px;">
+                                    @endif
                                 </span>
                                 <span class="app-brand-text demo text-body fw-bolder">Login Wali</span>
                             </a>

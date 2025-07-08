@@ -47,25 +47,31 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('sneat') }}/assets/js/config.js"></script>
     
-    <script src="{{ asset('sneat') }}/assets/vendor/libs/jquery/jquery.js"></script>
-    
-    <script src="{{ asset('sneat') }}/assets/vendor/libs/popper/popper.js"></script>
-    <script src="{{ asset('sneat') }}/assets/vendor/js/bootstrap.js"></script>
+    <!-- Remove duplicate jQuery and Bootstrap from head - they're loaded in body -->
     <link rel="stylesheet" href="{{ asset('font/css/all.min.css') }}">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     
     <style>
-        /* Ensure dropdown menus are visible */
-        .dropdown-menu.show {
-            display: block !important;
-        }
-        
         /* Ensure dropdown toggle is clickable */
         .dropdown-toggle {
             cursor: pointer !important;
             pointer-events: auto !important;
+        }
+        
+        /* Ensure dropdown container is positioned correctly */
+        .dropdown {
+            position: relative !important;
+        }
+        
+        /* Let Bootstrap handle dropdown display - only override positioning */
+        .dropdown-menu {
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+            margin-top: 0.125rem !important;
         }
         
         /* Ensure badge doesn't block clicks */
@@ -73,53 +79,43 @@
             pointer-events: none !important;
         }
         
+        /* Dropdown positioning fixes */
+        .dropdown-menu {
+            z-index: 1050 !important;
+        }
+        
+        /* Ensure dropdowns are visible */
+        .dropdown-menu.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
         /* Mobile-like dropdown behavior for desktop */
         @media (min-width: 992px) {
-            .dropdown-menu {
-                position: fixed !important;
-                top: 60px !important;
-                left: auto !important;
+            .dropdown-notifications .dropdown-menu {
+                position: absolute !important;
+                top: 100% !important;
                 right: 0 !important;
-                width: 100% !important;
+                left: auto !important;
+                width: 320px !important;
                 max-width: 320px !important;
                 margin: 0 !important;
-                border-radius: 0 !important;
+                border-radius: 8px !important;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-                z-index: 1050 !important;
             }
             
-            /* Notifications dropdown */
-            .dropdown-notifications .dropdown-menu {
-                left: auto !important;
-                right: 0 !important;
-            }
-            
-            /* User dropdown */
             .dropdown-user .dropdown-menu {
-                left: auto !important;
+                position: absolute !important;
+                top: 100% !important;
                 right: 0 !important;
+                left: auto !important;
+                width: 280px !important;
+                max-width: 280px !important;
+                margin: 0 !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
             }
-        }
-        
-        /* Force left positioning for all dropdowns */
-        .dropdown-menu {
-            right: 0 !important;
-            left: auto !important;
-            transform: none !important;
-        }
-        
-        /* Specific for notifications */
-        .dropdown-notifications .dropdown-menu {
-            right: 0 !important;
-            left: auto !important;
-            transform: none !important;
-        }
-        
-        /* Specific for user profile */
-        .dropdown-user .dropdown-menu {
-            right: 0 !important;
-            left: auto !important;
-            transform: none !important;
         }
         
         /* Mobile-like overlay effect */
@@ -145,8 +141,14 @@
                 top: 100% !important;
                 left: auto !important;
                 right: 0 !important;
-                width: auto !important;
-                max-width: none !important;
+                width: 280px !important;
+                max-width: 280px !important;
+                border-radius: 8px !important;
+            }
+            
+            .dropdown-notifications .dropdown-menu {
+                width: 320px !important;
+                max-width: 320px !important;
             }
         }
         
@@ -785,7 +787,62 @@
         }
 
         $(document).ready(function() {
-            // ... existing ready code ...
+            // Debug dropdown issues
+            console.log('Document ready - checking dropdowns');
+            
+            // Check if Bootstrap is loaded
+            if (typeof bootstrap !== 'undefined') {
+                console.log('Bootstrap loaded successfully');
+                
+                // Remove any existing event handlers to prevent conflicts
+                $('.dropdown-toggle').off('click');
+                
+                // Test dropdown functionality
+                $('.dropdown-toggle').on('click', function(e) {
+                    console.log('Dropdown clicked:', this);
+                    console.log('Bootstrap version:', bootstrap.Dropdown.VERSION);
+                    
+                    // Let Bootstrap handle it, but log what happens
+                    setTimeout(function() {
+                        var $dropdown = $(e.target).closest('.dropdown').find('.dropdown-menu');
+                        console.log('Dropdown state after click:', $dropdown.hasClass('show'));
+                    }, 100);
+                });
+                
+                console.log('Bootstrap dropdowns should work automatically');
+            } else {
+                console.error('Bootstrap not loaded!');
+                
+                // Fallback: manual dropdown handling
+                $('.dropdown-toggle').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    var $dropdown = $(this).next('.dropdown-menu');
+                    var $allDropdowns = $('.dropdown-menu');
+                    
+                    // Close other dropdowns
+                    $allDropdowns.not($dropdown).removeClass('show');
+                    
+                    // Toggle current dropdown
+                    $dropdown.toggleClass('show');
+                    
+                    console.log('Manual dropdown toggle:', $dropdown.hasClass('show'));
+                });
+                
+                // Close dropdowns when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.dropdown').length) {
+                        $('.dropdown-menu').removeClass('show');
+                    }
+                });
+            }
+            
+            // Additional debugging
+            console.log('Found dropdown toggles:', $('.dropdown-toggle').length);
+            $('.dropdown-toggle').each(function(index) {
+                console.log('Dropdown', index + 1, ':', this.className, this.textContent.trim());
+            });
         });
     </script>
 </body>

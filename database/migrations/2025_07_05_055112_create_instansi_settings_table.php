@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('nomor_wa_instansi')->nullable();
             $table->text('alamat_instansi')->nullable();
             $table->string('logo_instansi')->nullable();
+            $table->string('nama_penanggung_jawab')->nullable();
+            $table->string('nama_jabatan')->nullable();
+            $table->string('ttd_penanggung_jawab')->nullable();
             $table->timestamps();
         });
     }

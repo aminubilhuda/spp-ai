@@ -37,16 +37,41 @@
                                         <td>{{ $user->akses }}</td>
                                         <td>
                                             <a href="{{ route($routePrefix . '.show', $user->id) }}"
-                                                class="btn btn-sm btn-info"> <i class="fas fa-eye"></i> Detail</a>
+                                                class="btn btn-sm btn-info" title="Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <a href="{{ route($routePrefix . '.edit', $user->id) }}"
-                                                class="btn btn-sm btn-warning"> <i class="fas fa-edit"></i> Edit</a>
+                                                class="btn btn-sm btn-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            @if($routePrefix === 'wali')
+                                                <!-- Tombol Reset Password - khusus untuk wali -->
+                                                <a href="{{ route('wali.reset-password', $user->id) }}"
+                                                   class="btn btn-sm btn-secondary" 
+                                                   title="Reset Password"
+                                                   onclick="return confirm('Reset password wali {{ $user->name }}?')">
+                                                    <i class="fas fa-key"></i>
+                                                </a>
+                                                
+                                                <!-- Tombol Lihat Siswa - khusus untuk wali -->
+                                                <a href="{{ route('wali.siswa', $user->id) }}"
+                                                   class="btn btn-sm btn-primary" 
+                                                   title="Lihat Siswa">
+                                                    <i class="fas fa-users"></i>
+                                                    <span class="badge bg-light text-dark">{{ $user->siswa->count() }}</span>
+                                                </a>
+                                            @endif
+                                            
                                             <form action="{{ route($routePrefix . '.destroy', $user->id) }}" method="post"
                                                 class="d-inline">
                                                 @csrf
                                                 @method('delete')
                                                 <button type="submit" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Apakah anda yakin?')"><i class="fas fa-trash">
-                                                    </i> Hapus</button>
+                                                    onclick="return confirm('Apakah anda yakin ingin menghapus {{ $user->name }}?')" 
+                                                    title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>

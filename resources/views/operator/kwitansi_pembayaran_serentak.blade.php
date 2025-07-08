@@ -252,8 +252,11 @@
                 <td></td>
                 <td style="text-align: right; padding-top: 3mm;">
                     {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
-                    Petugas<br><br><br>
-                    {{ auth()->user()->name }}
+                    {{ getInstansiSetting('nama_jabatan') ?: 'Bendahara' }}<br><br>
+                    @if(getInstansiTtdUrl())
+                        <img src="{{ getInstansiTtdUrl() }}" alt="Tanda Tangan" style="max-height: 30px;"><br>
+                    @endif
+                    {{ getInstansiSetting('nama_penanggung_jawab') ?: auth()->user()->name }}
                 </td>
             </tr>
         </table>
@@ -362,8 +365,11 @@
                 <td></td>
                 <td style="text-align: right; padding-top: 3mm;">
                     {{ getInstansiSetting('nama_instansi') }}, {{ date('d-m-Y') }}<br>
-                    Petugas<br><br><br>
-                    {{ auth()->user()->name }}
+                    {{ getInstansiSetting('nama_jabatan') ?: 'Bendahara' }}<br><br>
+                    @if(getInstansiTtdUrl())
+                        <img src="{{ getInstansiTtdUrl() }}" alt="Tanda Tangan" style="max-height: 30px;"><br>
+                    @endif
+                    {{ getInstansiSetting('nama_penanggung_jawab') ?: auth()->user()->name }}
                 </td>
             </tr>
         </table>

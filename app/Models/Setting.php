@@ -13,7 +13,10 @@ class Setting extends Model
         'email_instansi', 
         'nomor_wa_instansi',
         'alamat_instansi',
-        'logo_instansi'
+        'logo_instansi',
+        'nama_penanggung_jawab',
+        'nama_jabatan',
+        'ttd_penanggung_jawab'
     ];
 
     /**

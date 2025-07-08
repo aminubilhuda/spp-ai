@@ -450,10 +450,14 @@
                         \Carbon\Carbon::setLocale('id');
                     @endphp
                     <div class="date">Tuban, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') }}</div>
-                    <div class="title">Bendahara</div>
-                    <div class="signature-line"></div>
-                    <div class="name">{{ getInstansiSetting('nama_bendahara') ?? '.........................' }}</div>
-                    <div class="nip">NIP. {{ getInstansiSetting('nip_bendahara') ?? '.........................' }}</div>
+                    <div class="title">{{ getInstansiSetting('nama_jabatan') ?: 'Bendahara' }}</div>
+                    @if(getInstansiTtdUrl())
+                        <img src="{{ getInstansiTtdUrl() }}" alt="Tanda Tangan" style="max-height: 50px; margin: 10px 0;">
+                    @else
+                        <div class="signature-line"></div>
+                    @endif
+                    <div class="name">{{ getInstansiSetting('nama_penanggung_jawab') ?? '.........................' }}</div>
+                    <div class="nip">{{ getInstansiSetting('nama_jabatan') ?: 'Bendahara' }}</div>
                 </div>
             </div>
         </div>

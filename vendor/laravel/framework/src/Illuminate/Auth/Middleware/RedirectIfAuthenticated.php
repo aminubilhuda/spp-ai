@@ -28,6 +28,16 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $user = Auth::user();
+                if ($user->akses == 'operator' || $user->akses == 'admin') {
+                    return redirect()->route('operator.beranda');
+                } else if ($user->akses == 'wali') {
+                    return redirect()->route('wali.beranda');
+                } else {
+                    Auth::logout();
+                    session()->flash('error', 'Anda tidak memiliki akses');
+                    return redirect()->route('login');
+                }
                 return redirect($this->redirectTo($request));
             }
         }

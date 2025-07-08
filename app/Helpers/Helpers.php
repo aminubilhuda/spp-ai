@@ -81,6 +81,75 @@ function getInstansiLogoUrl() {
 }
 
 /**
+ * Mendapatkan URL logo instansi untuk storage URL (tidak base64)
+ * 
+ * @return string
+ */
+function getInstansiLogoStorageUrl() {
+    $logoPath = getInstansiSetting('logo_instansi');
+    
+    if (!$logoPath) {
+        return '';
+    }
+    
+    return Storage::disk('public')->url($logoPath);
+}
+
+/**
+ * Mendapatkan URL TTD penanggung jawab yang aman
+ * 
+ * @return string
+ */
+function getInstansiTtdUrl() {
+    $ttdPath = getInstansiSetting('ttd_penanggung_jawab');
+    
+    if (!$ttdPath) {
+        return '';
+    }
+    
+    // Bersihkan path dari 'storage/' jika ada
+    $cleanPath = str_replace('storage/', '', $ttdPath);
+    $fullPath = storage_path('app/public/' . $cleanPath);
+    
+    // Cek apakah file ada
+    if (!file_exists($fullPath)) {
+        return '';
+    }
+    
+    // Cek apakah file adalah gambar
+    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    
+    if (!in_array($extension, $allowedTypes)) {
+        return '';
+    }
+    
+    // Baca file dan encode ke base64
+    try {
+        $imageData = file_get_contents($fullPath);
+        $mimeType = mime_content_type($fullPath);
+        return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+    } catch (\Exception $e) {
+        return '';
+    }
+}
+
+/**
+ * Mendapatkan URL TTD penanggung jawab untuk storage URL (tidak base64)
+ * 
+ * @return string
+ */
+function getInstansiTtdStorageUrl() {
+    $ttdPath = getInstansiSetting('ttd_penanggung_jawab');
+    
+    if (!$ttdPath) {
+        return '';
+    }
+    
+    return Storage::disk('public')->url($ttdPath);
+}
+
+/**
  * Check if payment can be cancelled
  * 
  * @param \App\Models\Pembayaran $pembayaran

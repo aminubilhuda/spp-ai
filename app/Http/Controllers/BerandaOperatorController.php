@@ -58,11 +58,14 @@ class BerandaOperatorController extends Controller
             $statusCount[$status]++;
         }
 
-        // Recent payments
+        // Recent payments - urutkan dari yang terbaru
+        // Prioritas 1: tanggal_bayar (desc) - pembayaran terbaru di atas
+        // Prioritas 2: created_at (desc) - jika tanggal_bayar sama, urutkan berdasarkan waktu dibuat
         $recentPayments = Pembayaran::with(['tagihan.siswa', 'tagihan_detail'])
             ->where('status_konfirmasi', 'Sudah Dikonfirmasi')
-            ->latest('tanggal_bayar')
-            ->take(5)
+            ->orderBy('tanggal_bayar', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
             ->get();
 
         $data = [

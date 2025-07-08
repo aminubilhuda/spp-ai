@@ -142,9 +142,13 @@
 
     <div class="signature">
         <div>{{ getInstansiSetting('nama_instansi') }}, {{ now()->translatedFormat('d F Y') }}</div>
-        <div style="margin-top: 10px;">Bendahara</div>
-        <div class="signature-line"></div>
-        <div>{{ strtoupper(auth()->user()->name) }}</div>
+        <div style="margin-top: 10px;">{{ getInstansiSetting('nama_jabatan') ?: 'Bendahara' }}</div>
+        @if(getInstansiTtdUrl())
+            <img src="{{ getInstansiTtdUrl() }}" alt="Tanda Tangan" style="max-height: 40px; margin: 10px 0;">
+        @else
+            <div class="signature-line"></div>
+        @endif
+        <div>{{ strtoupper(getInstansiSetting('nama_penanggung_jawab') ?: auth()->user()->name) }}</div>
     </div>
 </body>
 </html> 

@@ -22,6 +22,7 @@ class WaliController extends Controller
     {
         return view ('operator.'.$this->viewIndex, [
             'models' => Model::where('akses', 'wali')
+            ->with('siswa')  // Eager loading untuk performa
             ->latest()
             ->paginate(50),
             'routePrefix' => $this->routePrefix,
@@ -132,5 +133,44 @@ class WaliController extends Controller
 
         session()->flash('success', 'Wali berhasil dihapus');
         return back();
+    }
+
+    /**
+     * Reset password wali
+     */
+    public function resetPassword(string $id)
+    {
+        $wali = Model::where('akses', 'wali')->findOrFail($id);
+        
+        // Generate password baru (8 karakter)
+        $newPassword = Str::random(8);
+        
+        // Update password
+        $wali->update([
+            'password' => Hash::make($newPassword)
+        ]);
+        
+        session()->flash('success', 'Password wali berhasil direset. Password baru: ' . $newPassword);
+        return back();
+    }
+
+    /**
+     * Lihat daftar siswa yang terkait dengan wali
+     */
+    public function siswa(string $id)
+    {
+        $wali = Model::where('akses', 'wali')->findOrFail($id);
+        
+        $data = [
+            'wali' => $wali,
+            'siswaList' => \App\Models\Siswa::with(['jurusan', 'user'])
+                ->where('wali_id', $id)
+                ->latest()
+                ->paginate(20),
+            'title' => 'Daftar Siswa - ' . $wali->name,
+            'routePrefix' => $this->routePrefix,
+        ];
+        
+        return view('operator.wali_siswa', $data);
     }
 }
