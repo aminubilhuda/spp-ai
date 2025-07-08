@@ -131,18 +131,18 @@
                 <div class="card-body">
                     @php
                         $namaBulan = [
-                            '01' => 'Januari',
-                            '02' => 'Februari',
-                            '03' => 'Maret',
-                            '04' => 'April',
-                            '05' => 'Mei',
-                            '06' => 'Juni',
                             '07' => 'Juli',
                             '08' => 'Agustus',
                             '09' => 'September',
                             '10' => 'Oktober',
                             '11' => 'November',
                             '12' => 'Desember',
+                            '01' => 'Januari',
+                            '02' => 'Februari',
+                            '03' => 'Maret',
+                            '04' => 'April',
+                            '05' => 'Mei',
+                            '06' => 'Juni',
                         ];
 
                         // Mengelompokkan tagihan berdasarkan bulan
@@ -204,6 +204,18 @@
             <div class="card">
                 <h5 class="card-header">Daftar Tagihan Siswa</h5>
                 <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <form method="GET" action="">
+                                <label for="tahun_pelajaran_id">Tahun Pelajaran</label>
+                                <select name="tahun_pelajaran_id" id="tahun_pelajaran_id" class="form-control" onchange="this.form.submit()">
+                                    @foreach($tahunPelajarans as $tp)
+                                        <option value="{{ $tp->id }}" {{ ($tahunPelajaranId == $tp->id) ? 'selected' : '' }}>{{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <div class="mb-3">
                             <button type="button" class="btn btn-primary" onclick="openBatchPaymentModal()">
@@ -400,6 +412,7 @@
                 </div>
                 <form id="paymentForm" action="{{ route('pembayaran.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="tahun_pelajaran_id" id="tahun_pelajaran_id_input">
                     <div class="modal-body">
                         <div id="payment-alert" class="alert" style="display: none;"></div>
                         <input type="hidden" name="tagihan_id" id="tagihan_id">
@@ -703,6 +716,12 @@
 
             // Load all tagihan details initially
             loadBatchPaymentDetails();
+
+            // Set tahun pelajaran id dari select
+            var tahunPelajaranSelect = document.getElementById('tahun_pelajaran_id');
+            if (tahunPelajaranSelect) {
+                document.getElementById('tahun_pelajaran_id_input').value = tahunPelajaranSelect.value;
+            }
         }
 
         function loadBatchPaymentDetails(month = '', year = '') {
@@ -947,6 +966,12 @@
                     if (data.detail && data.detail.nama_siswa) {
                         document.querySelector('#paymentModalLabel').textContent = 
                             `Form Pembayaran - ${data.detail.nama_siswa}`;
+                    }
+
+                    // Set tahun pelajaran id dari select
+                    var tahunPelajaranSelect = document.getElementById('tahun_pelajaran_id');
+                    if (tahunPelajaranSelect) {
+                        document.getElementById('tahun_pelajaran_id_input').value = tahunPelajaranSelect.value;
                     }
                 })
                 .catch(error => {

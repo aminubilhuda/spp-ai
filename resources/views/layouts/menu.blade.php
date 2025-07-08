@@ -35,6 +35,12 @@
                 <div data-i18n="Analytics">Pengaturan</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->is('operator/tahun-pelajaran*') ? 'active' : '' }}">
+            <a href="{{ route('tahun-pelajaran.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                <div data-i18n="Analytics">Tahun Pelajaran</div>
+            </a>
+        </li>
 
         <!-- Data Master -->
         <li class="menu-item {{ request()->is('operator/user*') || request()->is('operator/wali*') || request()->is('operator/siswa*') || request()->is('operator/jurusan*') ? 'active open' : '' }}">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use App\Models\TagihanDetail;
+use App\Models\TahunPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -96,6 +97,13 @@ class PembayaranController extends Controller
                 $buktiPath = $file->store('bukti_pembayaran', 'public');
             }
 
+            // Ambil tahun_pelajaran_id dari request jika ada, jika tidak pakai tahun pelajaran aktif
+            $tahunPelajaranId = $request->input('tahun_pelajaran_id') ?? null;
+            if (!$tahunPelajaranId) {
+                $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
+                $tahunPelajaranId = $tahunAktif ? $tahunAktif->id : null;
+            }
+
             // Buat record pembayaran untuk setiap tagihan
             $pembayaranIds = [];
             
@@ -145,6 +153,7 @@ class PembayaranController extends Controller
                         'user_id' => auth()->id(),
                         'no_rekening_pengirim' => $request->no_rekening_pengirim,
                         'bank_pengirim' => $request->bank_pengirim,
+                        'tahun_pelajaran_id' => $tahunPelajaranId,
                     ]);
                     
                     // Set status awal menggunakan package Spatie

@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('tagihans', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('tahun_pelajaran_id')->nullable();
+            $table->foreign('tahun_pelajaran_id')->references('id')->on('tahun_pelajarans')->onDelete('set null');
             $table->foreignId('siswa_id')->index();
             $table->foreignId('user_id')->index();
             $table->string('angkatan')->nullable();

@@ -278,15 +278,22 @@
 @endsection
 
 @section('content')
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card">
-                <h5 class="card-header">{{ $title }}</h5>
-                <div class="card-body">
-                    {{-- Tambahkan div untuk menampilkan total tagihan --}}
-                    <div class="alert alert-info mb-4">
-                        <strong>Total Tagihan:</strong> <span id="total-tagihan">Rp 0</span>
+        <div class="col-lg-10 col-xl-8">
+            {{-- Alert/Error --}}
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
                     </div>
+            @endif
 
                     <form action="{{ isset($model->id) ? route($route, $model->id) : route($route) }}" id="form-tagihan-ajax" method="POST">
                         @csrf
@@ -294,40 +301,32 @@
                             @method('PUT')
                         @endif
 
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Pilih Biaya</label>
+                {{-- Card: Pilih Biaya --}}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">1. Pilih Biaya</h6>
+                    </div>
+                    <div class="card-body">
                                 <div class="row">
                                     @foreach ($biaya as $item)
                                         <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <div class="form-check">
+                                    <div class="form-check mb-2">
                                                         <input type="checkbox" name="biaya_id[]" value="{{ $item->id }}"
                                                             class="form-check-input @error('biaya_id') is-invalid @enderror"
                                                             id="biaya_{{ $item->id }}" data-jumlah="{{ $item->total_tagihan }}"
                                                             {{ is_array(old('biaya_id')) && in_array($item->id, old('biaya_id')) ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="biaya_{{ $item->id }}">
                                                             <strong>{{ $item->nama }}</strong>
-                                                            <br>
-                                                            <span class="text-primary">{{ formatRupiah($item->total_tagihan) }}</span>
+                                            <span class="text-primary ms-2">{{ formatRupiah($item->total_tagihan) }}</span>
                                                         </label>
                                                     </div>
-                                                    
                                                     @if($item->children->count() > 0)
-                                                        <div class="mt-2 ms-4">
-                                                            <small class="text-muted">Rincian:</small>
-                                                            <ul class="list-unstyled ms-3">
+                                        <ul class="list-unstyled ms-4 mb-0">
                                                                 @foreach($item->children as $child)
-                                                                    <li>
-                                                                        <small>• {{ $child->nama }}: {{ formatRupiah($child->jumlah) }}</small>
-                                                                    </li>
+                                                <li><small>• {{ $child->nama }}: {{ formatRupiah($child->jumlah) }}</small></li>
                                                                 @endforeach
                                                             </ul>
-                                                        </div>
                                                     @endif
-                                                </div>
-                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -337,61 +336,42 @@
                             </div>
                         </div>
 
-                        {{-- Mode Selection --}}
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">Mode Pemilihan Siswa</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="mode_siswa" id="mode_filter" value="filter" checked>
-                                            <label class="form-check-label" for="mode_filter">
-                                                <i class="bx bx-filter-alt"></i> Filter Siswa (Bulk)
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="mode_siswa" id="mode_single" value="single">
-                                            <label class="form-check-label" for="mode_single">
-                                                <i class="bx bx-user"></i> Pilih Siswa Spesifik
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
+                {{-- Card: Mode Pemilihan Siswa --}}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">2. Pilih Siswa</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="mode_siswa" id="mode_filter" value="filter" checked>
+                                <label class="form-check-label" for="mode_filter">
+                                    <i class="bx bx-filter-alt"></i> Filter Siswa (Bulk)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="mode_siswa" id="mode_single" value="single">
+                                <label class="form-check-label" for="mode_single">
+                                    <i class="bx bx-user"></i> Pilih Siswa Spesifik
+                                </label>
                             </div>
                         </div>
-
                         {{-- Single Student Selection --}}
                         <div class="row mb-3" id="single-student-section" style="display: none;">
                             <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">Pilih Siswa Spesifik</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Cari Siswa</label>
-                                                <select name="siswa_id" class="form-control @error('siswa_id') is-invalid @enderror" id="siswa-select">
-                                                    <option value="">Cari siswa berdasarkan nama atau NISN...</option>
-                                                </select>
-                                                @error('siswa_id')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div id="siswa-info" class="alert alert-info" style="display: none;">
-                                                    <h6>Informasi Siswa:</h6>
-                                                    <div id="siswa-details"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <label class="form-label">Cari Siswa</label>
+                                <select name="siswa_id" class="form-control @error('siswa_id') is-invalid @enderror" id="siswa-select">
+                                    <option value="">Cari siswa berdasarkan nama atau NISN...</option>
+                                </select>
+                                @error('siswa_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div id="siswa-info" class="alert alert-info mt-2" style="display: none;">
+                                    <h6>Informasi Siswa:</h6>
+                                    <div id="siswa-details"></div>
                                 </div>
                             </div>
                         </div>
-
                         {{-- Filter Siswa (Bulk) --}}
                         <div class="row mb-3" id="filter-siswa-section">
                             <div class="col-md-3">
@@ -399,10 +379,7 @@
                                 <select name="angkatan" class="form-control @error('angkatan') is-invalid @enderror">
                                     <option value="">Pilih Angkatan</option>
                                     @foreach ($angkatan as $item)
-                                        <option value="{{ $item }}"
-                                            {{ old('angkatan') == $item ? 'selected' : '' }}>
-                                            {{ $item }}
-                                        </option>
+                                        <option value="{{ $item }}" {{ old('angkatan') == $item ? 'selected' : '' }}>{{ $item }}</option>
                                     @endforeach
                                 </select>
                                 @error('angkatan')
@@ -414,10 +391,7 @@
                                 <select name="jurusan" class="form-control @error('jurusan') is-invalid @enderror">
                                     <option value="">Semua Jurusan</option>
                                     @foreach ($jurusan as $kode => $nama)
-                                        <option value="{{ $kode }}"
-                                            {{ old('jurusan') == $kode ? 'selected' : '' }}>
-                                            {{ $nama }}
-                                        </option>
+                                        <option value="{{ $kode }}" {{ old('jurusan') == $kode ? 'selected' : '' }}>{{ $nama }}</option>
                                     @endforeach
                                 </select>
                                 @error('jurusan')
@@ -429,9 +403,7 @@
                                 <select name="kelas" class="form-control @error('kelas') is-invalid @enderror">
                                     <option value="">Semua Kelas</option>
                                     @foreach ($kelas as $item)
-                                        <option value="{{ $item }}" {{ old('kelas') == $item ? 'selected' : '' }}>
-                                            {{ $item }}
-                                        </option>
+                                        <option value="{{ $item }}" {{ old('kelas') == $item ? 'selected' : '' }}>{{ $item }}</option>
                                     @endforeach
                                 </select>
                                 @error('kelas')
@@ -442,53 +414,73 @@
                                 <label class="form-label">Jenis Kelamin <small class="text-muted">(opsional)</small></label>
                                 <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror">
                                     <option value="">Semua Jenis Kelamin</option>
-                                    <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>
-                                        Laki-laki
-                                    </option>
-                                    <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>
-                                        Perempuan
-                                    </option>
+                                    <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
                                 </select>
                                 @error('jenis_kelamin')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                            </div>
+                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
+                {{-- Card: Tahun Pelajaran & Tanggal --}}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">3. Tahun Pelajaran & Tanggal</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tahun Pelajaran</label>
+                                <select name="tahun_pelajaran_id" id="tahun_pelajaran_id" class="form-control">
+                                    @foreach($tahunPelajarans as $tp)
+                                        <option value="{{ $tp->id }}" {{ (old('tahun_pelajaran_id', $tahunAktif?->id) == $tp->id) ? 'selected' : '' }}>{{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">Tanggal Tagihan</label>
-                                <input type="date" name="tanggal_tagihan"
-                                    class="form-control @error('tanggal_tagihan') is-invalid @enderror"
-                                    value="{{ date('Y-m-01') }}">
+                                <input type="date" name="tanggal_tagihan" class="form-control @error('tanggal_tagihan') is-invalid @enderror" value="{{ date('Y-m-01') }}">
                                 @error('tanggal_tagihan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Tanggal Jatuh Tempo</label>
-                                <input type="date" name="tanggal_jatuh_tempo"
-                                    class="form-control @error('tanggal_jatuh_tempo') is-invalid @enderror"
-                                    value="{{ date('Y-m-28') }}">
+                                <input type="date" name="tanggal_jatuh_tempo" class="form-control @error('tanggal_jatuh_tempo') is-invalid @enderror" value="{{ date('Y-m-28') }}">
                                 @error('tanggal_jatuh_tempo')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" name="generate_1_tahun" id="generate_1_tahun" value="1" {{ old('generate_1_tahun') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="generate_1_tahun">
+                                Generate Tagihan 1 Tahun (Juli 2025 - Juni 2026)
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Keterangan</label>
-                                <textarea name="keterangan" class="form-control @error('keterangan') is-invalid @enderror" rows="3">{{ old('keterangan') }}</textarea>
+                {{-- Card: Keterangan --}}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">4. Keterangan (Opsional)</h6>
+                    </div>
+                    <div class="card-body">
+                        <textarea name="keterangan" class="form-control @error('keterangan') is-invalid @enderror" rows="3" placeholder="Keterangan tambahan (opsional)">{{ old('keterangan') }}</textarea>
                                 @error('keterangan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">{{ $button }}</button>
-                    </form>
+                <div class="d-flex justify-content-end mb-4">
+                    <button type="submit" class="btn btn-primary px-4 py-2">Simpan Tagihan</button>
                 </div>
+            </form>
             </div>
         </div>
     </div>

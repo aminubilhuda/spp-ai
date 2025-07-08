@@ -27,13 +27,13 @@ class UserSeeder extends Seeder
 
         // Create a new user
         User::create([
-            'name' => 'Operator2',
-            'akses' => 'operator',
+            'name' => 'admin',
+            'akses' => 'admin',
             'nohp' => '081298788990',
             'nohp_verified_at' => now(),
-            'email' => 'operator2@operator.com',
+            'email' => 'admin@admin.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('operator'),
+            'password' => Hash::make('admin'),
         ]);
 
         // Create a new user

@@ -38,7 +38,8 @@ class BiayaSeeder extends Seeder
                 'jumlah' => 250000,
                 'user_id' => 1
             ],
-        ];        foreach ($biayas as $biaya) {
+        ];        
+        foreach ($biayas as $biaya) {
             Biaya::create($biaya);
         }
     }

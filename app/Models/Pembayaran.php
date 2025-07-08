@@ -13,6 +13,7 @@ class Pembayaran extends Model
 
     protected $table = 'pembayarans';
     protected $fillable = [
+        'tahun_pelajaran_id',
         'tagihan_id',
         'tagihan_detail_id',
         'wali_id',
@@ -105,5 +106,10 @@ class Pembayaran extends Model
     public function getMetodePembayaranFormattedAttribute()
     {
         return str_replace('_', ' ', $this->metode_pembayaran);
+    }
+
+    public function tahunPelajaran()
+    {
+        return $this->belongsTo(TahunPelajaran::class, 'tahun_pelajaran_id');
     }
 }

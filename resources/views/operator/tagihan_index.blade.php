@@ -185,10 +185,10 @@
                                         </a>
                                     @endif
                                 </div>
-                                <select name="tahun" class="form-select" style="width: auto" onchange="this.form.submit()">
-                                    @foreach($tahunList as $tahun)
-                                        <option value="{{ $tahun }}" {{ $tahun == $tahunSelected ? 'selected' : '' }}>
-                                            Tahun {{ $tahun }}
+                                <select name="tahun_pelajaran_id" class="form-select" style="width: auto" onchange="this.form.submit()">
+                                    @foreach($tahunPelajarans as $tp)
+                                        <option value="{{ $tp->id }}" {{ $tp->id == $tahunPelajaranId ? 'selected' : '' }}>
+                                            {{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}
                                         </option>
                                     @endforeach
                                 </select>

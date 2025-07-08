@@ -51,6 +51,11 @@ class Tagihan extends Model
         return $this->hasMany(Pembayaran::class);
     }
 
+    public function tahunPelajaran()
+    {
+        return $this->belongsTo(TahunPelajaran::class, 'tahun_pelajaran_id');
+    }
+
     // Format status for display
     public function getStatusTagihanAttribute()
     {

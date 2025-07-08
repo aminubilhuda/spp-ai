@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Jurusan;
 use App\Models\TagihanDetail;
+use App\Models\TahunPelajaran;
 use Illuminate\Http\Request;
 use PDF;
 
@@ -20,6 +21,10 @@ class TagihanController extends Controller
 
     public function index(Request $request)
     {
+        $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+        $tahunAktif = $tahunPelajarans->firstWhere('is_aktif', 1);
+        $tahunPelajaranId = $request->get('tahun_pelajaran_id', $tahunAktif?->id);
+
         // Query dasar untuk tagihan dengan eager loading yang lebih efisien
         $baseQuery = Tagihan::query()
             ->select('tagihans.siswa_id', 
@@ -32,6 +37,11 @@ class TagihanController extends Controller
                   ->with('jurusan:id,nama'); 
             }])
             ->groupBy('tagihans.siswa_id');
+        
+        // Filter tahun pelajaran aktif
+        if ($tahunPelajaranId) {
+            $baseQuery->where('tagihans.tahun_pelajaran_id', $tahunPelajaranId);
+        }
         
         // Filter tahun (default tahun sekarang)
         $tahun = $request->get('tahun', date('Y'));
@@ -86,6 +96,9 @@ class TagihanController extends Controller
             'title' => 'Data Tagihan Siswa',
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
             'jurusan' => Jurusan::pluck('nama', 'id'),
+            'tahunPelajarans' => $tahunPelajarans,
+            'tahunPelajaranId' => $tahunPelajaranId,
+            'tahunAktif' => $tahunAktif,
             'tahunList' => $tahunList,
             'tahunSelected' => $tahun
         ]);
@@ -97,7 +110,8 @@ class TagihanController extends Controller
         $biaya = Biaya::with('children')
                      ->whereNull('parent_id') // Hanya ambil parent biaya
                      ->get();
-        
+        $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+        $tahunAktif = $tahunPelajarans->firstWhere('is_aktif', 1);
         $data = [
             'model' => new Tagihan(),
             'method' => 'POST',
@@ -107,7 +121,9 @@ class TagihanController extends Controller
             'biaya' => $biaya,
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
             'kelas' => ['X', 'XI', 'XII'],
-            'jurusan' => Jurusan::pluck('nama', 'id')->all()
+            'jurusan' => Jurusan::pluck('nama', 'id')->all(),
+            'tahunPelajarans' => $tahunPelajarans,
+            'tahunAktif' => $tahunAktif,
         ];
         return view('operator.' . $this->viewCreate, $data);
     }    
@@ -195,60 +211,133 @@ class TagihanController extends Controller
             
             $count = 0;
             
-            foreach($siswa as $item) {                
-                $tagihanData = [
-                    'user_id' => auth()->user()->id,
-                    'denda' => 0,
-                    'siswa_id' => $item->id,
-                    'angkatan' => !empty($requestData['angkatan']) ? $requestData['angkatan'] : $item->angkatan,
-                    'jurusan' => !empty($requestData['jurusan']) ? $requestData['jurusan'] : $item->jurusan_id,
-                    'kelas' => !empty($requestData['kelas']) ? $requestData['kelas'] : $item->kelas,
-                    'tanggal_tagihan' => $requestData['tanggal_tagihan'],
-                    'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
-                    'keterangan' => $requestData['keterangan'] ?? null,
-                ];
-                
-                $tagihan = Tagihan::create($tagihanData);
-                
-                foreach($biaya_id_array as $biaya_id) {
-                    $biaya = Biaya::with('children')->findOrFail($biaya_id);
-                    
-                    // Jika biaya adalah parent, buat tagihan detail untuk semua children
-                    if ($biaya->isParent() && $biaya->children->count() > 0) {
-                        foreach ($biaya->children as $child) {
-                            if (!$child->jumlah) {
-                                throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
+            foreach($siswa as $item) {
+                // Ambil tahun_pelajaran_id dari request jika ada, jika tidak pakai tahun pelajaran aktif
+                $tahunPelajaranId = $requestData['tahun_pelajaran_id'] ?? null;
+                if (!$tahunPelajaranId) {
+                    $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
+                    $tahunPelajaranId = $tahunAktif ? $tahunAktif->id : null;
+                }
+
+                // Jika generate 1 tahun dicentang
+                if ($request->has('generate_1_tahun')) {
+                    $start = \Carbon\Carbon::create(2025, 7, 1);
+                    $end = \Carbon\Carbon::create(2026, 6, 1);
+
+                    for ($date = $start->copy(); $date->lte($end); $date->addMonth()) {
+                        // Cek duplikasi tagihan
+                        $exists = Tagihan::where('siswa_id', $item->id)
+                            ->whereMonth('tanggal_tagihan', $date->month)
+                            ->whereYear('tanggal_tagihan', $date->year)
+                            ->where('tahun_pelajaran_id', $tahunPelajaranId)
+                            ->exists();
+                        if ($exists) continue;
+
+                        $tagihanData = [
+                            'user_id' => auth()->user()->id,
+                            'denda' => 0,
+                            'siswa_id' => $item->id,
+                            'angkatan' => $item->angkatan,
+                            'jurusan' => $item->jurusan_id,
+                            'kelas' => $item->kelas,
+                            'tahun_pelajaran_id' => $tahunPelajaranId,
+                            'tanggal_tagihan' => $date->format('Y-m-01'),
+                            'tanggal_jatuh_tempo' => $date->format('Y-m-28'),
+                            'keterangan' => $requestData['keterangan'] ?? null,
+                        ];
+
+                        $tagihan = Tagihan::create($tagihanData);
+
+                        foreach($biaya_id_array as $biaya_id) {
+                            $biaya = Biaya::with('children')->findOrFail($biaya_id);
+
+                            if ($biaya->isParent() && $biaya->children->count() > 0) {
+                                foreach ($biaya->children as $child) {
+                                    if (!$child->jumlah) {
+                                        throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
+                                    }
+                                    $tagihan->tagihan_details()->create([
+                                        'nama_biaya' => $child->nama,
+                                        'jumlah_biaya' => $child->jumlah,
+                                        'tagihan_id' => $tagihan->id,
+                                        'biaya_id' => $child->id,
+                                        'status' => 'baru'
+                                    ]);
+                                    $count++;
+                                }
+                            } else {
+                                if (!$biaya->jumlah) {
+                                    throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                                }
+                                $tagihan->tagihan_details()->create([
+                                    'nama_biaya' => $biaya->nama,
+                                    'jumlah_biaya' => $biaya->jumlah,
+                                    'tagihan_id' => $tagihan->id,
+                                    'biaya_id' => $biaya->id,
+                                    'status' => 'baru'
+                                ]);
+                                $count++;
                             }
-                            
+                        }
+
+                        // Kirim notifikasi ke wali murid
+                        if ($item->wali) {
+                            $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
+                        }
+                    }
+                } else {
+                    // Proses single tagihan seperti biasa
+                    $tagihanData = [
+                        'user_id' => auth()->user()->id,
+                        'denda' => 0,
+                        'siswa_id' => $item->id,
+                        'angkatan' => $item->angkatan,
+                        'jurusan' => $item->jurusan_id,
+                        'kelas' => $item->kelas,
+                        'tahun_pelajaran_id' => $tahunPelajaranId,
+                        'tanggal_tagihan' => $requestData['tanggal_tagihan'],
+                        'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
+                        'keterangan' => $requestData['keterangan'] ?? null,
+                    ];
+
+                    $tagihan = Tagihan::create($tagihanData);
+
+                    foreach($biaya_id_array as $biaya_id) {
+                        $biaya = Biaya::with('children')->findOrFail($biaya_id);
+
+                        if ($biaya->isParent() && $biaya->children->count() > 0) {
+                            foreach ($biaya->children as $child) {
+                                if (!$child->jumlah) {
+                                    throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
+                                }
+                                $tagihan->tagihan_details()->create([
+                                    'nama_biaya' => $child->nama,
+                                    'jumlah_biaya' => $child->jumlah,
+                                    'tagihan_id' => $tagihan->id,
+                                    'biaya_id' => $child->id,
+                                    'status' => 'baru'
+                                ]);
+                                $count++;
+                            }
+                        } else {
+                            if (!$biaya->jumlah) {
+                                throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                            }
                             $tagihan->tagihan_details()->create([
-                                'nama_biaya' => $child->nama,
-                                'jumlah_biaya' => $child->jumlah,
+                                'nama_biaya' => $biaya->nama,
+                                'jumlah_biaya' => $biaya->jumlah,
                                 'tagihan_id' => $tagihan->id,
-                                'biaya_id' => $child->id,
+                                'biaya_id' => $biaya->id,
                                 'status' => 'baru'
                             ]);
                             $count++;
                         }
-                    } else {
-                        // Jika biaya adalah child atau tidak punya children, buat tagihan detail langsung
-                        if (!$biaya->jumlah) {
-                            throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
-                        }
-                        
-                        $tagihan->tagihan_details()->create([
-                            'nama_biaya' => $biaya->nama,
-                            'jumlah_biaya' => $biaya->jumlah,
-                            'tagihan_id' => $tagihan->id,
-                            'biaya_id' => $biaya->id,
-                            'status' => 'baru'
-                        ]);
-                        $count++;
                     }
-                }
-                
-                // Kirim notifikasi ke wali murid
-                if ($item->wali) {
-                    $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
+
+                    // Kirim notifikasi ke wali murid
+                    if ($item->wali) {
+                        $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
+                    }
                 }
             }
             
@@ -302,18 +391,19 @@ class TagihanController extends Controller
 
     public function edit(Tagihan $tagihan)
     {
-        // Optimasi query dengan select kolom yang dibutuhkan saja
         $siswa = Siswa::select('id', 'nama', 'nisn', 'kelas', 'jurusan_id', 'angkatan')
             ->with('jurusan:id,nama')
             ->get();
-            
         $biaya = Biaya::with('children')->whereNull('parent_id')->get();
-        
+        $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+        $tahunAktif = $tahunPelajarans->firstWhere('is_aktif', 1);
         return view('operator.' . $this->viewEdit, [
             'title' => 'Edit Data Tagihan',
             'tagihan' => $tagihan,
             'siswa' => $siswa,
-            'biaya' => $biaya
+            'biaya' => $biaya,
+            'tahunPelajarans' => $tahunPelajarans,
+            'tahunAktif' => $tahunAktif,
         ]);
     }
 
@@ -345,17 +435,22 @@ class TagihanController extends Controller
             $biaya = Biaya::findOrFail($requestData['biaya_id']);
             $siswa = Siswa::findOrFail($requestData['siswa_id']);
             
+            // Ambil tahun_pelajaran_id dari request jika ada, jika tidak pakai tahun pelajaran aktif
+            $tahunPelajaranId = $requestData['tahun_pelajaran_id'] ?? null;
+            if (!$tahunPelajaranId) {
+                $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
+                $tahunPelajaranId = $tahunAktif ? $tahunAktif->id : null;
+            }
             // Update main tagihan
             $tagihan->update([
                 'siswa_id' => $requestData['siswa_id'],
                 'angkatan' => $siswa->angkatan,
-                'kelas' => $siswa->kelas,
                 'jurusan' => $siswa->jurusan_id,
+                'kelas' => $siswa->kelas,
+                'tahun_pelajaran_id' => $tahunPelajaranId,
                 'tanggal_tagihan' => $requestData['tanggal_tagihan'],
                 'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
-                'keterangan' => $requestData['keterangan'],
-                'denda' => $requestData['denda'],
-                'user_id' => auth()->user()->id,
+                'keterangan' => $requestData['keterangan'] ?? null,
             ]);
 
             // Delete existing details
@@ -468,23 +563,30 @@ class TagihanController extends Controller
     public function showByStudent($siswaId)
     {
         try {
-            // Cek apakah siswa ada
             $siswa = Siswa::findOrFail($siswaId);
-            
-            // Mengambil data tagihan dengan detail biaya
+    
+            // Ambil semua tahun pelajaran
+            $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+            $tahunAktif = $tahunPelajarans->firstWhere('is_aktif', 1);
+            $tahunPelajaranId = request('tahun_pelajaran_id', $tahunAktif?->id);
+    
+            // Filter tagihan sesuai tahun pelajaran yang dipilih
             $tagihan = Tagihan::with('tagihan_details')
                 ->where('siswa_id', $siswaId)
+                ->where('tahun_pelajaran_id', $tahunPelajaranId)
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
-            // Memuat relasi jurusan (eager loading)
+    
             $siswa->load('jurusan:id,nama');
-            
+    
             return view('operator.tagihan_siswa_detail', [
                 'title' => 'Detail Tagihan Siswa: ' . $siswa->nama,
                 'siswa' => $siswa,
                 'routePrefix' => $this->routePrefix,
-                'tagihan' => $tagihan
+                'tagihan' => $tagihan,
+                'tahunPelajarans' => $tahunPelajarans,
+                'tahunAktif' => $tahunAktif,
+                'tahunPelajaranId' => $tahunPelajaranId,
             ]);
         } catch (\Exception $e) {
             return redirect()->route($this->routePrefix . '.index')

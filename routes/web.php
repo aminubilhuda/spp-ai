@@ -28,6 +28,7 @@ use App\Http\Controllers\PanduanPembayaranController;
 use App\Http\Controllers\WaliMuridInvoiceController;
 use App\Http\Controllers\KartuSppController;
 use App\Http\Controllers\LaporanFormController;
+use App\Http\Controllers\TahunPelajaranController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -154,6 +155,10 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
 
     //Laporan
     Route::get('laporanform/create', [LaporanFormController::class, 'create'])->name('laporanform.create');
+
+    // Tahun Pelajaran
+    Route::resource('tahun-pelajaran', TahunPelajaranController::class);
+    Route::get('tahun-pelajaran/{id}/set-aktif', [TahunPelajaranController::class, 'setAktif'])->name('tahun-pelajaran.set-aktif');
 });
 
 // ============================================================================
