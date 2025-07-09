@@ -11,8 +11,8 @@
                         Pengaturan WhatsApp Notification
                     </h5>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-label-{{ config('services.fonnte.enabled') ? 'success' : 'danger' }} me-2">
-                            {{ config('services.fonnte.enabled') ? 'Aktif' : 'Nonaktif' }}
+                        <span class="badge bg-label-{{ $waSettings['enabled'] ? 'success' : 'danger' }} me-2">
+                            {{ $waSettings['enabled'] ? 'Aktif' : 'Nonaktif' }}
                         </span>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Status WhatsApp</h6>
                                             <p class="mb-0">
-                                                @if(config('services.fonnte.enabled'))
+                                                @if($waSettings['enabled'])
                                                     <span class="text-success">✅ Aktif</span>
                                                 @else
                                                     <span class="text-danger">❌ Nonaktif</span>
@@ -66,7 +66,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Token API</h6>
                                             <p class="mb-0">
-                                                @if(config('services.fonnte.token'))
+                                                @if($waSettings['token'])
                                                     <span class="text-success">✅ Terkonfigurasi</span>
                                                 @else
                                                     <span class="text-danger">❌ Belum Dikonfigurasi</span>
@@ -94,7 +94,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="enabled" name="enabled" 
-                                           value="1" {{ config('services.fonnte.enabled') ? 'checked' : '' }}>
+                                           value="1" {{ $waSettings['enabled'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="enabled">
                                         Aktifkan WhatsApp Notification
                                     </label>
@@ -103,7 +103,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="typing" name="typing" 
-                                           value="1" {{ config('services.fonnte.settings.typing') ? 'checked' : '' }}>
+                                           value="1" {{ $waSettings['typing'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="typing">
                                         Tampilkan Indikator Typing
                                     </label>
@@ -112,16 +112,22 @@
                             <div class="col-md-6">
                                 <label for="country_code" class="form-label">Kode Negara</label>
                                 <input type="text" class="form-control" id="country_code" name="country_code" 
-                                       value="{{ config('services.fonnte.settings.country_code', '62') }}" 
+                                       value="{{ $waSettings['country_code'] }}" 
                                        placeholder="62">
                                 <small class="text-muted">Contoh: 62 untuk Indonesia</small>
                             </div>
                             <div class="col-md-6">
                                 <label for="delay" class="form-label">Delay Antar Pesan (detik)</label>
                                 <input type="number" class="form-control" id="delay" name="delay" 
-                                       value="{{ config('services.fonnte.settings.delay', '2') }}" 
+                                       value="{{ $waSettings['delay'] }}" 
                                        min="0" max="60">
                                 <small class="text-muted">Delay untuk menghindari spam</small>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="token" class="form-label">Token API WhatsApp (Fonnte)</label>
+                                <input type="text" class="form-control" id="token" name="token" 
+                                       value="{{ $waSettings['token'] }}" placeholder="Masukkan token Fonnte...">
+                                <small class="text-muted">Token API dari dashboard Fonnte Anda.</small>
                             </div>
                         </div>
 
@@ -137,7 +143,7 @@
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="notif_pembayaran" 
                                            name="notifications[pembayaran]" value="1" 
-                                           {{ config('services.fonnte.notifications.pembayaran') ? 'checked' : '' }}>
+                                           {{ $waSettings['notif_pembayaran'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="notif_pembayaran">
                                         <i class="bx bx-money text-success me-2"></i>
                                         Notifikasi Pembayaran
@@ -151,7 +157,7 @@
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="notif_reminder" 
                                            name="notifications[reminder]" value="1" 
-                                           {{ config('services.fonnte.notifications.reminder') ? 'checked' : '' }}>
+                                           {{ $waSettings['notif_reminder'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="notif_reminder">
                                         <i class="bx bx-time text-warning me-2"></i>
                                         Reminder Pembayaran
@@ -165,7 +171,7 @@
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="notif_konfirmasi" 
                                            name="notifications[konfirmasi]" value="1" 
-                                           {{ config('services.fonnte.notifications.konfirmasi') ? 'checked' : '' }}>
+                                           {{ $waSettings['notif_konfirmasi'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="notif_konfirmasi">
                                         <i class="bx bx-check text-success me-2"></i>
                                         Konfirmasi Pembayaran
@@ -179,7 +185,7 @@
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="notif_sistem" 
                                            name="notifications[sistem]" value="1" 
-                                           {{ config('services.fonnte.notifications.sistem') ? 'checked' : '' }}>
+                                           {{ $waSettings['notif_sistem'] ? 'checked' : '' }}>
                                     <label class="form-check-label" for="notif_sistem">
                                         <i class="bx bx-cog text-info me-2"></i>
                                         Notifikasi Sistem

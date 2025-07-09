@@ -39,25 +39,48 @@ class WhatsappFonnteController extends Controller
      */
     public function settings()
     {
-        return view('operator.whatsapp.settings');
+        // Ambil semua setting WhatsApp dari DB
+        $waSettings = [
+            'enabled' => settings('whatsapp_enabled', false),
+            'token' => settings('whatsapp_token'),
+            'typing' => settings('whatsapp_typing', false),
+            'country_code' => settings('whatsapp_country_code', '62'),
+            'delay' => settings('whatsapp_delay', '2'),
+            'notif_pembayaran' => settings('whatsapp_notif_pembayaran', true),
+            'notif_reminder' => settings('whatsapp_notif_reminder', true),
+            'notif_konfirmasi' => settings('whatsapp_notif_konfirmasi', true),
+            'notif_sistem' => settings('whatsapp_notif_sistem', true),
+        ];
+        return view('operator.whatsapp.settings', compact('waSettings'));
     }
 
     /**
-     * Simpan pengaturan WhatsApp (simulasi, karena config tidak bisa diubah runtime)
+     * Simpan pengaturan WhatsApp ke tabel settings
      */
     public function updateSettings(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'enabled' => 'nullable|boolean',
+            'token' => 'nullable|string',
             'typing' => 'nullable|boolean',
             'country_code' => 'nullable|string',
             'delay' => 'nullable|numeric',
             'notifications' => 'nullable|array',
         ]);
 
-        // Simulasi simpan ke session (karena config/services.php tidak bisa diubah runtime)
-        session()->flash('success', 'Pengaturan WhatsApp berhasil disimpan (simulasi, config tidak berubah).');
+        // Simpan ke tabel settings
+        settings(['whatsapp_enabled' => $request->boolean('enabled')]);
+        settings(['whatsapp_token' => $request->token]);
+        settings(['whatsapp_typing' => $request->boolean('typing')]);
+        settings(['whatsapp_country_code' => $request->country_code]);
+        settings(['whatsapp_delay' => $request->delay]);
+        $notifs = $request->notifications ?? [];
+        settings(['whatsapp_notif_pembayaran' => isset($notifs['pembayaran'])]);
+        settings(['whatsapp_notif_reminder' => isset($notifs['reminder'])]);
+        settings(['whatsapp_notif_konfirmasi' => isset($notifs['konfirmasi'])]);
+        settings(['whatsapp_notif_sistem' => isset($notifs['sistem'])]);
+
+        session()->flash('success', 'Pengaturan WhatsApp berhasil disimpan!');
         return redirect()->back();
     }
 

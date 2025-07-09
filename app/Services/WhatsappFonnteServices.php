@@ -6,17 +6,28 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
+if (!function_exists('settings')) {
+    function settings($key = null, $default = null) {
+        return app()->bound('QCod\\Settings\\Setting\\SettingStorage')
+            ? app('QCod\\Settings\\Setting\\SettingStorage')->get($key, $default)
+            : $default;
+    }
+}
+
 class WhatsappFonnteServices
 {
     protected $token;
     protected $baseUrl = 'https://api.fonnte.com/send';
-    protected $countryCode = '62';
-    protected $typing = false;
-    protected $delay = '2';
+    protected $countryCode;
+    protected $typing;
+    protected $delay;
 
     public function __construct()
     {
-        $this->token = config('services.fonnte.token');
+        $this->token = settings('whatsapp_token');
+        $this->countryCode = settings('whatsapp_country_code', '62');
+        $this->typing = settings('whatsapp_typing', false);
+        $this->delay = settings('whatsapp_delay', '2');
     }
 
     /**
@@ -39,7 +50,7 @@ class WhatsappFonnteServices
         ], $options);
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::asForm()->withHeaders([
                 'Authorization' => $this->token
             ])->post($this->baseUrl, $data);
 
@@ -80,14 +91,14 @@ class WhatsappFonnteServices
         $siswa = $pembayaran->tagihan->siswa;
         $wali = $siswa->wali;
         
-        if (!$wali || !$wali->no_wa) {
+        if (!$wali || !$wali->nohp) {
             Log::warning('Wali tidak memiliki nomor WhatsApp', ['siswa_id' => $siswa->id]);
             return false;
         }
 
         $message = $this->formatPembayaranMessage($pembayaran);
         
-        return $this->sendMessage($wali->no_wa, $message);
+        return $this->sendMessage($wali->nohp, $message);
     }
 
     /**
@@ -102,14 +113,14 @@ class WhatsappFonnteServices
         $siswa = $tagihan->siswa;
         $wali = $siswa->wali;
         
-        if (!$wali || !$wali->no_wa) {
+        if (!$wali || !$wali->nohp) {
             Log::warning('Wali tidak memiliki nomor WhatsApp', ['siswa_id' => $siswa->id]);
             return false;
         }
 
         $message = $this->formatReminderMessage($tagihan);
         
-        return $this->sendMessage($wali->no_wa, $message);
+        return $this->sendMessage($wali->nohp, $message);
     }
 
     /**
@@ -124,14 +135,14 @@ class WhatsappFonnteServices
         $siswa = $pembayaran->tagihan->siswa;
         $wali = $siswa->wali;
         
-        if (!$wali || !$wali->no_wa) {
+        if (!$wali || !$wali->nohp) {
             Log::warning('Wali tidak memiliki nomor WhatsApp', ['siswa_id' => $siswa->id]);
             return false;
         }
 
         $message = $this->formatKonfirmasiMessage($pembayaran);
         
-        return $this->sendMessage($wali->no_wa, $message);
+        return $this->sendMessage($wali->nohp, $message);
     }
 
     /**
@@ -242,7 +253,7 @@ class WhatsappFonnteServices
      */
     protected function isWhatsAppEnabled()
     {
-        return config('services.fonnte.enabled', false) && !empty($this->token);
+        return settings('whatsapp_enabled', false) && !empty($this->token);
     }
 
     /**
@@ -250,7 +261,7 @@ class WhatsappFonnteServices
      */
     protected function isNotificationEnabled($type)
     {
-        $config = config("services.fonnte.notifications.{$type}", true);
+        $config = settings('whatsapp_notif_' . $type, true);
         return $this->isWhatsAppEnabled() && $config;
     }
 
@@ -396,7 +407,7 @@ class WhatsappFonnteServices
         $total = number_format($tagihan->jumlah_tagihan, 0, ',', '.');
         $jatuhTempo = \Carbon\Carbon::parse($tagihan->tanggal_jatuh_tempo)->format('d/m/Y');
 
-        return "\uD83D\uDCE2 *TAGIHAN SPP BARU*\n\n" .
+        return "📢 *TAGIHAN SPP BARU*\n\n" .
                "Nama Siswa : {$siswa->nama}\n" .
                "Kelas      : {$siswa->kelas}\n" .
                "Total      : Rp {$total}\n" .
@@ -414,11 +425,19 @@ class WhatsappFonnteServices
         }
         $siswa = $tagihan->siswa;
         $wali = $siswa->wali;
-        if (!$wali || !$wali->no_wa) {
+        // Fallback: jika nohp kosong, ambil dari user->nohp
+        $target = null;
+        if ($wali) {
+            $target = $wali->nohp;
+            if (empty($target) && method_exists($wali, 'user') && $wali->user) {
+                $target = $wali->user->nohp;
+            }
+        }
+        if (empty($target)) {
             \Log::warning('Wali tidak memiliki nomor WhatsApp', ['siswa_id' => $siswa->id]);
             return false;
         }
         $message = $this->formatTagihanMessage($tagihan);
-        return $this->sendMessage($wali->no_wa, $message);
+        return $this->sendMessage($target, $message);
     }
 }
