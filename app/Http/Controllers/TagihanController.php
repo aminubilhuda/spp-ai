@@ -242,7 +242,7 @@ class TagihanController extends Controller
                     $requestData['keterangan'] ?? null,
                     auth()->id(),
                     true, // kirim notifikasi wali
-                    false // notifikasi operator opsional
+                    true // notifikasi operator opsional
                 );
                 \DB::commit();
                 if ($request->ajax()) {
@@ -643,7 +643,6 @@ class TagihanController extends Controller
     public function detailInfo($id)
     {
         try {
-            \Log::info('Fetching tagihan detail info for ID: ' . $id);
             
             $detail = TagihanDetail::with(['tagihan.siswa'])->findOrFail($id);
             
@@ -665,10 +664,7 @@ class TagihanController extends Controller
             return response()->json($response);
 
         } catch (\Exception $e) {
-            \Log::error('Error in detailInfo method:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+
             
             return response()->json([
                 'error' => 'Gagal mengambil data tagihan: ' . $e->getMessage()

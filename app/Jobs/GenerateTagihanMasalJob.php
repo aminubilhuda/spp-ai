@@ -51,21 +51,11 @@ class GenerateTagihanMasalJob implements ShouldQueue
      */
     public function handle(): void
     {
-        \Log::info('Job dimulai: GenerateTagihanMasalJob', [
-            'siswa_ids' => $this->siswaIds,
-            'biaya_ids' => $this->biayaIds,
-            'tahun_pelajaran_id' => $this->tahunPelajaranId,
-            'tanggal_mulai' => $this->tanggalMulai,
-            'tanggal_akhir' => $this->tanggalAkhir,
-            'operator_id' => $this->operatorId
-        ]);
+
         try {
             $siswaList = Siswa::with(['wali'])->whereIn('id', $this->siswaIds)->get();
             $biayaList = Biaya::with('children')->whereIn('id', $this->biayaIds)->get();
-            \Log::info('Jumlah siswa:', ['count' => $siswaList->count()]);
-            \Log::info('Jumlah biaya:', ['count' => $biayaList->count()]);
-            \Log::info('Tanggal mulai:', ['tanggal' => $this->tanggalMulai]);
-            \Log::info('Tanggal akhir:', ['tanggal' => $this->tanggalAkhir]);
+
             $rekapTagihan = [];
             $operator = User::find($this->operatorId);
 
@@ -74,20 +64,14 @@ class GenerateTagihanMasalJob implements ShouldQueue
                 $bulan = Carbon::parse($this->tanggalMulai)->copy();
                 $end = Carbon::parse($this->tanggalAkhir)->copy();
                 while ($bulan->lte($end)) {
-                    \Log::info('Proses bulan:', ['bulan' => $bulan->format('Y-m')]);
+
                     // Cek duplikasi tagihan
                     $exists = Tagihan::where('siswa_id', $siswa->id)
                         ->whereMonth('tanggal_tagihan', $bulan->month)
                         ->whereYear('tanggal_tagihan', $bulan->year)
                         ->where('tahun_pelajaran_id', $this->tahunPelajaranId)
                         ->exists();
-                    \Log::info('Cek duplikasi:', [
-                        'siswa_id' => $siswa->id,
-                        'bulan' => $bulan->month,
-                        'tahun' => $bulan->year,
-                        'tahun_pelajaran_id' => $this->tahunPelajaranId,
-                        'exists' => $exists
-                    ]);
+
                     if ($exists) {
                         $bulan->addMonth();
                         continue;
@@ -105,28 +89,13 @@ class GenerateTagihanMasalJob implements ShouldQueue
                         'keterangan' => $this->keterangan,
                         'denda' => 0,
                     ]);
-                    \Log::info('Tagihan dibuat:', [
-                        'tagihan_id' => $tagihan->id,
-                        'siswa_id' => $siswa->id,
-                        'bulan' => $bulan->format('Y-m')
-                    ]);
+
                     // Buat detail tagihan
                     foreach ($biayaList as $biaya) {
-                        \Log::info('Cek biaya', [
-                            'biaya_id' => $biaya->id,
-                            'is_parent' => $biaya->isParent(),
-                            'child_count' => $biaya->children->count(),
-                            'nama' => $biaya->nama,
-                            'jumlah' => $biaya->jumlah
-                        ]);
+
                         if ($biaya->isParent() && $biaya->children->count() > 0) {
                             foreach ($biaya->children as $child) {
-                                \Log::info('Buat detail child', [
-                                    'tagihan_id' => $tagihan->id,
-                                    'biaya_id' => $child->id,
-                                    'nama_biaya' => $child->nama,
-                                    'jumlah_biaya' => $child->jumlah
-                                ]);
+
                                 TagihanDetail::create([
                                     'tagihan_id' => $tagihan->id,
                                     'biaya_id' => $child->id,
@@ -136,12 +105,7 @@ class GenerateTagihanMasalJob implements ShouldQueue
                                 ]);
                             }
                         } else {
-                            \Log::info('Buat detail single', [
-                                'tagihan_id' => $tagihan->id,
-                                'biaya_id' => $biaya->id,
-                                'nama_biaya' => $biaya->nama,
-                                'jumlah_biaya' => $biaya->jumlah
-                            ]);
+
                             TagihanDetail::create([
                                 'tagihan_id' => $tagihan->id,
                                 'biaya_id' => $biaya->id,
@@ -153,7 +117,33 @@ class GenerateTagihanMasalJob implements ShouldQueue
                     }
                     // Kirim notifikasi ke wali untuk setiap tagihan baru
                     if ($this->kirimNotifikasiWali && $siswa->wali) {
-                        $siswa->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
+                        \Log::info('DEBUG: Jenis $tagihan sebelum konversi', [
+                            'class' => is_object($tagihan) ? get_class($tagihan) : gettype($tagihan),
+                            'id' => is_object($tagihan) && isset($tagihan->id) ? $tagihan->id : null
+                        ]);
+                        $tagihanId = null;
+                        if (is_object($tagihan) && isset($tagihan->id)) {
+                            $tagihanId = $tagihan->id;
+                        } elseif (is_array($tagihan) && isset($tagihan['id'])) {
+                            $tagihanId = $tagihan['id'];
+                        }
+                        if ($tagihanId) {
+                            $tagihanModel = \App\Models\Tagihan::where('id', $tagihanId)->first();
+                            if ($tagihanModel && $tagihanModel instanceof \Illuminate\Database\Eloquent\Model) {
+                                \Log::info('DEBUG: Akan kirim notifikasi wali', [
+                                    'tagihan_id' => $tagihanModel->id,
+                                    'class' => get_class($tagihanModel)
+                                ]);
+                                $siswa->wali->notify(new \App\Notifications\TagihanNotification($tagihanModel));
+                            } else {
+                                \Log::warning('DEBUG: tagihanModel bukan Eloquent', [
+                                    'tagihan_id' => $tagihanId,
+                                    'class' => $tagihanModel ? get_class($tagihanModel) : 'null'
+                                ]);
+                            }
+                        } else {
+                            \Log::warning('DEBUG: Tidak dapat id tagihan untuk notifikasi wali');
+                        }
                     }
                     $tagihanSiswa[] = $tagihan;
                     $bulan->addMonth();
@@ -179,15 +169,16 @@ class GenerateTagihanMasalJob implements ShouldQueue
             }
         } catch (\Exception $e) {
             \Log::error('Job gagal: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'siswa_ids' => $this->siswaIds,
-                'biaya_ids' => $this->biayaIds,
-                'tahun_pelajaran_id' => $this->tahunPelajaranId,
-                'tanggal_mulai' => $this->tanggalMulai,
-                'tanggal_akhir' => $this->tanggalAkhir,
+                // 'trace' => $e->getTraceAsString(),
+                // 'siswa_ids' => $this->siswaIds,
+                // 'biaya_ids' => $this->biayaIds,
+                // 'tahun_pelajaran_id' => $this->tahunPelajaranId,
+                // 'tanggal_mulai' => $this->tanggalMulai,
+                // 'tanggal_akhir' => $this->tanggalAkhir,
                 'operator_id' => $this->operatorId
             ]);
             throw $e;
         }
     }
 }
+
