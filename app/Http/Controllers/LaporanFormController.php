@@ -7,13 +7,32 @@ use Illuminate\Http\Request;
 use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\TahunPelajaran;
+use Carbon\Carbon;
 
 class LaporanFormController extends Controller
 {
     public function create(Request $request)
     {
         $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
-        return view('operator.laporanform_index', compact('tahunPelajarans'));
+
+        $totalHariIni = \App\Models\Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->whereDate('tanggal_bayar', Carbon::today())
+            ->sum('jumlah_dibayar');
+
+        $totalMingguIni = \App\Models\Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->whereBetween('tanggal_bayar', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->sum('jumlah_dibayar');
+
+        $totalBulanIni = \App\Models\Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi')
+            ->whereBetween('tanggal_bayar', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->sum('jumlah_dibayar');
+
+        return view('operator.laporanform_index', compact(
+            'tahunPelajarans',
+            'totalHariIni',
+            'totalMingguIni',
+            'totalBulanIni'
+        ));
     }
 
     public function tagihan(Request $request)

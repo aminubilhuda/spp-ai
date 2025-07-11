@@ -259,6 +259,12 @@
                                                     class="btn btn-icon btn-sm btn-primary" target="_blank" title="Cetak Kartu SPP">
                                                     <i class="bx bx-printer"></i>
                                                 </a>
+                                                <form action="{{ route('tagihan.kirim-wa', ['tagihan' => $item->latest_tagihan_id ?? $item->id]) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-icon btn-sm btn-success" title="Kirim WhatsApp Manual">
+                                                        <i class="bx bxl-whatsapp"></i>
+                                                    </button>
+                                                </form>
                                                 <form action="{{ route($routePrefix . '.destroy', $item->siswa_id) }}"
                                                     method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')"
                                                     class="d-inline">

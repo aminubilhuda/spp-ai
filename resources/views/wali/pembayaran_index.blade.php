@@ -195,6 +195,7 @@
                                             <th>
                                                 <i class="fas fa-file-invoice me-1"></i>Item Tagihan
                                             </th>
+                                            <th><i class="fas fa-calendar-alt me-1"></i>Periode</th>
                                             <th class="text-end">
                                                 <i class="fas fa-money-bill me-1"></i>Jumlah
                                             </th>
@@ -230,6 +231,13 @@
                                                 </td>
                                                 <td>
                                                     <span class="fw-semibold">{{ $item->tagihan_detail->nama_biaya ?? 'N/A' }}</span>
+                                                </td>
+                                                <td>
+                                                    @if(!empty($item->tagihan_detail->periode))
+                                                        {{ $item->tagihan_detail->periode }}
+                                                    @else
+                                                        {{ \Carbon\Carbon::parse($item->tagihan->tanggal_tagihan)->translatedFormat('F Y') }}
+                                                    @endif
                                                 </td>
                                                 <td class="text-end">
                                                     <span class="fw-bold text-success">{{ formatRupiah($item->jumlah_dibayar) }}</span>
@@ -338,6 +346,16 @@
                                             <div class="mb-3">
                                                 <small class="text-muted d-block">Item Tagihan</small>
                                                 <span class="fw-semibold">{{ $item->tagihan_detail->nama_biaya ?? 'N/A' }}</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block">Periode</small>
+                                                <span class="fw-semibold">
+                                                    @if(!empty($item->tagihan_detail->periode))
+                                                        {{ $item->tagihan_detail->periode }}
+                                                    @else
+                                                        {{ \Carbon\Carbon::parse($item->tagihan->tanggal_tagihan)->translatedFormat('F Y') }}
+                                                    @endif
+                                                </span>
                                             </div>
                                             
                                             <div class="d-flex justify-content-between align-items-center">

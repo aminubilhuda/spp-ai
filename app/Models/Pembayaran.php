@@ -73,7 +73,7 @@ class Pembayaran extends Model
      */
     public function wali(): BelongsTo
     {
-        return $this->belongsTo(Wali::class);
+        return $this->belongsTo(User::class, 'wali_id');
     }
 
     /**

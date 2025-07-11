@@ -73,6 +73,12 @@
                         </table>
                     </div>
                     <a href="{{ route('tagihan.index') }}" class="btn btn-primary">Kembali</a>
+                    <form action="{{ route('tagihan.kirim-wa', ['tagihan' => $tagihan->id]) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            <i class="bx bxl-whatsapp"></i> Kirim WhatsApp Manual
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

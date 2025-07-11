@@ -425,7 +425,7 @@
                             @endphp
                             <tr>
                                 <td>{{ $no++ }}</td>
-                                <td>{{ \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->translatedFormat('d/m/Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($tagihan->tanggal_tagihan)->locale('id')->isoFormat('D MMMM Y') }}</td>
                                 <td>{{ $detail->nama_biaya }}</td>
                                 <td class="text-right">{{ formatRupiah($detail->jumlah_biaya) }}</td>
                                 <td><span class="badge badge-{{ $statusClass }}">{{ $statusText }}</span></td>

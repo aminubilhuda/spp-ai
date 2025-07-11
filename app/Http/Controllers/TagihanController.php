@@ -31,6 +31,12 @@ class TagihanController extends Controller
                      \DB::raw('COUNT(DISTINCT tagihans.id) as total_tagihan'), 
                      \DB::raw('SUM(tagihan_details.jumlah_biaya) as total_nilai'),
                      \DB::raw('MAX(tagihans.created_at) as latest_created'))
+            ->addSelect([
+                'latest_tagihan_id' => Tagihan::select('id')
+                    ->whereColumn('siswa_id', 'tagihans.siswa_id')
+                    ->orderByDesc('created_at')
+                    ->limit(1)
+            ])
             ->join('tagihan_details', 'tagihans.id', '=', 'tagihan_details.tagihan_id')
             ->with(['siswa' => function($q) {
                 $q->select('id', 'nama', 'nisn', 'kelas', 'jurusan_id', 'angkatan')
@@ -283,8 +289,12 @@ class TagihanController extends Controller
                         // Kirim notifikasi ke wali murid
                         if ($item->wali) {
                             $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
-                            // Kirim notifikasi WhatsApp ke wali
-                            app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
+                            // Pastikan relasi siswa.wali sudah di-load
+                            $tagihan->load('siswa.wali');
+                            // Kirim WhatsApp hanya untuk tagihan bulan berjalan (generate 1 tahun) atau single
+                            if (!isset($date) || ($date->month == now()->month && $date->year == now()->year)) {
+                                app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
+                            }
                         }
                     }
                 } else {
@@ -730,5 +740,18 @@ class TagihanController extends Controller
         
         $pdf->setPaper('A4', 'portrait');
         return $pdf->stream('rekap_tagihan_' . $siswa->nama . '.pdf');
+    }
+
+    /**
+     * Kirim notifikasi WhatsApp manual untuk tagihan tertentu
+     */
+    public function kirimWaManual(Request $request, Tagihan $tagihan)
+    {
+        $result = app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
+        if ($result) {
+            return back()->with('success', 'Notifikasi WhatsApp berhasil dikirim!');
+        } else {
+            return back()->with('error', 'Gagal mengirim notifikasi WhatsApp. Pastikan nomor HP wali valid dan WhatsApp aktif.');
+        }
     }
 }

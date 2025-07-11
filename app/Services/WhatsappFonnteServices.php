@@ -166,7 +166,7 @@ class WhatsappFonnteServices
     {
         $siswa = $pembayaran->tagihan->siswa;
         $jumlah = number_format($pembayaran->jumlah_dibayar, 0, ',', '.');
-        $tanggal = $pembayaran->tanggal_bayar->format('d/m/Y H:i');
+        $tanggal = $pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y H:i') : '-';
         
         return "💰 *NOTIFIKASI PEMBAYARAN SPP*\n\n" .
                "Halo {$siswa->wali->name},\n\n" .
@@ -439,5 +439,26 @@ class WhatsappFonnteServices
         }
         $message = $this->formatTagihanMessage($tagihan);
         return $this->sendMessage($target, $message);
+    }
+
+    /**
+     * Kirim notifikasi WhatsApp rekap pembayaran batch ke wali
+     */
+    public function sendRekapPembayaranBatch($wali, $listPembayaran)
+    {
+        if (!$wali || !$wali->nohp) {
+            \Log::warning('Wali tidak memiliki nomor WhatsApp (rekap batch)', ['wali_id' => $wali->id ?? null]);
+            return false;
+        }
+        $message = "💰 *REKAP PEMBAYARAN SPP*\nBerikut daftar pembayaran yang telah diterima:\n";
+        foreach ($listPembayaran as $pembayaran) {
+            $periode = $pembayaran->tagihan && $pembayaran->tagihan->tanggal_tagihan
+                ? \Carbon\Carbon::parse($pembayaran->tagihan->tanggal_tagihan)->translatedFormat('M Y')
+                : '-';
+            $jumlah = number_format($pembayaran->jumlah_dibayar, 0, ',', '.');
+            $message .= "- {$periode}: Rp {$jumlah}\n";
+        }
+        $message .= "\nTerima kasih atas pembayaran Anda.";
+        return $this->sendMessage($wali->nohp, $message);
     }
 }

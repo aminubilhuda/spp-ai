@@ -31,6 +31,7 @@ use App\Http\Controllers\TahunPelajaranController;
 use App\Http\Controllers\LaporanTagihanController;
 use App\Http\Controllers\LaporanRekapPembayaranController;
 use App\Http\Controllers\WhatsappFonnteController;
+use App\Http\Controllers\WaliMuridProfileController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -165,6 +166,9 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     Route::get('tahun-pelajaran/{id}/set-aktif', [TahunPelajaranController::class, 'setAktif'])->name('tahun-pelajaran.set-aktif');
 });
 
+// Route manual kirim WhatsApp tagihan
+Route::post('operator/tagihan/{tagihan}/kirim-wa', [App\Http\Controllers\TagihanController::class, 'kirimWaManual'])->name('tagihan.kirim-wa');
+
 // ============================================================================
 // WALI MURID ROUTES
 // ============================================================================
@@ -199,6 +203,10 @@ Route::prefix('walimurid')->middleware(['auth', 'auth.wali'])->name('wali.')->gr
     // Kwitansi
     Route::get('kwitansi/{id}', [KwitansiPembayaranController::class, 'show'])->name('kwitansi.show');
 
+    //walimurid profile
+    Route::get('profile', [WaliMuridProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [WaliMuridProfileController::class, 'update'])->name('profile.update');
+
     // Route untuk profile wali murid
     Route::get('profile', [WaliMuridProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [WaliMuridProfileController::class, 'update'])->name('profile.update');
@@ -222,4 +230,6 @@ Route::get('logout', function () {
 })->name('logout');
 
 Route::get('/whatsapp/test-tagihan/{id}', [WhatsappFonnteController::class, 'testTagihan']);
+
+Route::get('/operator/laporan-uang-masuk/{periode}', [PembayaranController::class, 'laporanUangMasukDetail'])->name('laporan.uang_masuk');
 

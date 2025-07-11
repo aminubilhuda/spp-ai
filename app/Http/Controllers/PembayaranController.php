@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PembayaranController extends Controller
 {
@@ -169,7 +170,16 @@ class PembayaranController extends Controller
 
             // Commit transaksi jika semua berhasil
             DB::commit();
-            
+
+            // Kirim notifikasi WhatsApp rekap jika pembayaran batch
+            if (count($pembayaranIds) > 1) {
+                // Ambil wali dari salah satu pembayaran (semua pembayaran batch pasti untuk wali yang sama)
+                $firstPembayaran = \App\Models\Pembayaran::find($pembayaranIds[0]);
+                $wali = $firstPembayaran && $firstPembayaran->tagihan && $firstPembayaran->tagihan->siswa ? $firstPembayaran->tagihan->siswa->wali : null;
+                $listPembayaran = \App\Models\Pembayaran::whereIn('id', $pembayaranIds)->with(['tagihan'])->get();
+                app(\App\Services\WhatsappFonnteServices::class)->sendRekapPembayaranBatch($wali, $listPembayaran);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pembayaran berhasil disimpan',
@@ -326,7 +336,7 @@ class PembayaranController extends Controller
 
         $pembayaran = $query->paginate(15)->withQueryString();
 
-        return view('wali.pembayaran_index', [
+        return view('operator.pembayaran_index', [
             'pembayaran' => $pembayaran,
             'title' => 'Data Pembayaran',
             'search' => $request->search,
@@ -475,5 +485,29 @@ class PembayaranController extends Controller
         }
 
         $tagihanDetail->save();
+    }
+
+    public function laporanUangMasukDetail($periode)
+    {
+        $query = Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi');
+        $title = '';
+        if ($periode == 'hari') {
+            $query->whereDate('tanggal_bayar', Carbon::today());
+            $title = 'Detail Uang Masuk Hari Ini';
+        } elseif ($periode == 'minggu') {
+            $query->whereBetween('tanggal_bayar', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            $title = 'Detail Uang Masuk Minggu Ini';
+        } elseif ($periode == 'bulan') {
+            $query->whereBetween('tanggal_bayar', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+            $title = 'Detail Uang Masuk Bulan Ini';
+        }
+
+        $pembayaran = $query->with(['tagihan.siswa'])->orderBy('tanggal_bayar', 'desc')->get();
+
+        return view('operator.laporan_uang_masuk_detail', [
+            'pembayaran' => $pembayaran,
+            'title' => $title,
+            'periode' => $periode,
+        ]);
     }
 }
