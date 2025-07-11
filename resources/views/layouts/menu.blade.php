@@ -106,6 +106,21 @@
             </a>
         </li>
 
+        <!-- Pengeluaran Kas -->
+        <li class="menu-item {{ request()->is('operator/pengeluaran-kas*') ? 'active' : '' }}">
+            <a href="{{ route('pengeluaran-kas.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div data-i18n="Basic">Pengeluaran Kas</div>
+            </a>
+        </li>
+        <!-- Laporan Kas -->
+        <li class="menu-item {{ request()->is('operator/laporan-kas') ? 'active' : '' }}">
+            <a href="{{ route('laporan-kas') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bar-chart"></i>
+                <div data-i18n="Basic">Laporan Kas</div>
+            </a>
+        </li>
+
         <!-- Laporan -->
         <li class="menu-item {{ request()->is('operator/laporanform*') ? 'active' : '' }}">
             <a href="{{ route('laporanform.create') }}" class="menu-link">

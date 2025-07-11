@@ -32,6 +32,7 @@ use App\Http\Controllers\LaporanTagihanController;
 use App\Http\Controllers\LaporanRekapPembayaranController;
 use App\Http\Controllers\WhatsappFonnteController;
 use App\Http\Controllers\WaliMuridProfileController;
+use App\Http\Controllers\PengeluaranKasController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -164,6 +165,9 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
     // Tahun Pelajaran
     Route::resource('tahun-pelajaran', TahunPelajaranController::class);
     Route::get('tahun-pelajaran/{id}/set-aktif', [TahunPelajaranController::class, 'setAktif'])->name('tahun-pelajaran.set-aktif');
+
+    Route::resource('pengeluaran-kas', PengeluaranKasController::class)->except(['show', 'edit', 'update', 'destroy']);
+    Route::get('laporan-kas', [PengeluaranKasController::class, 'laporanKas'])->name('laporan-kas');
 });
 
 // Route manual kirim WhatsApp tagihan
