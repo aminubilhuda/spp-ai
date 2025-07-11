@@ -10,6 +10,7 @@ use App\Models\TagihanDetail;
 use App\Models\TahunPelajaran;
 use Illuminate\Http\Request;
 use PDF;
+use App\Jobs\GenerateTagihanMasalJob;
 
 class TagihanController extends Controller
 {
@@ -215,148 +216,100 @@ class TagihanController extends Controller
                 throw new \Exception('Tidak ada siswa yang sesuai dengan kriteria yang dipilih');
             }
             
-            $count = 0;
-            
-            foreach($siswa as $item) {
-                // Ambil tahun_pelajaran_id dari request jika ada, jika tidak pakai tahun pelajaran aktif
-                $tahunPelajaranId = $requestData['tahun_pelajaran_id'] ?? null;
-                if (!$tahunPelajaranId) {
-                    $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
-                    $tahunPelajaranId = $tahunAktif ? $tahunAktif->id : null;
+            // Ambil tahun_pelajaran_id dari request jika ada, jika tidak pakai tahun pelajaran aktif
+            $tahunPelajaranId = $requestData['tahun_pelajaran_id'] ?? null;
+            if (!$tahunPelajaranId) {
+                $tahunAktif = TahunPelajaran::where('is_aktif', 1)->first();
+                $tahunPelajaranId = $tahunAktif ? $tahunAktif->id : null;
+            }
+
+            // Jika generate 1 tahun dicentang, dispatch job dan return response sukses segera
+            if ($request->has('generate_1_tahun')) {
+                // Ambil tahun ajaran dari tahun pelajaran aktif atau request
+                $tpNama = $tahunAktif?->nama ?? '2025/2026';
+                preg_match('/(\d{4})[\/\-](\d{4})/', $tpNama, $matches);
+                $tahunAwal = $matches[1] ?? '2025';
+                $tahunAkhir = $matches[2] ?? '2026';
+                $tanggalMulai = \Carbon\Carbon::create($tahunAwal, 7, 1)->format('Y-m-d');
+                $tanggalAkhir = \Carbon\Carbon::create($tahunAkhir, 6, 1)->format('Y-m-d');
+                // Dispatch job
+                GenerateTagihanMasalJob::dispatch(
+                    $siswa->pluck('id')->toArray(),
+                    $biaya_id_array,
+                    $tahunPelajaranId,
+                    $tanggalMulai,
+                    $tanggalAkhir,
+                    $requestData['keterangan'] ?? null,
+                    auth()->id(),
+                    true, // kirim notifikasi wali
+                    false // notifikasi operator opsional
+                );
+                \DB::commit();
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Proses generate tagihan masal sedang berjalan di background.',
+                        'redirect' => route($this->routePrefix . '.index')
+                    ]);
                 }
+                return redirect()->route($this->routePrefix . '.index')
+                    ->with('success', 'Proses generate tagihan masal sedang berjalan di background.');
+            }
 
-                // Jika generate 1 tahun dicentang
-                if ($request->has('generate_1_tahun')) {
-                    $start = \Carbon\Carbon::create(2025, 7, 1);
-                    $end = \Carbon\Carbon::create(2026, 6, 1);
-
-                    for ($date = $start->copy(); $date->lte($end); $date->addMonth()) {
-                        // Cek duplikasi tagihan
-                        $exists = Tagihan::where('siswa_id', $item->id)
-                            ->whereMonth('tanggal_tagihan', $date->month)
-                            ->whereYear('tanggal_tagihan', $date->year)
-                            ->where('tahun_pelajaran_id', $tahunPelajaranId)
-                            ->exists();
-                        if ($exists) continue;
-
-                        $tagihanData = [
-                            'user_id' => auth()->user()->id,
-                            'denda' => 0,
-                            'siswa_id' => $item->id,
-                            'angkatan' => $item->angkatan,
-                            'jurusan' => $item->jurusan_id,
-                            'kelas' => $item->kelas,
-                            'tahun_pelajaran_id' => $tahunPelajaranId,
-                            'tanggal_tagihan' => $date->format('Y-m-01'),
-                            'tanggal_jatuh_tempo' => $date->format('Y-m-28'),
-                            'keterangan' => $requestData['keterangan'] ?? null,
-                        ];
-
-                        $tagihan = Tagihan::create($tagihanData);
-
-                        foreach($biaya_id_array as $biaya_id) {
-                            $biaya = Biaya::with('children')->findOrFail($biaya_id);
-
-                            if ($biaya->isParent() && $biaya->children->count() > 0) {
-                                foreach ($biaya->children as $child) {
-                                    if (!$child->jumlah) {
-                                        throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
-                                    }
-                                    $tagihan->tagihan_details()->create([
-                                        'nama_biaya' => $child->nama,
-                                        'jumlah_biaya' => $child->jumlah,
-                                        'tagihan_id' => $tagihan->id,
-                                        'biaya_id' => $child->id,
-                                        'status' => 'baru'
-                                    ]);
-                                    $count++;
-                                }
-                            } else {
-                                if (!$biaya->jumlah) {
-                                    throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
-                                }
-                                $tagihan->tagihan_details()->create([
-                                    'nama_biaya' => $biaya->nama,
-                                    'jumlah_biaya' => $biaya->jumlah,
-                                    'tagihan_id' => $tagihan->id,
-                                    'biaya_id' => $biaya->id,
-                                    'status' => 'baru'
-                                ]);
-                                $count++;
-                            }
-                        }
-
-                        // Kirim notifikasi ke wali murid
-                        if ($item->wali) {
-                            $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
-                            // Pastikan relasi siswa.wali sudah di-load
-                            $tagihan->load('siswa.wali');
-                            // Kirim WhatsApp hanya untuk tagihan bulan berjalan (generate 1 tahun) atau single
-                            if (!isset($date) || ($date->month == now()->month && $date->year == now()->year)) {
-                                app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
-                            }
-                        }
-                    }
-                } else {
-                    // Proses single tagihan seperti biasa
-                    $tagihanData = [
-                        'user_id' => auth()->user()->id,
-                        'denda' => 0,
-                        'siswa_id' => $item->id,
-                        'angkatan' => $item->angkatan,
-                        'jurusan' => $item->jurusan_id,
-                        'kelas' => $item->kelas,
-                        'tahun_pelajaran_id' => $tahunPelajaranId,
-                        'tanggal_tagihan' => $requestData['tanggal_tagihan'],
-                        'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
-                        'keterangan' => $requestData['keterangan'] ?? null,
-                    ];
-
-                    $tagihan = Tagihan::create($tagihanData);
-
-                    foreach($biaya_id_array as $biaya_id) {
-                        $biaya = Biaya::with('children')->findOrFail($biaya_id);
-
-                        if ($biaya->isParent() && $biaya->children->count() > 0) {
-                            foreach ($biaya->children as $child) {
-                                if (!$child->jumlah) {
-                                    throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
-                                }
-                                $tagihan->tagihan_details()->create([
-                                    'nama_biaya' => $child->nama,
-                                    'jumlah_biaya' => $child->jumlah,
-                                    'tagihan_id' => $tagihan->id,
-                                    'biaya_id' => $child->id,
-                                    'status' => 'baru'
-                                ]);
-                                $count++;
-                            }
-                        } else {
-                            if (!$biaya->jumlah) {
-                                throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+            // Proses single tagihan seperti biasa
+            $count = 0;
+            foreach($siswa as $item) {
+                $tagihanData = [
+                    'user_id' => auth()->user()->id,
+                    'denda' => 0,
+                    'siswa_id' => $item->id,
+                    'angkatan' => $item->angkatan,
+                    'jurusan' => $item->jurusan_id,
+                    'kelas' => $item->kelas,
+                    'tahun_pelajaran_id' => $tahunPelajaranId,
+                    'tanggal_tagihan' => $requestData['tanggal_tagihan'],
+                    'tanggal_jatuh_tempo' => $requestData['tanggal_jatuh_tempo'],
+                    'keterangan' => $requestData['keterangan'] ?? null,
+                ];
+                $tagihan = Tagihan::create($tagihanData);
+                foreach($biaya_id_array as $biaya_id) {
+                    $biaya = Biaya::with('children')->findOrFail($biaya_id);
+                    if ($biaya->isParent() && $biaya->children->count() > 0) {
+                        foreach ($biaya->children as $child) {
+                            if (!$child->jumlah) {
+                                throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $child->nama);
                             }
                             $tagihan->tagihan_details()->create([
-                                'nama_biaya' => $biaya->nama,
-                                'jumlah_biaya' => $biaya->jumlah,
+                                'nama_biaya' => $child->nama,
+                                'jumlah_biaya' => $child->jumlah,
                                 'tagihan_id' => $tagihan->id,
-                                'biaya_id' => $biaya->id,
+                                'biaya_id' => $child->id,
                                 'status' => 'baru'
                             ]);
                             $count++;
                         }
-                    }
-
-                    // Kirim notifikasi ke wali murid
-                    if ($item->wali) {
-                        $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
-                        // Kirim notifikasi WhatsApp ke wali
-                        app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
+                    } else {
+                        if (!$biaya->jumlah) {
+                            throw new \Exception("Jumlah biaya tidak boleh kosong untuk biaya: " . $biaya->nama);
+                        }
+                        $tagihan->tagihan_details()->create([
+                            'nama_biaya' => $biaya->nama,
+                            'jumlah_biaya' => $biaya->jumlah,
+                            'tagihan_id' => $tagihan->id,
+                            'biaya_id' => $biaya->id,
+                            'status' => 'baru'
+                        ]);
+                        $count++;
                     }
                 }
+                // Kirim notifikasi ke wali murid
+                if ($item->wali) {
+                    $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
+                    // Kirim notifikasi WhatsApp ke wali
+                    app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
+                }
             }
-            
             \DB::commit();
-
             // Response untuk AJAX request
             if ($request->ajax()) {
                 return response()->json([
@@ -365,7 +318,6 @@ class TagihanController extends Controller
                     'redirect' => route($this->routePrefix . '.index')
                 ]);
             }
-
             // Response untuk non-AJAX request
             return redirect()->route($this->routePrefix . '.index')
                 ->with('success', 'Data berhasil ditambah untuk ' . $count . ' tagihan');
