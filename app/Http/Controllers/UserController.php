@@ -21,7 +21,7 @@ class UserController extends Controller
     public function index()
     {
         return view ('operator.'.$this->viewIndex, [
-            'models' => Model::where('akses', 'operator')
+            'models' => Model::whereIn('akses', ['operator', 'admin'])
             ->latest()
             ->paginate(50),
             'routePrefix' => $this->routePrefix,

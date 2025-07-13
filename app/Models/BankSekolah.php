@@ -16,7 +16,8 @@ class BankSekolah extends Model
         'nama_bank', 
         'no_rekening',
         'atas_nama',
-        'keterangan'
+        'keterangan',
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     /**

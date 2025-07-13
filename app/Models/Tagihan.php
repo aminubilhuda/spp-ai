@@ -13,7 +13,10 @@ class Tagihan extends Model
     use HasFormatRupiah;
     use HasStatuses;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'tahun_pelajaran_id', 'siswa_id', 'user_id', 'angkatan', 'jurusan', 'kelas', 'tanggal_tagihan', 'tanggal_jatuh_tempo', 'keterangan', 'denda', // tambahkan field lain jika ada
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
+    ];
     protected $dates = [
         'tanggal_tagihan',
         'tanggal_jatuh_tempo',

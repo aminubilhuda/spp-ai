@@ -16,6 +16,10 @@ class PengeluaranKas extends Model
         'kategori',
         'keterangan',
         'user_id',
+        'sync_id',
+        'synced_at',
+        'sync_status',
+        'source_system',
     ];
 
     public function user()

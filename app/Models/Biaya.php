@@ -14,7 +14,10 @@ class Biaya extends Model
     use HasFactory;
     use HasFormatRupiah;
     
-    protected $fillable = ['parent_id', 'nama', 'jumlah', 'user_id'];
+    protected $fillable = [
+        'nama', 'jumlah', 'user_id', // tambahkan field lain jika ada
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
+    ];
     protected $appends = ['total_tagihan'];
 
     

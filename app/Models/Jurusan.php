@@ -10,7 +10,10 @@ class Jurusan extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['nama', 'keterangan'];
+    protected $fillable = [
+        'nama', 'keterangan',
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
+    ];
     
     /**
      * Relasi dengan siswa

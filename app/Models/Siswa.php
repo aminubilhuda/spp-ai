@@ -12,7 +12,10 @@ class Siswa extends Model
     /** @use HasFactory<\Database\Factories\SiswaFactory> */
     use HasFactory;
     use HasStatuses;
-    protected $guarded = [];
+    protected $fillable = [
+        'wali_id', 'wali_status', 'nama', 'nisn', 'nis', 'foto', 'jenis_kelamin', 'jurusan_id', 'kelas', 'angkatan', 'user_id', // tambahkan field lain jika ada
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
+    ];
 
     // relasi 
     public function user(): BelongsTo

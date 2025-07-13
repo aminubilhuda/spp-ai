@@ -10,7 +10,8 @@ class TahunPelajaran extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nama', 'is_aktif'
+        'nama', 'is_aktif',
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     public function tagihans()

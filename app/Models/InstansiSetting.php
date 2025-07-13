@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Setting extends Model
+class InstansiSetting extends Model
 {
-    protected $table = 'instansi_settings';
-    
+    use HasFactory;
+
     protected $fillable = [
-        'name', 'val', // tambahkan field lain jika ada
+        'nama_instansi',
+        'email_instansi',
+        'nomor_wa_instansi',
+        'alamat_instansi',
+        'logo_instansi',
+        'nama_penanggung_jawab',
+        'nama_jabatan',
+        'ttd_penanggung_jawab',
         'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
@@ -37,4 +45,4 @@ class Setting extends Model
         
         return $setting;
     }
-}
+} 

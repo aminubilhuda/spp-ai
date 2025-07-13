@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Exports\LaporanUangMasukExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PembayaranController extends Controller
 {
@@ -509,5 +511,11 @@ class PembayaranController extends Controller
             'title' => $title,
             'periode' => $periode,
         ]);
+    }
+
+    public function exportLaporanUangMasuk($periode)
+    {
+        $namaFile = 'laporan_uang_masuk_' . $periode . '_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new LaporanUangMasukExport($periode), $namaFile);
     }
 }

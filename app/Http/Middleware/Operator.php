@@ -16,7 +16,7 @@ class Operator
     public function handle(Request $request, Closure $next): Response
     {
         // Check if the user is an operator
-        if ($request->user()->akses == 'operator') {
+        if ($request->user()->akses == 'operator' || $request->user()->akses == 'admin') {
            return $next($request);
         }
         

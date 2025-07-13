@@ -6,6 +6,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\BackupDatabaseCommand;
 use App\Console\Commands\RestoreDatabaseCommand;
+use App\Console\Commands\SyncDatabaseCommand;
+use App\Console\Commands\GenerateApiKeyCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -17,6 +19,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         BackupDatabaseCommand::class,
         RestoreDatabaseCommand::class,
+        SyncDatabaseCommand::class,
+        GenerateApiKeyCommand::class,
     ];
 
     /**
@@ -30,6 +34,12 @@ class Kernel extends ConsoleKernel
         // Bisa ditambahkan schedule backup otomatis di sini jika diperlukan
         // Contoh: backup setiap hari jam 00:00
         // $schedule->command('backup:run')->daily();
+
+        // Auto sync database setiap 5 menit
+        $schedule->command('sync:database both')
+            ->everyFiveMinutes()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

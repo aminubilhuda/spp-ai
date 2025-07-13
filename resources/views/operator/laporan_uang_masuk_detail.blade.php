@@ -8,7 +8,10 @@
                 <h5 class="mb-0">{{ $title }}</h5>
             </div>
             <div class="card-body">
-                <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm mb-3"><i class="bx bx-arrow-back"></i> Kembali</a>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm"><i class="bx bx-arrow-back"></i> Kembali</a>
+                    <a href="{{ route('laporan.uangmasuk.export', ['periode' => $periode]) }}" class="btn btn-success btn-sm"><i class="bx bx-download"></i> Export Excel</a>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead>

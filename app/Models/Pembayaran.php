@@ -25,7 +25,11 @@ class Pembayaran extends Model
         'tanggal_bayar',
         'bank_sekolah_id',
         'no_rekening_pengirim',
-        'bank_pengirim'
+        'bank_pengirim',
+        'sync_id',
+        'synced_at',
+        'sync_status',
+        'source_system',
     ];
 
     protected $dates = ['tanggal_bayar'];

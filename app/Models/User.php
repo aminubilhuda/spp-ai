@@ -25,6 +25,7 @@ class User extends Authenticatable
         'nohp',
         'password',
         'akses',
+        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     /**

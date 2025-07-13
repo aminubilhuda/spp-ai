@@ -31,7 +31,11 @@ class Bank extends Model
      */
     protected $fillable = [
         'sandi_bank',
-        'nama_bank'
+        'nama_bank',
+        'sync_id',
+        'synced_at',
+        'sync_status',
+        'source_system',
     ];
 
     /**
