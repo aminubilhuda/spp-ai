@@ -193,15 +193,18 @@ class TagihanController extends Controller
                 $siswaQuery->currentStatus('Aktif');
 
                 if (!empty($requestData['angkatan'])) {
-                    $siswaQuery->where('angkatan', $requestData['angkatan']);
+                    $angkatan = is_array($requestData['angkatan']) ? $requestData['angkatan'] : [$requestData['angkatan']];
+                    $siswaQuery->whereIn('angkatan', $angkatan);
                 }
 
                 if (!empty($requestData['jurusan'])) {
-                    $siswaQuery->where('jurusan_id', $requestData['jurusan']);
+                    $jurusan = is_array($requestData['jurusan']) ? $requestData['jurusan'] : [$requestData['jurusan']];
+                    $siswaQuery->whereIn('jurusan_id', $jurusan);
                 }
                 
                 if (!empty($requestData['kelas'])) {
-                    $siswaQuery->where('kelas', $requestData['kelas']);
+                    $kelas = is_array($requestData['kelas']) ? $requestData['kelas'] : [$requestData['kelas']];
+                    $siswaQuery->whereIn('kelas', $kelas);
                 }
                 
                 if (!empty($requestData['jenis_kelamin'])) {

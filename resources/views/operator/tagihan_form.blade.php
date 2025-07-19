@@ -239,6 +239,13 @@
             minimumInputLength: 2
         });
         
+        // Inisialisasi Select2 untuk multiple select
+        $('.select2').select2({
+            placeholder: 'Pilih ...',
+            allowClear: true,
+            width: '100%'
+        });
+        
         // Format untuk dropdown option
         function formatSiswaOption(siswa) {
             if (siswa.loading) return siswa.text;
@@ -376,36 +383,36 @@
                         <div class="row mb-3" id="filter-siswa-section">
                             <div class="col-md-3">
                                 <label class="form-label">Angkatan <small class="text-muted">(opsional)</small></label>
-                                <select name="angkatan" class="form-control @error('angkatan') is-invalid @enderror">
-                                    <option value="">Pilih Angkatan</option>
+                                <select name="angkatan[]" class="form-control select2" multiple>
                                     @foreach ($angkatan as $item)
-                                        <option value="{{ $item }}" {{ old('angkatan') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                        <option value="{{ $item }}" {{ (collect(old('angkatan'))->contains($item)) ? 'selected' : '' }}>{{ $item }}</option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Pilih lebih dari satu angkatan jika perlu</small>
                                 @error('angkatan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Jurusan <small class="text-muted">(opsional)</small></label>
-                                <select name="jurusan" class="form-control @error('jurusan') is-invalid @enderror">
-                                    <option value="">Semua Jurusan</option>
+                                <select name="jurusan[]" class="form-control select2" multiple>
                                     @foreach ($jurusan as $kode => $nama)
-                                        <option value="{{ $kode }}" {{ old('jurusan') == $kode ? 'selected' : '' }}>{{ $nama }}</option>
+                                        <option value="{{ $kode }}" {{ (collect(old('jurusan'))->contains($kode)) ? 'selected' : '' }}>{{ $nama }}</option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Pilih lebih dari satu jurusan jika perlu</small>
                                 @error('jurusan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Kelas <small class="text-muted">(opsional)</small></label>
-                                <select name="kelas" class="form-control @error('kelas') is-invalid @enderror">
-                                    <option value="">Semua Kelas</option>
+                                <select name="kelas[]" class="form-control select2" multiple>
                                     @foreach ($kelas as $item)
-                                        <option value="{{ $item }}" {{ old('kelas') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                        <option value="{{ $item }}" {{ (collect(old('kelas'))->contains($item)) ? 'selected' : '' }}>{{ $item }}</option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Pilih lebih dari satu kelas jika perlu</small>
                                 @error('kelas')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
