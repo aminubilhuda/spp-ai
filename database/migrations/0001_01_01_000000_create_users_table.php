@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('akses', ['admin', 'operator', 'wali'])->default('admin');
-            $table->string('nohp')->unique();
+            $table->string('nohp')->unique()->nullable();
             $table->timestamp('nohp_verified_at')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

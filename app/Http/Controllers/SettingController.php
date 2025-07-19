@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Setting;
+use App\Models\InstansiSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,14 +11,14 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings = Setting::getInstansiSettings();
+        $settings = InstansiSetting::getInstansiSettings();
         
         return view('operator.setting_form', compact('settings'));
     }
 
     public function create()
     {
-        $settings = Setting::getInstansiSettings();
+        $settings = InstansiSetting::getInstansiSettings();
         
         return view('operator.setting_form', compact('settings'));
     }
@@ -63,7 +63,7 @@ class SettingController extends Controller
             $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
             
             // Hapus logo lama jika ada
-            $oldSettings = Setting::getInstansiSettings();
+            $oldSettings = InstansiSetting::getInstansiSettings();
             if ($oldSettings->logo_instansi) {
                 Storage::disk('public')->delete($oldSettings->logo_instansi);
             }
@@ -79,7 +79,7 @@ class SettingController extends Controller
             $filename = 'ttd_' . time() . '.' . $file->getClientOriginalExtension();
             
             // Hapus TTD lama jika ada
-            $oldSettings = Setting::getInstansiSettings();
+            $oldSettings = InstansiSetting::getInstansiSettings();
             if ($oldSettings->ttd_penanggung_jawab) {
                 Storage::disk('public')->delete($oldSettings->ttd_penanggung_jawab);
             }
@@ -90,7 +90,7 @@ class SettingController extends Controller
         }
 
         // Simpan ke database
-        Setting::saveInstansiSettings($settings);
+        InstansiSetting::saveInstansiSettings($settings);
 
         return redirect()->back()->with('success', 'Pengaturan instansi berhasil disimpan!');
     }

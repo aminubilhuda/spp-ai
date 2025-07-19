@@ -303,7 +303,7 @@ class TagihanController extends Controller
                     }
                 }
                 // Kirim notifikasi ke wali murid
-                if ($item->wali) {
+                if ($item->wali && !empty($item->wali->id)) {
                     $item->wali->notify(new \App\Notifications\TagihanNotification($tagihan));
                     // Kirim notifikasi WhatsApp ke wali
                     app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);

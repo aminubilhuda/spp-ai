@@ -116,7 +116,7 @@ class GenerateTagihanMasalJob implements ShouldQueue
                         }
                     }
                     // Kirim notifikasi ke wali untuk setiap tagihan baru
-                    if ($this->kirimNotifikasiWali && $siswa->wali) {
+                    if ($this->kirimNotifikasiWali && $siswa->wali && !empty($siswa->wali->id)) {
                         \Log::info('DEBUG: Jenis $tagihan sebelum konversi', [
                             'class' => is_object($tagihan) ? get_class($tagihan) : gettype($tagihan),
                             'id' => is_object($tagihan) && isset($tagihan->id) ? $tagihan->id : null
