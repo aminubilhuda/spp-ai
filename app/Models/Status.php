@@ -8,6 +8,5 @@ class Status extends SpatieStatus
 {
     protected $fillable = [
         'name', 'reason', 'model_type', 'model_id',
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 }

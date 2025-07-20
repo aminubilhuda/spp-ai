@@ -9,8 +9,7 @@ class Setting extends Model
     protected $table = 'instansi_settings';
     
     protected $fillable = [
-        'name', 'val', // tambahkan field lain jika ada
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
+        'name', 'val', 
     ];
 
     /**

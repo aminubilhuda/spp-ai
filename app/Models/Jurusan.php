@@ -12,7 +12,6 @@ class Jurusan extends Model
     
     protected $fillable = [
         'nama', 'keterangan',
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
     
     /**

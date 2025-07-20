@@ -33,7 +33,6 @@ use App\Http\Controllers\LaporanRekapPembayaranController;
 use App\Http\Controllers\WhatsappFonnteController;
 use App\Http\Controllers\WaliMuridProfileController;
 use App\Http\Controllers\PengeluaranKasController;
-use App\Http\Controllers\SyncStatusController;
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -169,14 +168,6 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
 
     Route::resource('pengeluaran-kas', PengeluaranKasController::class)->except(['show', 'edit', 'update', 'destroy']);
     Route::get('laporan-kas', [PengeluaranKasController::class, 'laporanKas'])->name('laporan-kas');
-
-    // Database Sync Status
-    Route::get('sync/status', [SyncStatusController::class, 'index'])->name('sync.status');
-    Route::get('sync/status/data', [SyncStatusController::class, 'getStatus'])->name('sync.status.data');
-    Route::get('sync/check-connection', [SyncStatusController::class, 'checkConnection'])->name('sync.check-connection');
-    Route::post('sync/manual', [SyncStatusController::class, 'manualSync'])->name('sync.manual');
-    Route::post('sync/table/{tableName}', [SyncStatusController::class, 'syncTable'])->name('sync.table');
-    Route::post('sync/reset-failed', [SyncStatusController::class, 'resetFailed'])->name('sync.reset-failed');
 });
 
 // Route manual kirim WhatsApp tagihan
@@ -246,4 +237,3 @@ Route::get('/whatsapp/test-tagihan/{id}', [WhatsappFonnteController::class, 'tes
 
 Route::get('/operator/laporan-uang-masuk/{periode}', [PembayaranController::class, 'laporanUangMasukDetail'])->name('laporan.uang_masuk');
 Route::get('/laporan-uang-masuk/export/{periode}', [\App\Http\Controllers\PembayaranController::class, 'exportLaporanUangMasuk'])->name('laporan.uangmasuk.export');
-

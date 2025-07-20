@@ -33,12 +33,6 @@
                 <div data-i18n="Analytics">Pengaturan</div>
             </a>
         </li>
-        <li class="menu-item {{ request()->is('operator/sync*') ? 'active' : '' }}">
-            <a href="{{ route('sync.status') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-sync"></i>
-                <div data-i18n="Analytics">Sinkronisasi Database</div>
-            </a>
-        </li>
         <li class="menu-item {{ request()->is('operator/tahun-pelajaran*') ? 'active' : '' }}">
             <a href="{{ route('tahun-pelajaran.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-calendar"></i>

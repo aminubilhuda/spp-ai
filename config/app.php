@@ -241,18 +241,4 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Database Sync Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for database synchronization between local and online
-    | systems.
-    |
-    */
-
-    'online_api_url' => env('ONLINE_API_URL', 'https://your-domain.com'),
-    'sync_api_key' => env('SYNC_API_KEY', 'your-secret-api-key'),
-    'sync_interval' => env('SYNC_INTERVAL', 300), // 5 minutes in seconds
-
 ];

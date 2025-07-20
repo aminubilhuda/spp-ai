@@ -11,7 +11,6 @@ class TahunPelajaran extends Model
 
     protected $fillable = [
         'nama', 'is_aktif',
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     public function tagihans()

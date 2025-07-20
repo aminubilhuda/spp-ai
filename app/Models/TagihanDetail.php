@@ -20,7 +20,6 @@ class TagihanDetail extends Model
         'jumlah_biaya', 
         'status',
         'tanggal_lunas',
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     protected $dates = [

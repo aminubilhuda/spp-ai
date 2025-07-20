@@ -18,7 +18,6 @@ class InstansiSetting extends Model
         'nama_penanggung_jawab',
         'nama_jabatan',
         'ttd_penanggung_jawab',
-        'sync_id', 'synced_at', 'sync_status', 'source_system',
     ];
 
     /**
