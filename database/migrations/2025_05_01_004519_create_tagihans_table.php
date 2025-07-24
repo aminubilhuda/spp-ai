@@ -24,6 +24,7 @@ return new class extends Migration
             $table->date('tanggal_jatuh_tempo');
             $table->string('keterangan')->nullable();
             $table->string('denda');
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

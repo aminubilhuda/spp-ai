@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('keterangan')->nullable();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@ class Setting extends Model
     protected $table = 'instansi_settings';
     
     protected $fillable = [
-        'name', 'val', 
+        'name', 'val', 'synced',
     ];
 
     /**

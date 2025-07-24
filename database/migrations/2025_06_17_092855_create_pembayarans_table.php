@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('no_rekening_pengirim')->nullable();
             $table->string('bank_pengirim')->nullable();
             $table->foreignId('user_id')->nullable()->index();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

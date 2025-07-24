@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('no_rekening');
             $table->string('atas_nama')->nullable();
             $table->string('keterangan')->nullable();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

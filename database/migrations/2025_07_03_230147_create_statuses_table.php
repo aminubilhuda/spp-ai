@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('reason')->nullable();
             $table->string('model_type');
             $table->unsignedBigInteger('model_id');
+            $table->boolean('synced')->default(false);
             $table->timestamps();
             
             // Index untuk performa query

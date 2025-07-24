@@ -7,15 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\TagihanDetail;
+use App\Traits\Syncable;
 
 class Biaya extends Model
 {
     /** @use HasFactory<\Database\Factories\BiayaFactory> */
     use HasFactory;
-    use HasFormatRupiah;
+    use HasFormatRupiah, Syncable;
     
     protected $fillable = [
-        'nama', 'jumlah', 'user_id',
+        'nama', 'jumlah', 'user_id', 'synced',
     ];
     protected $appends = ['total_tagihan'];
 

@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Syncable;
 
 class TahunPelajaran extends Model
 {
-    use HasFactory;
+    use HasFactory, Syncable;
 
     protected $fillable = [
-        'nama', 'is_aktif',
+        'nama', 'is_aktif', 'synced',
     ];
 
     public function tagihans()

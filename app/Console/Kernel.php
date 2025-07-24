@@ -8,6 +8,7 @@ use App\Console\Commands\BackupDatabaseCommand;
 use App\Console\Commands\RestoreDatabaseCommand;
 use App\Console\Commands\SyncDatabaseCommand;
 use App\Console\Commands\GenerateApiKeyCommand;
+use App\Console\Commands\PullFromOnlineCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -21,6 +22,7 @@ class Kernel extends ConsoleKernel
         RestoreDatabaseCommand::class,
         SyncDatabaseCommand::class,
         GenerateApiKeyCommand::class,
+        PullFromOnlineCommand::class,
     ];
 
     /**
@@ -31,15 +33,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Bisa ditambahkan schedule backup otomatis di sini jika diperlukan
-        // Contoh: backup setiap hari jam 00:00
-        // $schedule->command('backup:run')->daily();
-
-        // Auto sync database setiap 5 menit
-        $schedule->command('sync:database both')
-            ->everyFiveMinutes()
-            ->withoutOverlapping()
-            ->runInBackground();
+        // Pull updates from online server every minute
+        $schedule->job(new PullFromOnlineJob)->everyMinute();
     }
 
     /**

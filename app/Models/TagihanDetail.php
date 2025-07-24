@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\ModelStatus\HasStatuses;
+use App\Traits\Syncable;
 
 class TagihanDetail extends Model
 {
-    use HasFactory, HasStatuses;
+    use HasFactory, HasStatuses, Syncable;
     
     protected $table = 'tagihan_details';
     protected $fillable = [
@@ -20,6 +21,7 @@ class TagihanDetail extends Model
         'jumlah_biaya', 
         'status',
         'tanggal_lunas',
+        'synced',
     ];
 
     protected $dates = [

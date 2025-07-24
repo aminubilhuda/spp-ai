@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('kelas');
             $table->string('angkatan');
             $table->foreignId('user_id')->index();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

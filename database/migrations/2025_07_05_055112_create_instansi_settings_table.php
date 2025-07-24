@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('nama_penanggung_jawab')->nullable();
             $table->string('nama_jabatan')->nullable();
             $table->string('ttd_penanggung_jawab')->nullable();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

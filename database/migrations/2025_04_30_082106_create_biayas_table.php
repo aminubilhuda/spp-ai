@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama');
             $table->decimal('jumlah', 15, 2);
             $table->foreignId('user_id')->nullable()->constrained();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

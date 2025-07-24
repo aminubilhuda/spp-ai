@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\ModelStatus\HasStatuses;
+use App\Traits\Syncable;
 
 class Siswa extends Model
 {
     /** @use HasFactory<\Database\Factories\SiswaFactory> */
     use HasFactory;
-    use HasStatuses;
+    use HasStatuses, Syncable;
     protected $fillable = [
-        'wali_id', 'wali_status', 'nama', 'nisn', 'nis', 'foto', 'jenis_kelamin', 'jurusan_id', 'kelas', 'angkatan', 'user_id',
+        'wali_id', 'wali_status', 'nama', 'nisn', 'nis', 'foto', 'jenis_kelamin', 'jurusan_id', 'kelas', 'angkatan', 'user_id', 'synced',
     ];
 
     // relasi 

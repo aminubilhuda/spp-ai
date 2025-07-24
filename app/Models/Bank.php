@@ -11,12 +11,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\Syncable;
 
 /**
  * Bank Model.
  */
 class Bank extends Model
 {
+    use Syncable;
     /**
      * Table name.
      *
@@ -32,6 +34,7 @@ class Bank extends Model
     protected $fillable = [
         'sandi_bank',
         'nama_bank',
+        'synced',
     ];
 
     /**

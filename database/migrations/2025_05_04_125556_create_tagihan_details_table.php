@@ -20,6 +20,7 @@ return new class extends Migration
             $table->double('jumlah_biaya');
             $table->enum('status', ['baru','angsur','lunas', 'belum_lunas'])->default('baru');
             $table->timestamp('tanggal_lunas')->nullable();
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

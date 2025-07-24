@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\HasFormatRupiah;
 use Spatie\ModelStatus\HasStatuses;
+use App\Traits\Syncable;
 
 class Pembayaran extends Model
 {
-    use HasFormatRupiah, HasStatuses;
+    use HasFormatRupiah, HasStatuses, Syncable;
 
     protected $table = 'pembayarans';
     protected $fillable = [
@@ -26,6 +27,7 @@ class Pembayaran extends Model
         'bank_sekolah_id',
         'no_rekening_pengirim',
         'bank_pengirim',
+        'synced',
     ];
 
     protected $dates = ['tanggal_bayar'];

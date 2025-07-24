@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasFormatRupiah;
 use Spatie\ModelStatus\HasStatuses;
+use App\Traits\Syncable;
 
 class Tagihan extends Model
 {
     use HasFactory;
     use HasFormatRupiah;
-    use HasStatuses;
+    use HasStatuses, Syncable;
 
     protected $fillable = [
-        'tahun_pelajaran_id', 'siswa_id', 'user_id', 'angkatan', 'jurusan', 'kelas', 'tanggal_tagihan', 'tanggal_jatuh_tempo', 'keterangan', 'denda', 
+        'tahun_pelajaran_id', 'siswa_id', 'user_id', 'angkatan', 'jurusan', 'kelas', 'tanggal_tagihan', 'tanggal_jatuh_tempo', 'keterangan', 'denda', 'synced',
     ];
     protected $dates = [
         'tanggal_tagihan',

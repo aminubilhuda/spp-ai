@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\Syncable;
 
 class PengeluaranKas extends Model
 {
-    use HasFactory;
+    use HasFactory, Syncable;
 
     protected $table = 'pengeluaran_kas';
     protected $fillable = [
@@ -16,6 +17,7 @@ class PengeluaranKas extends Model
         'kategori',
         'keterangan',
         'user_id',
+        'synced',
     ];
 
     public function user()

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama')->unique(); // contoh: 2024/2025
             $table->boolean('is_aktif')->default(false);
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

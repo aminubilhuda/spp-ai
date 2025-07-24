@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('kategori'); // contoh: Setoran Bank, Operasional, ATK, dll
             $table->string('keterangan')->nullable();
             $table->unsignedBigInteger('user_id'); // operator yang mencatat
+            $table->boolean('synced')->default(false);
             $table->timestamps();
         });
     }

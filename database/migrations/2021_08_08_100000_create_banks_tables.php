@@ -24,6 +24,7 @@ class CreateBanksTables extends Migration
             $table->id();
             $table->string('sandi_bank',20);
             $table->string('nama_bank');
+            $table->boolean('synced')->default(false);
         });
     }
 

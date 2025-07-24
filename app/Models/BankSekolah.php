@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\Syncable;
 
 class BankSekolah extends Model
 {
     /** @use HasFactory<\Database\Factories\BankSekolahFactory> */
-    use HasFactory;
+    use HasFactory, Syncable;
     
     protected $fillable = [
         'kode_bank',
@@ -17,6 +18,7 @@ class BankSekolah extends Model
         'no_rekening',
         'atas_nama',
         'keterangan',
+        'synced',
     ];
 
     /**
