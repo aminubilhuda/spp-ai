@@ -9,22 +9,22 @@ trait Syncable
 {
     protected static function bootSyncable()
     {
-        static::created(function ($model) {
-            if (!$model->synced) {
-                SyncToOnlineJob::dispatch('created', $model->toArray());
-            }
-        });
+        // static::created(function ($model) {
+        //     if (!$model->synced) {
+        //         SyncToOnlineJob::dispatch('created', $model->toArray());
+        //     }
+        // });
 
-        static::updated(function ($model) {
-            if (!$model->synced) {
-                SyncToOnlineJob::dispatch('updated', $model->toArray());
-            }
-        });
+        // static::updated(function ($model) {
+        //     if (!$model->synced) {
+        //         SyncToOnlineJob::dispatch('updated', $model->toArray());
+        //     }
+        // });
 
-        static::deleted(function ($model) {
-            if (!$model->synced) {
-                SyncToOnlineJob::dispatch('deleted', ['id' => $model->id]);
-            }
-        });
+        // static::deleted(function ($model) {
+        //     if (!$model->synced) {
+        //         SyncToOnlineJob::dispatch('deleted', ['id' => $model->id]);
+        //     }
+        // });
     }
 }

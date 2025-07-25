@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
         SyncDatabaseCommand::class,
         GenerateApiKeyCommand::class,
         PullFromOnlineCommand::class,
+        \App\Console\Commands\SyncOnline::class,
     ];
 
     /**
@@ -34,7 +35,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Pull updates from online server every minute
-        $schedule->job(new PullFromOnlineJob)->everyMinute();
+        $schedule->job(new \App\Jobs\PullFromOnlineJob)->everyMinute();
+
+        // Sync data to online server every 10 minutes
+        $schedule->command('sync:online')->everyTenMinutes();
     }
 
     /**

@@ -246,7 +246,7 @@ class TagihanController extends Controller
                     auth()->id(),
                     true, // kirim notifikasi wali
                     true // notifikasi operator opsional
-                );
+                )->onQueue('high-priority');
                 \DB::commit();
                 if ($request->ajax()) {
                     return response()->json([
