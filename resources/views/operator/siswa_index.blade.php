@@ -1,5 +1,9 @@
 @extends('layouts.app_sneat')
 
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/operator/siswa_index.css') }}">
+@endsection
+
 @section('content')
     <div class="row justify-content-center">
         @if (session('success'))
@@ -10,32 +14,35 @@
         @endif
         <div class="col-md-12">
             <div class="card">
-                <h5 class="card-header">{{ $title }}</h5>
+                <h5 class="card-header">
+                    {{ $title }}
+                    <div class="d-flex gap-2">
+                        <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary btn-sm">
+                            <i class="bx bx-plus me-1"></i> Tambah Siswa
+                        </a>
+                        <a href="{{ route($routePrefix . '.export') }}" class="btn btn-success btn-sm">
+                            <i class='bx bx-export me-1'></i> Export Excel
+                        </a>
+                        <a href="{{ route($routePrefix . '.import.form') }}" class="btn btn-info btn-sm">
+                            <i class='bx bx-import me-1'></i> Import Excel
+                        </a>
+                    </div>
+                </h5>
 
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary mb-3 btn-sm">Tambah
-                                siswa</a>
-                            <a href="{{ route($routePrefix . '.export') }}" class="btn btn-success mb-3 btn-sm">
-                                <i class='bx bx-export'></i> Export Excel
-                            </a>
-                            <a href="{{ route($routePrefix . '.import.form') }}" class="btn btn-info mb-3 btn-sm">
-                                <i class='bx bx-import'></i> Import Excel
-                            </a>
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 ms-auto search-filter-section">
                             <form action="{{ route($routePrefix . '.index') }}" method="GET">
                                 <div class="input-group">
                                     <input type="text" name="search" class="form-control"
                                         placeholder="Cari siswa (nama, NISN, NIS, jurusan, kelas)"
                                         value="{{ $search ?? '' }}">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search"></i> Cari
+                                        <i class="bx bx-search"></i>
                                     </button>
                                     @if (isset($search) && $search != '')
                                         <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary">
-                                            <i class="fas fa-times"></i> Reset
+                                            <i class="bx bx-x"></i>
                                         </a>
                                     @endif
                                 </div>
@@ -62,7 +69,7 @@
                             </thead>
                             <tbody>
                                 @php $no = 1; @endphp
-                                @forelse ($models as $siswa)
+                                @foreach ($models as $siswa)
                                     <tr>
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $siswa->wali->name }}</td>
@@ -83,36 +90,33 @@
                                         <td>{{ $siswa->angkatan }}</td>
                                         <td>{{ formatRupiah($siswa->biaya_spp) }}</td>
                                         <td>{{ $siswa->status }}</td>
-                                        <td>
-                                            <a href="{{ route($routePrefix . '.show', $siswa->id) }}"
-                                                class="btn btn-sm btn-info"> <i class="fas fa-eye"></i></a>
-                                            <a href="{{ route($routePrefix . '.edit', $siswa->id) }}"
-                                                class="btn btn-sm btn-warning"> <i class="fas fa-edit"></i></a>
-                                            <form action="{{ route($routePrefix . '.destroy', $siswa->id) }}"
-                                                method="post" class="d-inline">
-                                                @csrf
-                                                @method('delete')
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Apakah anda yakin?')"><i class="fas fa-trash">
+                                        <td class="text-nowrap">
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route($routePrefix . '.show', $siswa->id) }}"
+                                                    class="btn btn-sm btn-info btn-icon"> <i class="bx bx-show"></i></a>
+                                                <a href="{{ route($routePrefix . '.edit', $siswa->id) }}"
+                                                    class="btn btn-sm btn-warning btn-icon"> <i class="bx bx-edit"></i></a>
+                                                <form action="{{ route($routePrefix . '.destroy', $siswa->id) }}"
+                                                    method="post" class="d-inline">
+                                                    @csrf
+                                                    @method('delete')
+                                                    <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                                        onclick="return confirm('Apakah anda yakin?')"><i class="bx bx-trash">
                                                     </i></button>
-                                            </form>
-
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="text-center">Tidak ada data</td>
-                                    </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
-                        <div class="card-footer">
-                            @if (isset($search) && $search != '')
-                                {{ $models->appends(['search' => $search])->links() }}
-                            @else
-                                {{ $models->links() }}
-                            @endif
-                        </div>
+                    </div>
+                    <div class="card-footer">
+                        @if (isset($search) && $search != '')
+                            {{ $models->appends(['search' => $search])->links() }}
+                        @else
+                            {{ $models->links() }}
+                        @endif
                     </div>
                 </div>
             </div>

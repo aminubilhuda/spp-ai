@@ -2,110 +2,7 @@
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css">
-    <style>
-        .dataTables_filter {
-            display: none;
-        }
-
-        .table > :not(caption) > * > * {
-            padding: 0.6rem 0.75rem;
-            vertical-align: middle;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .total-amount {
-            font-weight: 600;
-            color: #566a7f;
-        }
-
-        .search-box {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-        }
-
-        .search-box .form-control {
-            border-radius: 8px 0 0 8px;
-            border-right: none;
-        }
-
-        .search-box .btn {
-            border-radius: 0 8px 8px 0;
-        }
-
-        /* Styling untuk filter tahun */
-        select.form-select {
-            border-radius: 8px;
-            border: 1px solid #d9dee3;
-            padding: 0.4375rem 2rem 0.4375rem 0.875rem;
-            font-size: 0.9375rem;
-            font-weight: 400;
-            line-height: 1.5;
-            color: #566a7f;
-            background-color: #fff;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23697a8d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.875rem center;
-            background-size: 16px 12px;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        select.form-select:focus {
-            border-color: #696cff;
-            box-shadow: 0 0 0.25rem rgba(105, 108, 255, 0.1);
-            outline: 0;
-        }
-
-        .d-flex.gap-2 {
-            gap: 0.5rem !important;
-        }
-
-        /* Styling untuk tabel */
-        .table thead th {
-            background-color: #f5f5f9;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #566a7f;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-icon i {
-            font-size: 1rem;
-        }
-
-        .badge.bg-label-primary {
-            background-color: #e7e7ff !important;
-            color: #696cff;
-            font-weight: 500;
-        }
-
-        .text-primary {
-            color: #696cff !important;
-        }
-
-        /* Card styling */
-        .card {
-            box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-            border: none;
-        }
-
-        .card-header {
-            background-color: transparent;
-            border-bottom: 1px solid #d9dee3;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/operator/tagihan_index.css') }}">
 @endsection
 
 @section('content')
@@ -119,33 +16,49 @@
 
         <!-- Summary Cards -->
         <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card summary-card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title mb-0">Total Tagihan</h5>
+                                <h5 class="card-title">Total Tagihan</h5>
                                 <small class="text-muted">Seluruh Siswa</small>
                                 <h3 class="mt-2 mb-0">{{ $models->count() }}</h3>
                             </div>
-                            <div class="avatar bg-primary p-2 rounded">
-                                <i class="bx bx-file text-white" style="font-size: 24px"></i>
+                            <div class="avatar bg-label-primary p-2 rounded-circle">
+                                <i class="bx bx-file text-primary"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card summary-card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title mb-0">Total Nilai</h5>
+                                <h5 class="card-title">Total Nilai</h5>
                                 <small class="text-muted">Semua Tagihan</small>
                                 <h3 class="mt-2 mb-0">{{ formatRupiah($models->sum('total_nilai')) }}</h3>
                             </div>
-                            <div class="avatar bg-success p-2 rounded">
-                                <i class="bx bx-money text-white" style="font-size: 24px"></i>
+                            <div class="avatar bg-label-success p-2 rounded-circle">
+                                <i class="bx bx-money text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Tagihan Belum Lunas</h5>
+                                <small class="text-muted">Berdasarkan Filter</small>
+                                <h3 class="mt-2 mb-0">{{ formatRupiah($models->filter(fn($item) => $item->status !== 'lunas')->sum('total_nilai')) }}</h3>
+                            </div>
+                            <div class="avatar bg-label-warning p-2 rounded-circle">
+                                <i class="bx bx-hourglass text-warning"></i>
                             </div>
                         </div>
                     </div>
@@ -157,22 +70,22 @@
             <div class="card">
                 <h5 class="card-header d-flex justify-content-between align-items-center">
                     {{ $title }}
-                    <div>
+                    <div class="d-flex align-items-center">
                         <button type="button" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal"
                             data-bs-target="#deleteModal">
-                            <i class="bx bx-trash"></i> Hapus Berdasarkan Filter
+                            <i class="bx bx-trash me-1"></i> Hapus Berdasarkan Filter
                         </button>
                         <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary btn-sm">
-                            <i class="bx bx-plus"></i> Tambah Tagihan
+                            <i class="bx bx-plus me-1"></i> Tambah Tagihan
                         </a>
                     </div>
                 </h5>
 
                 <div class="card-body">
                     <!-- Search Section -->
-                    <div class="row mb-4">
-                        <div class="col-md-8">
-                            <form action="{{ route($routePrefix . '.index') }}" method="GET" class="d-flex gap-2">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-6">
+                            <form action="{{ route($routePrefix . '.index') }}" method="GET" class="d-flex align-items-center gap-2">
                                 <div class="input-group search-box flex-grow-1">
                                     <input type="text" name="search" class="form-control"
                                         placeholder="Cari siswa berdasarkan nama/NISN" value="{{ request('search') }}">
@@ -185,7 +98,11 @@
                                         </a>
                                     @endif
                                 </div>
-                                <select name="tahun_pelajaran_id" class="form-select" style="width: auto" onchange="this.form.submit()">
+                            </form>
+                        </div>
+                        <div class="col-md-3 ms-auto">
+                            <form action="{{ route($routePrefix . '.index') }}" method="GET">
+                                <select name="tahun_pelajaran_id" class="form-select" onchange="this.form.submit()">
                                     @foreach($tahunPelajarans as $tp)
                                         <option value="{{ $tp->id }}" {{ $tp->id == $tahunPelajaranId ? 'selected' : '' }}>
                                             {{ $tp->nama }}{{ $tp->is_aktif ? ' (Aktif)' : '' }}
@@ -208,11 +125,11 @@
                                     <th style="width: 15%">Jurusan</th>
                                     <th style="width: 10%">Tagihan</th>
                                     <th style="width: 20%">Total</th>
-                                    <th style="width: 20%">Aksi</th>
+                                    <th style="width: 20%" class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($models as $item)
+                                @foreach ($models as $item)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td class="fw-semibold text-primary">
@@ -249,8 +166,8 @@
                                         <td>
                                             <span class="fw-semibold">{{ formatRupiah($item->total_nilai) }}</span>
                                         </td>
-                                        <td>
-                                            <div class="d-flex gap-1">
+                                        <td class="text-nowrap">
+                                            <div class="d-flex gap-1 justify-content-end">
                                                 <a href="{{ route($routePrefix . '.showByStudent', $item->siswa_id) }}"
                                                     class="btn btn-icon btn-sm btn-info" title="Lihat Detail">
                                                     <i class="bx bx-show"></i>
@@ -277,21 +194,13 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center py-3">
-                                            <div class="text-muted">
-                                                <i class="bx bx-folder-open mb-2" style="font-size: 2rem;"></i>
-                                                <div>Tidak ada data</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="card-footer">
+                    <div class="mt-3">
                         {{ $models->links() }}
                     </div>
                 </div>
@@ -349,11 +258,11 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bx bx-x"></i> Batal
+                            <i class="bx bx-x me-1"></i> Batal
                         </button>
                         <button type="submit" class="btn btn-danger"
                             onclick="return confirm('Anda yakin ingin menghapus data tagihan dengan kriteria tersebut?')">
-                            <i class="bx bx-trash"></i> Hapus Tagihan
+                            <i class="bx bx-trash me-1"></i> Hapus Tagihan
                         </button>
                     </div>
                 </form>
@@ -363,12 +272,11 @@
 @endsection
 
 @section('scripts')
-    <!-- <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script> -->
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTables with specific settings
             var table = $('#tagihan-table').DataTable({
                 paging: false,
                 ordering: true,
@@ -376,17 +284,15 @@
                 searching: true,
                 columnDefs: [{
                         orderable: false,
-                        targets: [4]
-                    } // Disable sorting on action column
+                        targets: [7] // Disable sorting on action column
+                    }
                 ]
             });
 
-            // Custom search handler
             $('.form-control[name="search"]').on('keyup', function() {
                 table.search(this.value).draw();
             });
 
-            // Animated hover effect for action buttons
             $('.btn').hover(
                 function() {
                     $(this).addClass('shadow-sm');

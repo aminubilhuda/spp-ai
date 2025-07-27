@@ -1,0 +1,330 @@
+/* --- Global Styles --- */
+body {
+    font-family: 'Public Sans', sans-serif;
+    background-color: #f8f9fa; /* A very light, almost white background */
+    color: #343a40; /* Dark charcoal for primary text */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Base Card Styling --- */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef; /* Subtle light gray border */
+    border-radius: 0.75rem; /* Consistent rounded corners */
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05); /* Soft, diffused shadow */
+    margin-bottom: 1.5rem; /* Standard spacing between cards */
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08); /* Slightly more pronounced on hover */
+}
+
+.card-header {
+    background-color: #f8f9fa; /* Light header background */
+    border-bottom: 1px solid #e9ecef; /* Separator line */
+    padding: 1.25rem 1.5rem; /* Generous padding */
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057; /* Muted dark gray for header text */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0.75rem 0.75rem 0 0; /* Match card border-radius */
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    color: #6c757d; /* Muted gray for footer text */
+    border-radius: 0 0 0.75rem 0.75rem;
+}
+
+/* --- Specific Card Styles --- */
+
+/* Guardian Info Card - Emphasized with a modern touch */
+.guardian-info-card .card-header {
+    background: linear-gradient(45deg, #6610f2 0%, #8a2be2 100%); /* Deep purple to violet gradient */
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: none;
+    box-shadow: 0 0.3rem 0.8rem rgba(102, 16, 242, 0.2);
+}
+
+.guardian-info-card .avatar img {
+    width: 7.5rem; /* Larger avatar */
+    height: 7.5rem;
+    object-fit: cover;
+    border: 0.25rem solid #e0cffc; /* Light purple border */
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease-out;
+}
+
+.guardian-info-card .avatar img:hover {
+    transform: scale(1.05);
+}
+
+.guardian-info-card h5 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+}
+
+.guardian-info-card .badge {
+    font-size: 0.875rem;
+    padding: 0.4em 0.9em;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    background-color: #e0cffc; /* Light background for badge */
+    color: #6610f2; /* Text color matching gradient */
+}
+
+.guardian-info-card .card-footer p {
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.guardian-info-card .card-footer i {
+    margin-right: 0.6rem;
+    color: #6610f2; /* Accent color for icons */
+    font-size: 1.1rem;
+}
+
+/* Detail Info Card - Clean & Readable */
+.detail-info-card .card-header {
+    background-color: #007bff; /* Primary blue */
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: none;
+}
+
+.detail-info-card .table-borderless td {
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px dashed #e9ecef; /* Subtle dashed separator */
+}
+
+.detail-info-card .table-borderless tr:last-child td {
+    border-bottom: none;
+}
+
+.detail-info-card .table-borderless td:first-child {
+    font-weight: 600;
+    color: #555;
+    width: 30%; /* Adjusted width for better alignment */
+}
+
+/* Add Student Form Card - Action-oriented */
+.add-student-card .card-header {
+    background-color: #28a745; /* Success green */
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: none;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.form-select {
+    border-radius: 0.4rem;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: #495057;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select:focus {
+    border-color: #28a745; /* Accent color on focus */
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+/* Related Students Section - Organized Data */
+.related-students-card .card-header {
+    background-color: #ffc107; /* Warning orange */
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: none;
+}
+
+.related-students-card .table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #566a7f;
+    padding: 0.9rem 1.2rem;
+}
+
+.related-students-card .table tbody tr td {
+    vertical-align: middle;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.related-students-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.7em;
+    border-radius: 0.3rem;
+    font-weight: 500;
+}
+
+/* --- Action Buttons --- */
+.btn {
+    border-radius: 0.4rem; /* Consistent rounded corners */
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.btn-info {
+    background-color: #17a2b8; /* Info blue */
+    border-color: #17a2b8;
+}
+
+.btn-warning {
+    background-color: #ffc107; /* Warning yellow */
+    border-color: #ffc107;
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Danger red */
+    border-color: #dc3545;
+}
+
+.btn-success {
+    background-color: #28a745; /* Success green */
+    border-color: #28a745;
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Secondary gray */
+    border-color: #6c757d;
+}
+
+.d-inline .btn {
+    margin-left: 0.6rem; /* Spacing between inline buttons */
+}
+
+/* --- Alerts --- */
+.alert {
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 767.98px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+    .card-header .btn {
+        margin-top: 0.75rem;
+        width: 100%;
+    }
+    .card-body {
+        padding: 1.2rem;
+    }
+    .guardian-info-card .avatar img {
+        width: 6rem;
+        height: 6rem;
+    }
+    .guardian-info-card h5 {
+        font-size: 1.4rem;
+    }
+    .guardian-info-card .card-footer p {
+        font-size: 0.8rem;
+    }
+    .detail-info-card .table-borderless td {
+        display: block;
+        width: 100%;
+        padding: 0.3rem 0;
+    }
+    .detail-info-card .table-borderless td:first-child {
+        margin-bottom: 0.1rem;
+    }
+    .related-students-card .table th,
+    .related-students-card .table td {
+        white-space: nowrap;
+    }
+    .related-students-card .table-responsive {
+        overflow-x: auto;
+    }
+    .d-inline .btn {
+        margin-left: 0.4rem;
+    }
+    .btn-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.1rem;
+    }
+}

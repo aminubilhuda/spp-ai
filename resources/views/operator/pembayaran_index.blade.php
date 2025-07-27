@@ -145,8 +145,8 @@
                                         <td>{{ $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td>
-                                            <strong>{{ $item->tagihan->siswa->nama ?? 'N/A' }}</strong><br>
-                                            <small class="text-muted">{{ $item->tagihan->siswa->nisn ?? 'N/A' }}</small>
+                                            <strong>{{ $item->tagihan?->siswa?->nama ?? ($item->tagihan?->nama_siswa_manual ?? 'N/A') }}</strong><br>
+                                            <small class="text-muted">{{ $item->tagihan?->siswa?->nisn ?? ($item->tagihan?->nisn_manual ?? 'N/A') }}</small>
                                         </td>
                                         <td>{{ $item->tagihan_detail->nama_biaya ?? 'N/A' }}</td>
                                         <td>{{ formatRupiah($item->jumlah_dibayar) }}</td>
@@ -219,7 +219,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger" 
-                                                            onclick="return confirmDelete('{{ $item->tagihan->siswa->nama }}', '{{ formatRupiah($item->jumlah_dibayar) }}', '{{ $item->status_konfirmasi }}')"
+                                                            onclick="return confirmDelete('{{ $item->tagihan?->siswa?->nama ?? 'N/A' }}', '{{ formatRupiah($item->jumlah_dibayar) }}', '{{ $item->status_konfirmasi }}')"
                                                             title="Hapus Pembayaran">
                                                         <i class="fas fa-trash"></i>
                                                     </button>

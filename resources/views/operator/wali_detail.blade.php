@@ -1,6 +1,9 @@
 @extends('layouts.app_sneat', ['title' => 'Detail Wali Murid'])
 
-@section('content')
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/operator/wali_detail.css') }}">
+@endsection
+    @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row justify-content-center">
             @if (session('success'))
@@ -14,20 +17,20 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">{{ $title }}</h5>
-                        <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm">
-                            <i class="fa fa-arrow-left"></i> Kembali
+                        <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm btn-icon">
+                            <i class="bx bx-arrow-back"></i>
                         </a>
                     </div>
 
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4 text-center mb-4">
-                                <div class="card guardian-card border-primary">
-                                    <div class="card-header bg-primary text-white text-center">
-                                        <h5>INFORMASI WALI MURID</h5>
+                            <div class="col-md-12 text-center mb-4">
+                                <div class="card guardian-info-card">
+                                    <div class="card-header text-center">
+                                        INFORMASI WALI MURID
                                     </div>
                                     <div class="card-body">
-                                        <div class="avatar avatar-xl mb-3">
+                                        <div class="avatar avatar-xxl mb-3">
                                             <img src="{{ asset('sneat/assets/img/avatars/1.png') }}" alt="Avatar"
                                                 class="rounded-circle">
                                         </div>
@@ -36,23 +39,25 @@
                                             Wali Murid
                                         </p>
                                     </div>
-                                    <div class="card-footer bg-light">
-                                        <p class="mb-0"><i class="bx bx-envelope"></i> {{ $model->email }}</p>
-                                        <p class="mb-0"><i class="bx bx-phone"></i> {{ $model->nohp ?? 'Tidak ada' }}</p>
+                                    <div class="card-footer">
+                                        <p class="mb-0"><i class="bx bx-envelope me-1"></i> {{ $model->email }}</p>
+                                        <p class="mb-0"><i class="bx bx-phone me-1"></i> {{ $model->nohp ?? 'Tidak ada' }}</p>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-8">
-                                <div class="card mb-3">
-                                    <div class="card-header bg-dark text-white">
-                                        <h5 class="mb-0">INFORMASI LENGKAP WALI MURID</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card detail-info-card mb-3">
+                                    <div class="card-header">
+                                        INFORMASI LENGKAP WALI MURID
                                     </div>
                                     <div class="card-body">
                                         <table class="table table-borderless">
                                             <tr>
-                                                <td width="30%"><strong>Nama Lengkap</strong></td>
-                                                <td width="5%">:</td>
+                                                <td><strong>Nama Lengkap</strong></td>
+                                                <td>:</td>
                                                 <td>{{ $model->name }}</td>
                                             </tr>
                                             <tr>
@@ -78,11 +83,13 @@
                                         </table>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div class="col-md-6">
                                 <!-- Add Student to Guardian Form -->
-                                <div class="card mb-3">
-                                    <div class="card-header bg-success text-white">
-                                        <h5 class="mb-0">TAMBAH SISWA KE WALI MURID</h5>
+                                <div class="card add-student-card mb-3">
+                                    <div class="card-header">
+                                        TAMBAH SISWA KE WALI MURID
                                     </div>
                                     <div class="card-body">
                                         <form action="{{ route('siswa.tambahkewali') }}" method="POST">
@@ -113,7 +120,7 @@
                                                 </select>
                                             </div>
                                             <button type="submit" class="btn btn-success">
-                                                <i class="fas fa-user-plus"></i> Tambahkan Siswa
+                                                <i class="bx bx-user-plus me-1"></i> Tambahkan Siswa
                                             </button>
                                         </form>
                                     </div>
@@ -124,9 +131,9 @@
                         <!-- Siswa Terkait Section -->
                         <div class="row mt-3">
                             <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header bg-info text-white">
-                                        <h5 class="mb-0">SISWA YANG DIASUH</h5>
+                                <div class="card related-students-card">
+                                    <div class="card-header">
+                                        SISWA YANG DIASUH
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
@@ -153,17 +160,17 @@
                                                             </td>
                                                             <td>
                                                                 <a href="{{ route('siswa.show', $siswa->id) }}"
-                                                                    class="btn btn-sm btn-info">
-                                                                    <i class="fas fa-eye"></i> Detail
+                                                                    class="btn btn-sm btn-info btn-icon">
+                                                                    <i class="bx bx-show"></i>
                                                                 </a>
                                                                 <form action="{{ route('siswa.hapusdariwall') }}"
-                                                                    method="POST" class="d-inline"
-                                                                    onsubmit="return confirm('Apakah yakin ingin menghapus siswa ini dari wali murid?')">
+                                                                    method="POST" class="d-inline">
                                                                     @csrf
                                                                     <input type="hidden" name="siswa_id"
                                                                         value="{{ $siswa->id }}">
-                                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                                        <i class="fas fa-unlink"></i> Hapus dari Wali
+                                                                    <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                                                                        onclick="return confirm('Apakah yakin ingin menghapus siswa ini dari wali murid?')">
+                                                                        <i class="bx bx-unlink"></i>
                                                                     </button>
                                                                 </form>
                                                             </td>
@@ -172,7 +179,7 @@
                                                         <tr>
                                                             <td colspan="6" class="text-center">
                                                                 <div class="alert alert-info mt-2">
-                                                                    <i class="fas fa-info-circle me-2"></i>
+                                                                    <i class="bx bx-info-circle me-2"></i>
                                                                     Belum ada siswa yang diasuh oleh wali murid ini
                                                                 </div>
                                                             </td>
@@ -189,15 +196,14 @@
                         <div class="row mt-3">
                             <div class="col-md-12 text-center">
                                 <a href="{{ route($routePrefix . '.edit', $model->id) }}" class="btn btn-warning">
-                                    <i class="fa fa-edit"></i> Edit
+                                    <i class="bx bx-edit me-1"></i> Edit
                                 </a>
                                 <form action="{{ route($routePrefix . '.destroy', $model->id) }}" method="post"
                                     class="d-inline">
                                     @csrf
                                     @method('delete')
-                                    <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Apakah anda yakin ingin menghapus wali murid ini?')">
-                                        <i class="fa fa-trash"></i> Hapus
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bx bx-trash me-1"></i> Hapus
                                     </button>
                                 </form>
                             </div>
@@ -208,31 +214,7 @@
         </div>
     </div>
 
-    <style>
-        .guardian-card {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .guardian-card:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .guardian-card .card-header {
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .avatar img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    
 
     @push('scripts')
         <script>

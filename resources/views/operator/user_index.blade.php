@@ -33,7 +33,7 @@
                             </thead>
                             <tbody>
                                 @php $no = 1; @endphp
-                                @forelse ($models as $user)
+                                                                @forelse ($models as $user)
                                     <tr>
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $user->name }}</td>
