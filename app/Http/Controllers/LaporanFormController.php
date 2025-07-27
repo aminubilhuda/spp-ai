@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\TahunPelajaran;
+use App\Models\Siswa;
 use Carbon\Carbon;
 
 class LaporanFormController extends Controller
@@ -14,6 +15,7 @@ class LaporanFormController extends Controller
     public function create(Request $request)
     {
         $tahunPelajarans = TahunPelajaran::orderByDesc('is_aktif')->orderBy('nama')->get();
+        $kelasList = Siswa::select('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
 
         $totalHariIni = \App\Models\Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi')
             ->whereDate('tanggal_bayar', Carbon::today())
@@ -31,7 +33,8 @@ class LaporanFormController extends Controller
             'tahunPelajarans',
             'totalHariIni',
             'totalMingguIni',
-            'totalBulanIni'
+            'totalBulanIni',
+            'kelasList'
         ));
     }
 

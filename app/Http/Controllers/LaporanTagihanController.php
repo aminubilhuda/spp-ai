@@ -23,8 +23,10 @@ class LaporanTagihanController extends Controller
         }
 
         // Filter status
-        if ($request->status) {
-            $query->where('status', $request->status);
+        if ($request->filled('status')) {
+            $query->whereHas('tagihan_details', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         // Filter kelas

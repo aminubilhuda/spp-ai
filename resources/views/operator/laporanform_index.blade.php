@@ -60,9 +60,9 @@
                             <label class="form-label">Kelas</label>
                             <select name="kelas" class="form-select select2">
                                 <option value="">Pilih Kelas</option>
-                                @for($i = 10; $i <= 12; $i++)
-                                    <option value="{{ $i }}">Kelas {{ $i }}</option>
-                                @endfor
+                                @foreach($kelasList as $kelas)
+                                    <option value="{{ $kelas }}">{{ $kelas }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
@@ -119,9 +119,9 @@
                             <label class="form-label">Kelas</label>
                             <select name="kelas" class="form-select select2">
                                 <option value="">Pilih Kelas</option>
-                                @for($i = 10; $i <= 12; $i++)
-                                    <option value="{{ $i }}">Kelas {{ $i }}</option>
-                                @endfor
+                                @foreach($kelasList as $kelas)
+                                    <option value="{{ $kelas }}">{{ $kelas }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">

@@ -1,5 +1,10 @@
 @extends('layouts.app_sneat', ['title' => 'User'])
 
+@section('styles')
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css">
+@endsection
+
 @section('content')
     <div class="row justify-content-center">
         @if (session('success'))
@@ -15,7 +20,7 @@
                 <div class="card-body">
                     <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary mb-3 btn-sm">Tambah User</a>
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped" id="myTable">
                             <thead>
                                 <tr>
                                     <td>No</td>
@@ -82,12 +87,20 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="card-footer">
-                            {{ $models->links() }}
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#myTable').DataTable();
+        });
+    </script>
 @endsection

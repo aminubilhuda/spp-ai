@@ -48,7 +48,7 @@
                         <h6>Langkah 2: Upload File Excel</h6>
                         <p class="text-muted">Upload file Excel yang sudah diisi dengan data siswa.</p>
                         
-                        <form action="{{ route('siswa.import.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('siswa.import.store') }}" method="POST" enctype="multipart/form-data" id="importForm">
                             @csrf
                             <div class="mb-3">
                                 <label for="file" class="form-label">Pilih File Excel</label>
@@ -60,7 +60,7 @@
                                 <div class="form-text">Format yang didukung: .xlsx, .xls (Maksimal 2MB)</div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
                                 <i class="fas fa-upload"></i> Import Data
                             </button>
                             
@@ -108,6 +108,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-white ms-3 mb-0">Sedang mengimport data, mohon tunggu...</p>
+    </div>
 @endsection
 
 @push('scripts')
@@ -126,6 +134,12 @@
             
             this.parentNode.appendChild(fileInfo);
         }
+    });
+
+    // Show loading overlay on form submission
+    document.getElementById('importForm').addEventListener('submit', function() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        document.getElementById('submitBtn').disabled = true; // Disable button to prevent multiple submissions
     });
 </script>
 @endpush

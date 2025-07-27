@@ -23,7 +23,7 @@ class UserController extends Controller
         return view ('operator.'.$this->viewIndex, [
             'models' => Model::whereIn('akses', ['operator', 'admin'])
             ->latest()
-            ->paginate(50),
+            ->get(),
             'routePrefix' => $this->routePrefix,
             'title' => 'Data User',
         ]);
