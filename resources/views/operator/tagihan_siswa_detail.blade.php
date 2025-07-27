@@ -127,7 +127,7 @@
 
             <!-- Kartu SPP -->
             <div class="card mb-4">
-                <h5 class="card-header">Kartu SPP Tahun {{ date('Y') }}</h5>
+                <h5 class="card-header">Kartu SPP Tahun {{ $tahunAktif->nama ?? 'Tidak Diketahui' }}</h5>
                 <div class="card-body">
                     @php
                         $namaBulan = [
