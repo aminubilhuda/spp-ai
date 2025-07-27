@@ -27,40 +27,46 @@ class TagihanController extends Controller
         $tahunPelajaranId = $request->get('tahun_pelajaran_id', $tahunAktif?->id);
 
         // Query dasar untuk tagihan dengan eager loading yang lebih efisien
-        $baseQuery = Tagihan::query()
-            ->select('tagihans.siswa_id', 
-                     \DB::raw('COUNT(DISTINCT tagihans.id) as total_tagihan'), 
-                     \DB::raw('SUM(tagihan_details.jumlah_biaya) as total_nilai'),
-                     \DB::raw('MAX(tagihans.created_at) as latest_created'))
+        $baseQuery = Tagihan::query()->from('tagihans as t')
+            ->select('t.siswa_id', 
+                     \DB::raw('COUNT(DISTINCT t.id) as total_tagihan'), 
+                     \DB::raw('SUM(td.jumlah_biaya) as total_nilai'),
+                     \DB::raw('MAX(t.created_at) as latest_created'))
             ->addSelect([
                 'latest_tagihan_id' => Tagihan::select('id')
-                    ->whereColumn('siswa_id', 'tagihans.siswa_id')
+                    ->whereColumn('siswa_id', 't.siswa_id')
                     ->orderByDesc('created_at')
                     ->limit(1)
             ])
-            ->join('tagihan_details', 'tagihans.id', '=', 'tagihan_details.tagihan_id')
+            ->join('tagihan_details as td', 't.id', '=', 'td.tagihan_id')
+            ->join('siswas as s', 't.siswa_id', '=', 's.id') // Join eksplisit ke tabel siswa
+            ->leftJoin('jurusans as j', 's.jurusan_id', '=', 'j.id') // Join eksplisit ke tabel jurusan
             ->with(['siswa' => function($q) {
                 $q->select('id', 'nama', 'nisn', 'kelas', 'jurusan_id', 'angkatan')
                   ->with('jurusan:id,nama'); 
             }])
-            ->groupBy('tagihans.siswa_id');
+            ->groupBy('t.siswa_id');
         
         // Filter tahun pelajaran aktif
         if ($tahunPelajaranId) {
-            $baseQuery->where('tagihans.tahun_pelajaran_id', $tahunPelajaranId);
+            $baseQuery->where('t.tahun_pelajaran_id', $tahunPelajaranId);
         }
         
         // Filter tahun (default tahun sekarang)
         $tahun = $request->get('tahun', date('Y'));
-        $baseQuery->whereYear('tagihans.tanggal_tagihan', $tahun);
+        $baseQuery->whereYear('t.tanggal_tagihan', $tahun);
         
         // Filter pencarian
         if ($request->has('search')) {
             $search = $request->search;
             
-            $baseQuery->whereHas('siswa', function($q) use ($search) {
-                $q->where('nama', 'like', '%' . $search . '%')
-                  ->orWhere('nisn', 'like', '%' . $search . '%');
+            $baseQuery->where(function($q) use ($search) {
+                $q->where('s.nama', 'like', '%' . $search . '%')
+                  ->orWhere('s.nisn', 'like', '%' . $search . '%')
+                  ->orWhere('s.nis', 'like', '%' . $search . '%')
+                  ->orWhere('s.kelas', 'like', '%' . $search . '%')
+                  ->orWhere('s.angkatan', 'like', '%' . $search . '%')
+                  ->orWhere('j.nama', 'like', '%' . $search . '%'); // Cari berdasarkan nama jurusan
             });
         }
         
@@ -698,6 +704,13 @@ class TagihanController extends Controller
      */
     public function kirimWaManual(Request $request, Tagihan $tagihan)
     {
+        \Log::info('Kirim WA Manual Dipanggil', [
+            'tagihan_id_dari_route' => $tagihan->id,
+            'siswa_nama' => $tagihan->siswa->nama ?? 'N/A',
+            'wali_nohp' => $tagihan->siswa->wali->nohp ?? 'N/A',
+            'wali_id' => $tagihan->siswa->wali->id ?? 'N/A',
+            'siswa_id' => $tagihan->siswa->id ?? 'N/A',
+        ]);
         $result = app(\App\Services\WhatsappFonnteServices::class)->sendTagihanNotificationCustom($tagihan);
         if ($result) {
             return back()->with('success', 'Notifikasi WhatsApp berhasil dikirim!');
