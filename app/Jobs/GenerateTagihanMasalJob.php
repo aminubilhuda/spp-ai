@@ -58,7 +58,7 @@ class GenerateTagihanMasalJob implements ShouldQueue
         ]);
 
         try {
-            $siswaList = Siswa::with(['wali'])->whereIn('id', $this->siswaIds)->get();
+            $siswaList = Siswa::with(['wali'])->whereIn('id', $this->siswaIds)->currentStatus('aktif')->get();
             $biayaList = Biaya::with('children')->whereIn('id', $this->biayaIds)->get();
             $operator = User::find($this->operatorId);
 
