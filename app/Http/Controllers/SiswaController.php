@@ -319,6 +319,7 @@ class SiswaController extends Controller
         $data = $siswa->getCollection()->map(function($item) {
             return [
                 'id' => $item->id,
+                'text' => $item->nama . ' - ' . $item->nisn . ' (' . $item->kelas . ')',
                 'nama' => $item->nama,
                 'nisn' => $item->nisn,
                 'nis' => $item->nis,
@@ -330,8 +331,7 @@ class SiswaController extends Controller
         });
         
         return response()->json([
-            'data' => $data,
-            'total_count' => $siswa->total(),
+            'results' => $data,
             'pagination' => [
                 'more' => $siswa->hasMorePages()
             ]

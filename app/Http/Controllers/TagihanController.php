@@ -104,6 +104,7 @@ class TagihanController extends Controller
             'title' => 'Data Tagihan Siswa',
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
             'jurusan' => Jurusan::pluck('nama', 'id'),
+            'kelas' => Siswa::select('kelas')->distinct()->pluck('kelas'),
             'tahunPelajarans' => $tahunPelajarans,
             'tahunPelajaranId' => $tahunPelajaranId,
             'tahunAktif' => $tahunAktif
@@ -126,7 +127,7 @@ class TagihanController extends Controller
             'title' => 'Tambah Tagihan',
             'biaya' => $biaya,
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
-            'kelas' => ['X', 'XI', 'XII'],
+            'kelas' => Siswa::select('kelas')->distinct()->pluck('kelas'),
             'jurusan' => Jurusan::pluck('nama', 'id')->all(),
             'tahunPelajarans' => $tahunPelajarans,
             'tahunAktif' => $tahunAktif,
@@ -144,9 +145,12 @@ class TagihanController extends Controller
                 'biaya_id.*' => 'exists:biayas,id',
                 'mode_siswa' => 'required|in:filter,single',
                 'siswa_id' => 'nullable|exists:siswas,id',
-                'angkatan' => 'nullable|string',
-                'jurusan' => 'nullable|exists:jurusans,id',
-                'kelas' => 'nullable',
+                'angkatan' => 'nullable|array',
+                'angkatan.*' => 'string',
+                'jurusan' => 'nullable|array',
+                'jurusan.*' => 'exists:jurusans,id',
+                'kelas' => 'nullable|array',
+                'kelas.*' => 'string',
                 'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
                 'tanggal_tagihan' => 'required|date',
                 'tanggal_jatuh_tempo' => 'required|date',
@@ -158,6 +162,10 @@ class TagihanController extends Controller
                 'mode_siswa.required' => 'Pilih mode pemilihan siswa',
                 'mode_siswa.in' => 'Mode pemilihan siswa tidak valid',
                 'siswa_id.exists' => 'Siswa yang dipilih tidak valid',
+                'angkatan.array' => 'Format angkatan tidak valid',
+                'jurusan.array' => 'Format jurusan tidak valid',
+                'jurusan.*.exists' => 'Jurusan yang dipilih tidak valid',
+                'kelas.array' => 'Format kelas tidak valid',
                 'jenis_kelamin.in' => 'Jenis kelamin yang dipilih tidak valid',
                 'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi',
                 'tanggal_tagihan.date' => 'Format tanggal tagihan tidak valid',
@@ -480,6 +488,7 @@ class TagihanController extends Controller
                 'angkatan' => 'nullable',
                 'jurusan' => 'nullable',
                 'kelas' => 'nullable|string',
+                'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             ]);
             
             // Mulai membangun query
@@ -498,11 +507,14 @@ class TagihanController extends Controller
                 $query->where('kelas', $request->kelas);
             }
             
-            // Jika tidak ada filter yang dipilih, kembalikan dengan pesan error
-            if (!$request->filled('angkatan') && !$request->filled('jurusan') && !$request->filled('kelas')) {
-                return redirect()->route($this->routePrefix . '.index')
-                    ->with('error', 'Silakan pilih minimal satu kriteria untuk menghapus tagihan');
+            if ($request->filled('jenis_kelamin')) {
+                $query->whereHas('siswa', function($q) use ($request) {
+                    $q->where('jenis_kelamin', $request->jenis_kelamin);
+                });
             }
+            
+            // Jika tidak ada filter yang dipilih, query akan menghapus semua data
+            // Tidak perlu ada pengecekan filter kosong di sini lagi.
             
             // Hitung jumlah data yang akan dihapus
             $count = $query->count();

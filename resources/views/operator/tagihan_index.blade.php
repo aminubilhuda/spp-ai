@@ -242,9 +242,17 @@
                             <label class="form-label">Kelas</label>
                             <select name="kelas" class="form-select">
                                 <option value="">Pilih Kelas...</option>
-                                <option value="X">X</option>
-                                <option value="XI">XI</option>
-                                <option value="XII">XII</option>
+                                @foreach ($kelas as $kelasItem)
+                                    <option value="{{ $kelasItem }}">{{ $kelasItem }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" class="form-select">
+                                <option value="">Pilih Jenis Kelamin...</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
                             </select>
                         </div>
                         <div class="alert alert-warning">
