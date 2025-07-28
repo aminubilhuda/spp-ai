@@ -163,12 +163,45 @@
         // Toggle mode pemilihan siswa
         $('input[name="mode_siswa"]').change(function() {
             const mode = $(this).val();
+            console.log('Mode changed to:', mode);
             
             if (mode === 'single') {
                 $('#single-student-section').show();
                 $('#filter-siswa-section').hide();
                 // Disable filter inputs
                 $('#filter-siswa-section select').prop('disabled', true);
+                // Reinitialize select2
+                $('#siswa-select').select2('destroy').select2({
+                    placeholder: 'Cari siswa berdasarkan nama atau NISN...',
+                    allowClear: true,
+                    width: '100%',
+                    theme: 'bootstrap-5',
+                    language: 'id',
+                    ajax: {
+                        url: '{{ route("siswa.search") }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            console.log('Search params:', params);
+                            return {
+                                search: params.term,
+                                page: params.page
+                            };
+                        },
+                        processResults: function (data, params) {
+                            console.log('Received data:', data);
+                            params.page = params.page || 1;
+                            return {
+                                results: data.results,
+                                pagination: data.pagination
+                            };
+                        },
+                        cache: true
+                    },
+                    templateResult: formatSiswaOption,
+                    templateSelection: formatSiswaSelection,
+                    minimumInputLength: 2
+                });
             } else {
                 $('#single-student-section').hide();
                 $('#filter-siswa-section').show();
@@ -184,15 +217,14 @@
             const siswaDetails = $('#siswa-details');
             
             if (data && data.id) {
+                // Parse text untuk mendapatkan informasi siswa dari format "NAMA - NISN (KELAS)"
+                const [nama, nisn, kelas] = data.text.split(/\s*-\s*|\s*\(\s*|\s*\)\s*/);
+                
                 siswaDetails.html(`
                     <table class="table table-sm table-borderless mb-0">
-                        <tr><td><strong>Nama:</strong></td><td>${data.nama}</td></tr>
-                        <tr><td><strong>NISN:</strong></td><td>${data.nisn}</td></tr>
-                        <tr><td><strong>NIS:</strong></td><td>${data.nis}</td></tr>
-                        <tr><td><strong>Kelas:</strong></td><td>${data.kelas}</td></tr>
-                        <tr><td><strong>Jurusan:</strong></td><td>${data.jurusan}</td></tr>
-                        <tr><td><strong>Angkatan:</strong></td><td>${data.angkatan}</td></tr>
-                        <tr><td><strong>Jenis Kelamin:</strong></td><td>${data.jenis_kelamin}</td></tr>
+                        <tr><td><strong>Nama:</strong></td><td>${nama}</td></tr>
+                        <tr><td><strong>NISN:</strong></td><td>${nisn}</td></tr>
+                        <tr><td><strong>Kelas:</strong></td><td>${kelas}</td></tr>
                     </table>
                 `);
                 siswaInfo.show();
@@ -226,10 +258,8 @@
                 processResults: function (data, params) {
                     params.page = params.page || 1;
                     return {
-                        results: data.data,
-                        pagination: {
-                            more: (params.page * 30) < data.total_count
-                        }
+                        results: data.results,
+                        pagination: data.pagination
                     };
                 },
                 cache: true
@@ -248,9 +278,11 @@
         
         // Format untuk dropdown option
         function formatSiswaOption(siswa) {
+            console.log('Formatting option:', siswa);
             if (siswa.loading) return siswa.text;
             if (!siswa.id) return siswa.text;
             
+            // Data sudah dalam format yang benar dari server
             return $(`
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -268,7 +300,7 @@
         // Format untuk selected option
         function formatSiswaSelection(siswa) {
             if (!siswa.id) return siswa.text;
-            return `${siswa.nama} - ${siswa.nisn} (${siswa.kelas})`;
+            return siswa.text; // Gunakan text yang sudah diformat dari server
         }
         
         // Format number to Rupiah
