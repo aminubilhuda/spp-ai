@@ -17,10 +17,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ $title }}</h5>
-                    @if($model->status == "Aktif")
-                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => 'Nonaktif']) }}" class="btn btn-danger btn-sm">Non-Aktifkan Siswa ini</a>
+                    @if($model->status == \App\Models\Siswa::STATUS_AKTIF)
+                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => \App\Models\Siswa::STATUS_NONAKTIF]) }}" class="btn btn-danger btn-sm">Non-Aktifkan Siswa ini</a>
                     @else
-                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => 'Aktif']) }}" class="btn btn-success btn-sm">Aktifkan Siswa ini</a>
+                        <a href="{{ route('status.update', ['model' => 'Siswa', 'id' => $model->id, 'status' => \App\Models\Siswa::STATUS_AKTIF]) }}" class="btn btn-success btn-sm">Aktifkan Siswa ini</a>
                     @endif
                     <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary btn-sm">
                         <i class="fa fa-arrow-left"></i> Kembali

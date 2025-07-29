@@ -70,11 +70,6 @@ class SiswaController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function isValidStatus(string $name, ?string $reason = null): bool
-{
-    return in_array($name, ['Aktif', 'Nonaktif']);
-}
-
     public function store(StoreSiswaRequest $request)
     {
         // validasi data
@@ -93,7 +88,7 @@ class SiswaController extends Controller
         
         // Buat siswa baru
         $siswa = Model::create($requestData);
-        $siswa->setStatus('Aktif');
+        $siswa->setStatus(Model::STATUS_AKTIF);
         
         return redirect()
             ->route($this->routePrefix . '.index')
@@ -269,9 +264,10 @@ class SiswaController extends Controller
     /**
      * Export data siswa ke excel
      */
-    public function export() 
+    public function export(Request $request)
     {
-        return Excel::download(new SiswaExport, 'data-siswa-'.date('Y-m-d').'.xlsx');
+        $search = $request->input('search');
+        return Excel::download(new SiswaExport($search), 'data-siswa-'.date('Y-m-d').'.xlsx');
     }
     
     /**

@@ -55,6 +55,12 @@ class StatusController extends Controller
     {
         if ($request->model == 'Siswa') {
             $model = Siswa::findOrFail($request->id);
+
+            // Validasi status
+            if (!in_array($request->status, Siswa::getStatuses())) {
+                return back()->with('error', 'Status tidak valid.');
+            }
+
             $model->setStatus($request->status);
             $model->save();
             return back()->with('success', 'Status siswa berhasil diubah');

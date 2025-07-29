@@ -13,9 +13,27 @@ class Siswa extends Model
     /** @use HasFactory<\Database\Factories\SiswaFactory> */
     use HasFactory;
     use HasStatuses, Syncable;
+
+    // definisikan status
+    public const STATUS_AKTIF = 'Aktif';
+    public const STATUS_NONAKTIF = 'Nonaktif';
+
     protected $fillable = [
         'wali_id', 'wali_status', 'nama', 'nisn', 'nis', 'foto', 'jenis_kelamin', 'jurusan_id', 'kelas', 'angkatan', 'user_id', 'synced',
     ];
+
+    /**
+     * Get all possible statuses.
+     *
+     * @return array
+     */
+    public static function getStatuses(): array
+    {
+        return [
+            self::STATUS_AKTIF,
+            self::STATUS_NONAKTIF,
+        ];
+    }
 
     // relasi 
     public function user(): BelongsTo

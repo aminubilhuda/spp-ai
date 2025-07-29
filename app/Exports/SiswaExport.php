@@ -67,9 +67,9 @@ class SiswaExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             $siswa->nis,
             $siswa->kelas,
             $siswa->angkatan,
-            $siswa->jurusan_nama,
-            $siswa->alamat,
-            $siswa->nomor_telepon,
+            $siswa->jurusan->nama, // Menggunakan relasi untuk mendapatkan nama jurusan
+            $siswa->wali->name, // Menambahkan nama wali murid
+            $siswa->status, // Menambahkan status siswa
             $siswa->created_at->format('d/m/Y'),
             $siswa->updated_at->format('d/m/Y'),
         ];
@@ -84,8 +84,8 @@ class SiswaExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             'Kelas',
             'Angkatan',
             'Jurusan',
-            'Alamat',
-            'Nomor Telepon',
+            'Wali Murid', // Menambahkan header untuk wali murid
+            'Status', // Menambahkan header untuk status
             'Tanggal Dibuat',
             'Tanggal Diperbarui',
         ];
