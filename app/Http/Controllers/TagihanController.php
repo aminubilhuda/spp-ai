@@ -143,8 +143,9 @@ class TagihanController extends Controller
             $requestData = $request->validate([
                 'biaya_id' => 'required|array',
                 'biaya_id.*' => 'exists:biayas,id',
-                'mode_siswa' => 'required|in:filter,single',
-                'siswa_id' => 'nullable|exists:siswas,id',
+                'mode_siswa' => 'required|in:filter,spesifik',
+                'siswa_id' => 'nullable|array',
+                'siswa_id.*' => 'exists:siswas,id',
                 'angkatan' => 'nullable|array',
                 'angkatan.*' => 'string',
                 'jurusan' => 'nullable|array',
@@ -156,41 +157,39 @@ class TagihanController extends Controller
                 'tanggal_jatuh_tempo' => 'required|date',
                 'keterangan' => 'nullable|string'
             ], [
-                'biaya_id.required' => 'Pilih minimal satu biaya',
-                'biaya_id.array' => 'Format biaya tidak valid',
-                'biaya_id.*.exists' => 'Biaya yang dipilih tidak valid',
-                'mode_siswa.required' => 'Pilih mode pemilihan siswa',
-                'mode_siswa.in' => 'Mode pemilihan siswa tidak valid',
-                'siswa_id.exists' => 'Siswa yang dipilih tidak valid',
-                'angkatan.array' => 'Format angkatan tidak valid',
+                'biaya_id.required' => 'Pilih minimal satu biaya.',
+                'mode_siswa.required' => 'Pilih mode pemilihan siswa.',
+                'siswa_id.array' => 'Format siswa tidak valid.',
+                'siswa_id.*.exists' => 'Siswa yang dipilih tidak valid.',
+                'angkatan.array' => 'Format angkatan tidak valid.',
                 'jurusan.array' => 'Format jurusan tidak valid',
-                'jurusan.*.exists' => 'Jurusan yang dipilih tidak valid',
-                'kelas.array' => 'Format kelas tidak valid',
-                'jenis_kelamin.in' => 'Jenis kelamin yang dipilih tidak valid',
-                'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi',
-                'tanggal_tagihan.date' => 'Format tanggal tagihan tidak valid',
-                'tanggal_jatuh_tempo.required' => 'Tanggal jatuh tempo wajib diisi',
-                'tanggal_jatuh_tempo.date' => 'Format tanggal jatuh tempo tidak valid',
+                'jurusan.*.exists' => 'Jurusan yang dipilih tidak valid.',
+                'kelas.array' => 'Format kelas tidak valid.',
+                'tanggal_tagihan.required' => 'Tanggal tagihan wajib diisi.',
+                'tanggal_jatuh_tempo.required' => 'Tanggal jatuh tempo wajib diisi.',
             ]);
 
             // Validasi tambahan berdasarkan mode
-            if ($requestData['mode_siswa'] === 'single' && empty($requestData['siswa_id'])) {
-                throw new \Exception('Pilih siswa yang akan ditagih');
+            if ($requestData['mode_siswa'] === 'spesifik' && empty($requestData['siswa_id'])) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => ['siswa_id' => ['Silakan pilih minimal satu siswa.']],
+                ], 422);
             }
 
             // Data biaya
             $biaya_id_array = $requestData['biaya_id'];
             
             // Data siswa yang akan ditagih berdasarkan mode
-            if ($requestData['mode_siswa'] === 'single') {
-                // Mode single student
+            if ($requestData['mode_siswa'] === 'spesifik') {
+                // Mode siswa spesifik
                 $siswa = Siswa::with('jurusan')
                              ->currentStatus('Aktif')
-                             ->where('id', $requestData['siswa_id'])
+                             ->whereIn('id', $requestData['siswa_id'])
                              ->get();
                              
                 if ($siswa->isEmpty()) {
-                    throw new \Exception('Siswa yang dipilih tidak ditemukan atau tidak aktif');
+                    throw new \Exception('Siswa yang dipilih tidak ditemukan atau tidak aktif.');
                 }
             } else {
                 // Mode filter (bulk)

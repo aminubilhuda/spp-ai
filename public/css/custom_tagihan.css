@@ -1,0 +1,161 @@
+/* General Body and Container Adjustments */
+body {
+    background-color: #f8f9fa; /* Light background for the whole page */
+    font-family: 'Inter', sans-serif; /* Modern sans-serif font */
+}
+
+.container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Section Container (replaces card) */
+.section-container {
+    background-color: #ffffff;
+    border-radius: 0.75rem; /* More rounded corners */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04); /* Very subtle, diffused shadow */
+    margin-bottom: 2rem;
+    border: 1px solid #f0f0f0; /* Very light border */
+    overflow: hidden; /* Ensures content respects border-radius */
+}
+
+/* Section Header (replaces card-header) */
+.section-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #f5f5f5; /* Lighter separator */
+    background-color: #ffffff;
+}
+
+.section-title {
+    font-size: 1.5rem; /* Larger, more prominent title */
+    font-weight: 600; /* Semi-bold */
+    color: #343a40; /* Darker text for emphasis */
+    margin-bottom: 0;
+}
+
+/* Section Body (replaces card-body) */
+.section-body {
+    padding: 2rem;
+}
+
+/* Form Elements */
+.form-label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .select2-container--bootstrap-5 .select2-selection {
+    border-radius: 0.5rem; /* Consistent rounded corners */
+    border: 1px solid #e0e0e0;
+    padding: 0.75rem 1rem; /* Generous padding */
+    font-size: 1rem;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.form-control:focus, .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+    border-color: #88b4ff; /* Custom focus color */
+    box-shadow: 0 0 0 0.2rem rgba(136, 180, 255, 0.25); /* Custom focus shadow */
+}
+
+/* Checkboxes and Radios */
+.form-check-input {
+    border-radius: 0.35rem; /* Slightly rounded for checkboxes */
+    border: 1px solid #ccc;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.form-check-label {
+    color: #444;
+}
+
+.form-check-label strong {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Buttons */
+.btn-primary {
+    border-radius: 0.5rem;
+    padding: 0.85rem 2rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background-color: #007bff;
+    border-color: #007bff;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-2px); /* More pronounced lift */
+    box-shadow: 0 8px 16px rgba(0, 123, 255, 0.25); /* Stronger shadow on hover */
+}
+
+/* Alerts */
+.alert {
+    border-radius: 0.75rem; /* Match section container radius */
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Specific adjustments for siswa info */
+#siswa-info {
+    background-color: #e9f7ff; /* Lighter blue background */
+    border-color: #cce5ff;
+    color: #004085;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+#siswa-details table {
+    margin-bottom: 0;
+}
+
+#siswa-details table td {
+    padding: 0.25rem 0;
+    border-top: none;
+}
+
+#siswa-details table strong {
+    color: #333;
+}
+
+/* Select2 Customizations for minimalist look */
+.select2-container--bootstrap-5 .select2-selection--single {
+    height: calc(2.25rem + 2px); /* Adjust height to match form-control */
+    padding: 0.375rem 0.75rem; /* Adjust padding */
+}
+
+.select2-container--bootstrap-5 .select2-selection__arrow {
+    height: calc(2.25rem + 2px); /* Adjust arrow height */
+}
+
+.select2-container--bootstrap-5 .select2-selection__placeholder {
+    color: #6c757d; /* Lighter placeholder text */
+}
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    border-radius: 0.5rem;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.select2-container--bootstrap-5 .select2-results__option {
+    padding: 0.75rem 1rem;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: #e9f7ff; /* Lighter highlight for options */
+    color: #007bff;
+}
+
+.select2-container--bootstrap-5 .select2-results__option[aria-selected=true] {
+    background-color: #f0f8ff; /* Very light background for selected options */
+    color: #007bff;
+}
