@@ -32,6 +32,8 @@ class SiswaController extends Controller
     {
         $search = $request->input('search');
         $query = Model::query()->with(['wali', 'jurusan', 'tagihan.tagihan_details']); //eager loading -> with();
+        // Hapus filter status 'Aktif' agar semua siswa terlihat
+        // $query->currentStatus('Aktif');
         
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -299,7 +301,7 @@ class SiswaController extends Controller
         $limit = 30;
         
         $query = Model::with('jurusan')
-                     ->currentStatus('Aktif')
+                    // ->currentStatus('Aktif') // Hapus filter ini agar semua siswa dapat dicari
                      ->orderBy('nama');
         
         if ($search) {
@@ -381,5 +383,33 @@ class SiswaController extends Controller
                 ->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Update status siswa secara massal.
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|array',
+            'siswa_ids.*' => 'exists:siswas,id',
+            'status' => 'required|in:' . implode(',', Model::getStatuses()),
+        ]);
+
+        $siswaIds = $request->input('siswa_ids');
+        $status = $request->input('status');
+
+        // Update status untuk semua siswa yang dipilih
+        foreach ($siswaIds as $siswaId) {
+            $siswa = Model::find($siswaId);
+            if ($siswa) {
+                $siswa->setStatus($status);
+                $siswa->save(); // <-- Baris ini yang ditambahkan
+            }
+        }
+
+        return redirect()
+            ->route($this->routePrefix . '.index')
+            ->with('success', 'Status siswa yang dipilih berhasil diperbarui menjadi ' . $status);
     }
 }

@@ -17,6 +17,7 @@ class Siswa extends Model
     // definisikan status
     public const STATUS_AKTIF = 'Aktif';
     public const STATUS_NONAKTIF = 'Nonaktif';
+    public const STATUS_LULUS = 'Lulus';
 
     protected $fillable = [
         'wali_id', 'wali_status', 'nama', 'nisn', 'nis', 'foto', 'jenis_kelamin', 'jurusan_id', 'kelas', 'angkatan', 'user_id', 'synced',
@@ -32,6 +33,7 @@ class Siswa extends Model
         return [
             self::STATUS_AKTIF,
             self::STATUS_NONAKTIF,
+            self::STATUS_LULUS,
         ];
     }
 

@@ -49,45 +49,49 @@
                             </form>
                         </div>
                     </div>
+
+                    <form action="{{ url('operator/siswa/bulk-update-status') }}" method="POST" id="bulk-form">
+                        @csrf
+                        {{-- <input type="hidden" name="siswa_ids" id="selected-siswa-ids"> --}} {{-- Dihapus --}}
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <select name="status" class="form-select">
+                                        @foreach (\App\Models\Siswa::getStatuses() as $status)
+                                            <option value="{{ $status }}">{{ $status }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button class="btn btn-primary" type="submit">Terapkan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
                     <div class="table-responsive">
                         <table class="table table-striped table-sm">
                             <thead>
                                 <tr>
-                                    <td>No</td>
-                                    <td>Wali Murid</td>
-                                    <td>Nama</td>
-                                    <td>NISN</td>
-                                    <!-- {{-- <td>NIS</td> --}} -->
-                                    <!-- {{-- <td>Foto</td> --}} -->
-                                    <!-- <td>Jurusan</td> -->
-                                    <!-- <td>Kelas</td> -->
-                                    <td>Angkatan</td>
-                                    <td>Biaya SPP</td>
-                                    <td>Status</td>
-                                    <td>Aksi</td>
+                                    <th><input type="checkbox" id="select-all"></th>
+                                    <th>No</th>
+                                    <th>Wali Murid</th>
+                                    <th>Nama</th>
+                                    <th>NISN</th>
+                                    <th>Angkatan</th>
+                                    <th>Biaya SPP</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php $no = 1; @endphp
                                 @foreach ($models as $siswa)
                                     <tr>
+                                        <td><input type="checkbox" value="{{ $siswa->id }}" class="siswa-checkbox"></td>
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $siswa->wali->name }}</td>
                                         <td>{{ $siswa->nama }}</td>
                                         <td>{{ $siswa->nisn }}</td>
-                                        {{-- <td>{{ $siswa->nis }}</td> --}}
-                                        {{-- <td>
-                                            @if ($siswa->foto)
-                                                <img src="{{ asset('storage/' . $siswa->foto) }}"
-                                                    alt="Foto {{ $siswa->nama }}" class="img-thumbnail"
-                                                    style="max-height: 50px">
-                                            @else
-                                                <span class="badge bg-label-warning">Belum ada foto</span>
-                                            @endif
-                                        </td> --}}
-                                        <!-- <td>{{ $siswa->jurusan->nama }}</td> -->
-                                        <!-- <td>{{ $siswa->kelas }}</td> -->
-                                        <td>{{ $siswa->angkatan }}</td>
+                                        <td>{{ $siswa->angkatan ?? 'N/A' }}</td>
                                         <td>{{ formatRupiah($siswa->biaya_spp) }}</td>
                                         <td>{{ $siswa->status }}</td>
                                         <td class="text-nowrap">
@@ -123,3 +127,37 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('select-all').addEventListener('click', function(event) {
+        document.querySelectorAll('.siswa-checkbox').forEach(function(checkbox) {
+            checkbox.checked = event.target.checked;
+        });
+    });
+
+    document.getElementById('bulk-form').addEventListener('submit', function(event) {
+        const selectedIds = [];
+        const bulkForm = document.getElementById('bulk-form');
+
+        // Hapus input siswa_ids[] yang mungkin ada dari submit sebelumnya
+        bulkForm.querySelectorAll('input[name="siswa_ids[]"]').forEach(input => input.remove());
+
+        document.querySelectorAll('.siswa-checkbox:checked').forEach(function(checkbox) {
+            selectedIds.push(checkbox.value);
+
+            // Buat input hidden baru untuk setiap ID siswa yang dipilih
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'siswa_ids[]';
+            hiddenInput.value = checkbox.value;
+            bulkForm.appendChild(hiddenInput);
+        });
+
+        if (selectedIds.length === 0) {
+            alert('Pilih setidaknya satu siswa untuk diperbarui.');
+            event.preventDefault(); // Mencegah form disubmit jika tidak ada siswa yang dipilih
+        }
+    });
+</script>
+@endpush

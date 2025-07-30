@@ -90,6 +90,7 @@ Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function
         Route::post('siswa/tambahkewali', 'tambahKeWali')->name('siswa.tambahkewali');
         Route::post('siswa/hapusdariwall', 'hapusDariWali')->name('siswa.hapusdariwall');
     });
+    Route::post('siswa/bulk-update-status', [SiswaController::class, 'bulkUpdateStatus'])->name('siswa.bulk-update-status');
     Route::resource('siswa', SiswaController::class);
     
     // Master Data - Jurusan & Biaya
