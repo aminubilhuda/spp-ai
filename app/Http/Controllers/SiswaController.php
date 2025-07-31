@@ -46,7 +46,7 @@ class SiswaController extends Controller
         }
         
         return view ('operator.'.$this->viewIndex, [
-            'models' => $query->latest()->paginate(50),
+            'models' => $query->latest()->paginate(100),
             'routePrefix' => $this->routePrefix,
             'title' => 'Data Siswa',
             'search' => $search,
