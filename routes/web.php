@@ -69,8 +69,7 @@ Route::get('login-wali', [LoginController::class, 'showLoginFormWali'])->name('l
 // ============================================================================
 
 Route::prefix('operator')->middleware(['auth', 'auth.operator'])->group(function () {
-    // Beranda
-    Route::get('/beranda', [BerandaOperatorController::class, 'index'])->name('operator.beranda');
+    
     
     // Master Data - Users & Wali
     Route::resource('user', UserController::class);
