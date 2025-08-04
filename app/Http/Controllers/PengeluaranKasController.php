@@ -23,12 +23,23 @@ class PengeluaranKasController extends Controller
             $query->whereDate('tanggal', '<=', $request->tanggal_sampai);
         }
         $pengeluaran = $query->paginate(20)->withQueryString();
+
+        // Total uang masuk (sudah dikonfirmasi)
+        $totalUangMasuk = Pembayaran::where('status_konfirmasi', 'Sudah Dikonfirmasi')->sum('jumlah_dibayar');
+        // Total pengeluaran
+        $totalUangKeluar = PengeluaranKas::sum('jumlah');
+        // Saldo
+        $saldo = $totalUangMasuk - $totalUangKeluar;
+
         return view('operator.pengeluaran_kas_index', [
             'pengeluaran' => $pengeluaran,
             'title' => 'Histori Pengeluaran Kas',
             'kategori' => $request->kategori,
             'tanggal_dari' => $request->tanggal_dari,
-            'tanggal_sampai' => $request->tanggal_sampai
+            'tanggal_sampai' => $request->tanggal_sampai,
+            'totalUangMasuk' => $totalUangMasuk,
+            'totalUangKeluar' => $totalUangKeluar,
+            'saldo' => $saldo,
         ]);
     }
 

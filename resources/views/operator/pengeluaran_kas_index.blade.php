@@ -6,6 +6,32 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
     <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Uang Masuk</h5>
+                        <p class="card-text fs-4">{{ formatRupiah($totalUangMasuk) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Uang Keluar</h5>
+                        <p class="card-text fs-4">{{ formatRupiah($totalUangKeluar) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Saldo Kas</h5>
+                        <p class="card-text fs-4">{{ formatRupiah($saldo) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card">
             <h5 class="card-header">{{ $title ?? 'Histori Pengeluaran Kas' }}</h5>
             <div class="card-body">
