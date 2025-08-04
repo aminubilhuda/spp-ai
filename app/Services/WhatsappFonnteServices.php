@@ -24,10 +24,12 @@ class WhatsappFonnteServices
 
     public function __construct()
     {
-        $this->token = settings('whatsapp_token');
-        $this->countryCode = settings('whatsapp_country_code', '62');
-        $this->typing = settings('whatsapp_typing', false);
-        $this->delay = settings('whatsapp_delay', '2');
+        if (!app()->runningInConsole()) {
+            $this->token = settings('whatsapp_token');
+            $this->countryCode = settings('whatsapp_country_code', '62');
+            $this->typing = settings('whatsapp_typing', false);
+            $this->delay = settings('whatsapp_delay', '2');
+        }
     }
 
     /**
