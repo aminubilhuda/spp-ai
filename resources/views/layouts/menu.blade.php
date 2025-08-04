@@ -21,12 +21,13 @@
             <span class="menu-header-text">Dashboard & Pengaturan</span>
         </li>
         <!-- ================= DASHBOARD & PENGATURAN ================= -->
-        <li class="menu-item {{ request()->is('operator/beranda') ? 'active' : '' }}">
-            <a href="{{ route('operator.beranda') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Beranda</div>
+        <li class="menu-item {{ request()->routeIs('operator.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('operator.dashboard') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                <div data-i18n="Analytics">Dashboard</div>
             </a>
         </li>
+        
         <li class="menu-item {{ request()->is('operator/setting*') ? 'active' : '' }}">
             <a href="{{ route('setting.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-cog"></i>

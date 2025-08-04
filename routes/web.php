@@ -43,13 +43,19 @@ use App\Http\Controllers\PengeluaranKasController;
 // Route untuk login dengan signed URL
 Route::get('login/login-url', [LoginController::class, 'loginUrl'])->name('login.url');
 
+use App\Http\Controllers\Operator\DashboardController;
+
 Route::get('/', function () {
     return view('landing_page');
 });
 
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::middleware(['auth', 'auth.operator'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('operator.dashboard');
+});
 
 //Panduan Pembayaran
 Route::get('panduan-pembayaran/{id}', [PanduanPembayaranController::class, 'index'])->name('panduan.pembayaran');
