@@ -160,7 +160,7 @@ class LoginController extends Controller
     public function authenticated(Request $request, $user)
     {
         if ($user->akses == 'operator' || $user->akses == 'admin') {
-            return redirect()->route('operator.beranda');
+            return redirect()->route('operator.dashboard');
         } else if ($user->akses == 'wali') {
             return redirect()->route('wali.beranda');
         } else {

@@ -23,7 +23,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->akses == 'operator' || auth()->user()->akses == 'admin') {
+        if (auth()->user()->akses == 'operator') {
             return redirect()->route('operator.dashboard');
         }
         if (auth()->user()->akses == 'wali') {
