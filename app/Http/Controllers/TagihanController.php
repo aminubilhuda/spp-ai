@@ -26,12 +26,32 @@ class TagihanController extends Controller
         $tahunAktif = $tahunPelajarans->firstWhere('is_aktif', 1);
         $tahunPelajaranId = $request->get('tahun_pelajaran_id', $tahunAktif?->id);
 
+        // Hitung total tagihan seluruh siswa dalam setahun
+        $totalTagihanSetahun = Tagihan::query()
+            ->join('tagihan_details as td', 'tagihans.id', '=', 'td.tagihan_id')
+            ->where('tahun_pelajaran_id', $tahunPelajaranId)
+            ->sum('td.jumlah_biaya');
+
+        // Hitung sisa tagihan setahun dengan mengurangi total pembayaran yang sudah dikonfirmasi
+        $totalPembayaranSetahun = Tagihan::query()
+            ->join('tagihan_details as td', 'tagihans.id', '=', 'td.tagihan_id')
+            ->leftJoin('pembayarans as p', function($join) {
+                $join->on('td.id', '=', 'p.tagihan_detail_id')
+                     ->where('p.status_konfirmasi', '=', 'Sudah Dikonfirmasi');
+            })
+            ->where('tagihans.tahun_pelajaran_id', $tahunPelajaranId)
+            ->sum('p.jumlah_dibayar');
+
+        $sisaTagihanSetahun = $totalTagihanSetahun - $totalPembayaranSetahun;
+
         // Query dasar untuk tagihan dengan eager loading yang lebih efisien
         $baseQuery = Tagihan::query()->from('tagihans as t')
             ->select('t.siswa_id', 
                      \DB::raw('COUNT(DISTINCT t.id) as total_tagihan'), 
                      \DB::raw('SUM(td.jumlah_biaya) as total_nilai'),
-                     \DB::raw('MAX(t.created_at) as latest_created'))
+                     \DB::raw('MAX(t.created_at) as latest_created'),
+                     \DB::raw('SUM(COALESCE(p.jumlah_dibayar, 0)) as total_dibayar'),
+                     \DB::raw('SUM(td.jumlah_biaya - COALESCE(p.jumlah_dibayar, 0)) as sisa_tagihan'))
             ->addSelect([
                 'latest_tagihan_id' => Tagihan::select('id')
                     ->whereColumn('siswa_id', 't.siswa_id')
@@ -39,6 +59,10 @@ class TagihanController extends Controller
                     ->limit(1)
             ])
             ->join('tagihan_details as td', 't.id', '=', 'td.tagihan_id')
+            ->leftJoin('pembayarans as p', function($join) {
+                $join->on('td.id', '=', 'p.tagihan_detail_id')
+                     ->where('p.status_konfirmasi', '=', 'Sudah Dikonfirmasi');
+            })
             ->join('siswas as s', 't.siswa_id', '=', 's.id') // Join eksplisit ke tabel siswa
             ->leftJoin('jurusans as j', 's.jurusan_id', '=', 'j.id') // Join eksplisit ke tabel jurusan
             ->with(['siswa' => function($q) {
@@ -102,6 +126,8 @@ class TagihanController extends Controller
             'models' => $models,
             'routePrefix' => $this->routePrefix,
             'title' => 'Data Tagihan Siswa',
+            'totalTagihanSetahun' => $totalTagihanSetahun,
+            'sisaTagihanSetahun' => $sisaTagihanSetahun,
             'angkatan' => Siswa::select('angkatan')->distinct()->pluck('angkatan'),
             'jurusan' => Jurusan::pluck('nama', 'id'),
             'kelas' => Siswa::select('kelas')->distinct()->pluck('kelas'),

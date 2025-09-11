@@ -16,7 +16,7 @@
 
         <!-- Summary Cards -->
         <div class="row mb-4">
-            <div class="col-lg-4 col-md-6 mb-4">
+            {{-- <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card summary-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -31,14 +31,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card summary-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title">Total Nilai</h5>
-                                <small class="text-muted">Semua Tagihan</small>
+                                <h5 class="card-title">Total Tagihan</h5>
+                                <small class="text-muted">Data Terfilter</small>
                                 <h3 class="mt-2 mb-0">{{ formatRupiah($models->sum('total_nilai')) }}</h3>
                             </div>
                             <div class="avatar bg-label-success p-2 rounded-circle">
@@ -48,17 +48,50 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-12 mb-4">
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Total Tagihan</h5>
+                                <small class="text-muted">Tahun Pelajaran {{ $tahunAktif?->nama ?? '-' }}</small>
+                                <h3 class="mt-2 mb-0">{{ formatRupiah($totalTagihanSetahun) }}</h3>
+                            </div>
+                            <div class="avatar bg-label-info p-2 rounded-circle">
+                                <i class="bx bx-calendar text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card summary-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="card-title">Tagihan Belum Lunas</h5>
-                                <small class="text-muted">Berdasarkan Filter</small>
+                                <small class="text-muted">Data Terfilter</small>
                                 <h3 class="mt-2 mb-0">{{ formatRupiah($models->filter(fn($item) => $item->status !== 'lunas')->sum('total_nilai')) }}</h3>
                             </div>
                             <div class="avatar bg-label-warning p-2 rounded-circle">
                                 <i class="bx bx-hourglass text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Sisa Tagihan</h5>
+                                <small class="text-muted">Tahun Pelajaran {{ $tahunAktif?->nama ?? '-' }}</small>
+                                <h3 class="mt-2 mb-0">{{ formatRupiah($sisaTagihanSetahun) }}</h3>
+                            </div>
+                            <div class="avatar bg-label-danger p-2 rounded-circle">
+                                <i class="bx bx-wallet text-danger"></i>
                             </div>
                         </div>
                     </div>
@@ -123,8 +156,8 @@
                                     <th style="width: 10%">NISN</th>
                                     <th style="width: 7%">Kelas</th>
                                     <th style="width: 15%">Jurusan</th>
-                                    <th style="width: 10%">Tagihan</th>
-                                    <th style="width: 20%">Total</th>
+                                    <th style="width: 10%">Jumlah</th>
+                                    <th style="width: 20%">Total & Sisa</th>
                                     <th style="width: 20%" class="text-end">Aksi</th>
                                 </tr>
                             </thead>
@@ -164,7 +197,14 @@
                                             <span class="badge bg-label-primary">{{ $item->total_tagihan }}</span>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold">{{ formatRupiah($item->total_nilai) }}</span>
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold">{{ formatRupiah($item->total_nilai) }}</span>
+                                                <small class="text-muted">
+                                                    Sisa: <span class="text-{{ $item->sisa_tagihan > 0 ? 'danger' : 'success' }}">
+                                                        {{ formatRupiah($item->sisa_tagihan) }}
+                                                    </span>
+                                                </small>
+                                            </div>
                                         </td>
                                         <td class="text-nowrap">
                                             <div class="d-flex gap-1 justify-content-end">
